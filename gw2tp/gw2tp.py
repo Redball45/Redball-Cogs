@@ -1,18 +1,18 @@
 import discord
 from discord.ext import commands
 
-class Mycog:
+class Gw2tp:
     """My custom cog that does stuff!"""
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def mycom(self):
+    async def tpprice(self):
         """This does stuff!"""
 
         #Your code will go here
-        await self.bot.say("I can do stuff!")
+        await self.bot.say("I can do definitelystuff!")
 
 def setup(bot):
-    bot.add_cog(Mycog(bot))
+    bot.add_cog(Gw2tp(bot))
