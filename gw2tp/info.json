@@ -5,6 +5,5 @@
     "SHORT" : "GW2TP related commands",
     "DESCRIPTION" : "Trading post commands for Guild Wars 2",
     "TAGS" : ["tp", "gw2"],
-    "REQUIREMENTS" : [],
     "HIDDEN" : false
 }
