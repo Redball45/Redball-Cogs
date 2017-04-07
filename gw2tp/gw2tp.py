@@ -86,8 +86,8 @@ class Gw2tp:
 			shiniesresults = await r.json()
 		if "error" in shiniesresults:
 			raise APIError("The API is dead!")
-		if "text" in shiniesresults:
-			raise APIError(shiniesresults["text"])
+		if "null" in shiniesresults:
+			raise APIError(shiniesresults["null"])
 		return shiniesresults	
 
 	def gold_to_coins(self, money):
