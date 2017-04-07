@@ -37,7 +37,7 @@ class Gw2tp:
 		result = str(result).strip("['")
 		result = str(result).strip("']")
 
-		await self.bot.say('ID of the guild {0} is: {1}'.format(tpbuyid, result))
+		await self.bot.say('TP data for ID {0} is: {1}'.format(tpbuyid, result))
 
 
 
