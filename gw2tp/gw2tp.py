@@ -67,7 +67,7 @@ class Gw2tp:
 			try:
 				await self.bot.say(embed=data)
 			except discord.HTTPException:
-				await self.bot.say("Need permission to embed links")
+				await self.bot.say("Issue embedding data into discord - EC1")
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]
@@ -80,7 +80,7 @@ class Gw2tp:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Need permission to embed links")
+			await self.bot.say("Issue embedding data into discord - EC2")
 
 	@commands.command(pass_context=True)
 	async def tpid(self, ctx, *, tpdataid: str):
@@ -113,7 +113,7 @@ class Gw2tp:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Need permission to embed links")
+			await self.bot.say("Iss")
 
 	@commands.command(pass_context=True)
 	async def tplist(self, ctx, *, tpitemname: str):
@@ -142,7 +142,7 @@ class Gw2tp:
 			if counter > 9:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
-			await self.bot.say("Need permission to embed links")
+			await self.bot.say("Issue embedding data into discord - EC3")
 
 
 
