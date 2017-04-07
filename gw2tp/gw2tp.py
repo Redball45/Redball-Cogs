@@ -50,6 +50,10 @@ class Gw2tp:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
 		except APIError as e:
 			data = discord.Embed(description='Direct match not found, listing all - use !tpid (id)')
 			#For each item returned, add to the data table
@@ -59,10 +63,6 @@ class Gw2tp:
 				data.add_field(name=name['name'], value=name['item_id'])
 			try:
 				await self.bot.say(embed=data)
-			except APIError as e:
-				await self.bot.say("{0.mention}, API has responded with the following error: "
-									"`{1}`".format(user, e))
-				return
 			except discord.HTTPException:
 				await self.bot.say("Need permission to embed links")
 			return
@@ -123,7 +123,7 @@ class Gw2tp:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
-		except APIError as e:
+		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
@@ -154,11 +154,11 @@ class Gw2tp:
 		async with self.session.get(url) as r:
 			shiniesresults = await r.json()
 		if shiniesresults is None:
-			raise APIError("Could not find an item by that name")
+			raise ShinyAPIError("Could not find an item by that name")
 		if "error" in shiniesresults:
-			raise APIError("The API is dead!")
+			raise ShinyAPIError("The API is dead!")
 		if "text" in shiniesresults:
-			raise APIError(shiniesresults["text"])
+			raise ShinyAPIError(shiniesresults["text"])
 		return shiniesresults	
 
 	def gold_to_coins(self, money):
