@@ -69,6 +69,8 @@ class Gw2tp:
 			except discord.HTTPException:
 				await self.bot.say("Issue embedding data into discord - EC1")
 			return
+		buyprice = results["buys"]["unit_price"]
+		sellprice = results ["sells"]["unit_price"]			
 		if buyprice != 0:
 			buyprice = self.gold_to_coins(buyprice)
 		if sellprice != 0:
@@ -77,8 +79,6 @@ class Gw2tp:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'				
-		buyprice = results["buys"]["unit_price"]
-		sellprice = results ["sells"]["unit_price"]
 		buyprice = self.gold_to_coins(buyprice)
 		sellprice = self.gold_to_coins(sellprice)
 		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tplist (name) instead')
