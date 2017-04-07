@@ -17,14 +17,13 @@ class Gw2tp:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def tpbuy(ctx):
+    @commands.command(pass_context=True)
+    async def tpbuy(self, ctx, tpbuyid):
         """This finds the current buy price of an item
         Doesn't require any keys/scopes"""
         user = ctx.message.author
         try:
-        	tpbuyid = ctx.message
-        	commerce = "commerce/prices/"
+        	commerce = 'commerce/prices/'
             endpoint = commerce + tpbuyid
             result = await self.call_api(endpoint)
         except APIKeyError as e:
