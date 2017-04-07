@@ -23,6 +23,8 @@ except:
 class APIError(Exception):
 	pass
 
+class ShinyAPIError(Exception):
+	pass
 
 class APIKeyError(Exception):
 	pass
