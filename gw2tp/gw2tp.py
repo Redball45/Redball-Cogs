@@ -114,7 +114,7 @@ class Gw2tp:
 		data = discord.Embed(description='Matching IDs')
 		#For each item returned, add to the data table
 		for name in shiniesresults:
-			data.add_field(name=Item['name'], value=ID['item_id'])
+			data.add_field(name=name['name'], value=item_id['item_id'])
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
