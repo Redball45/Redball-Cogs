@@ -130,7 +130,7 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		data = discord.Embed(description='Matching IDs, use !tplist to see prices for a specific item')
+		data = discord.Embed(description='Matching IDs, use !tpid (id) to see prices for a specific item')
 		#For each item returned, add to the data table
 		counter = 0
 		for name in shiniesresults:
