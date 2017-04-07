@@ -71,7 +71,7 @@ class Gw2tp:
 					await self.bot.say("More than 10 entries, try to refine your search")
 			except discord.HTTPException:
 				await self.bot.say("Issue embedding data into discord - EC1")
-				return
+			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]			
 		if buyprice != 0:
