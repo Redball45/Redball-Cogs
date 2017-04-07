@@ -38,10 +38,11 @@ class Gw2tp:
 	async def tpdata(self, ctx, tpitemname: str):
 		"""This finds the current buy price of an item
 		Doesn't require any keys/scopes"""
-		shiniesendpoint = tpitemname
-		shiniesresults = await.self.call_shiniesapi(shiniesendpoint)
-		tpbuyid = results["item_id"]
 		user = ctx.message.author
+		try:
+			shiniesendpoint = tpitemname
+			shiniesresults = await.self.call_shiniesapi(shiniesendpoint)
+			tpbuyid = results["item_id"]
 		try:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpbuyid
@@ -78,9 +79,9 @@ class Gw2tp:
 		if "text" in results:
 			raise APIError(results["text"])
 		return results
-	async def call_shiniesapi(self, endpoint):
-		apiserv = 'https://www.gw2shinies.com/api/json/idbyname/'
-		url = apiserv + shiniesendpoint
+	async def call_shiniesapi(self, shiniesendpoint):
+		shinyapiserv = 'https://www.gw2shinies.com/api/json/idbyname/'
+		url = shinyapiserv + shiniesendpoint
 		async with self.session.get(url) as r:
 			shiniesresults = await r.json()
 		if "error" in shiniesresults:
