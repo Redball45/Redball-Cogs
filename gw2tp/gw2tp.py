@@ -16,6 +16,7 @@ class Gw2tp:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
 	@commands.command(pass_context=True)
 	async def tpbuy(self, ctx, tpbuyid: str):
