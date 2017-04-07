@@ -39,7 +39,7 @@ class Gw2tp:
 		"""This finds the current buy price of an item
 		Doesn't require any keys/scopes"""
 		user = ctx.message.author
-		tpitemname = tpitemname.replace(' ', '%20')
+		tpitemname = tpitemname.replace(" ", "%20")
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
