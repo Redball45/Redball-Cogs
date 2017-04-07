@@ -25,7 +25,7 @@ class Gw2tp:
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
 	@commands.command(pass_context=True)
-	async def tpbuy(self, ctx, tpbuyid: str):
+	async def tp(self, ctx, tpbuyid: str):
 		"""This finds the current buy price of an item
 		Doesn't require any keys/scopes"""
 		user = ctx.message.author
@@ -40,10 +40,17 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		result = str(result).strip("['")
-		result = str(result).strip("']")
+		buyprice = results["unit_price"]
+		sellprice = results ["unit_price"]
+		color = self.getColor(user)
+		data = discord.Embed(description=None, colour=color)
+		data.add_field(name="Buy price", value=buyprice)
+		data.add_field(name="Sell price", value=sellprice)
 
-		await self.bot.say('TP data for ID {0} is: {1}'.format(tpbuyid, result))
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
 
 
 
