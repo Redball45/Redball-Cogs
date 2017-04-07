@@ -60,15 +60,18 @@ class Gw2tp:
 		except APIError as e:
 			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tpid (id) to select one')
 			#For each item returned, add to the data table
-			shiniesendpoint = tpitemname
-			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
+			counter = 0
 			for name in shiniesresults:
-				data.add_field(name=name['name'], value=name['item_id'])
+				if counter < 10:
+					data.add_field(name=name['name'], value=name['item_id'])
+					counter += 1	
 			try:
 				await self.bot.say(embed=data)
+				if counter > 9:
+					await self.bot.say("More than 10 entries, try to refine your search")
 			except discord.HTTPException:
 				await self.bot.say("Issue embedding data into discord - EC1")
-			return
+				return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]			
 		if buyprice != 0:
