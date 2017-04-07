@@ -51,8 +51,16 @@ class Gw2tp:
 			await self.bot.say(e)
 			return
 		except APIError as e:
-			await self.bot.say("{0.mention}, Item possibly not found on the Commerce API, try searching by id instead with !tplist then !tpid - API has responded with the following error: "
-							   "`{1}`".format(user, e))
+
+			data = discord.Embed(description='Direct match not found, listing all - use !tpid (id)')
+			#For each item returned, add to the data table
+			for name in shiniesresults:
+				data.add_field(name=name['name'], value=name['item_id'])
+			try:
+				await self.bot.say(embed=data)
+			except discord.HTTPException:
+				await self.bot.say("Need permission to embed links")
+
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]
