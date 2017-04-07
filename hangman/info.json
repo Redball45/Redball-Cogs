@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Phxntxm",
+    "INSTALL_MSG" : "Hangman Cog",
+    "NAME" : "hangman",
+    "SHORT" : "Hangman",
+    "DESCRIPTION" : "All credit goes to Phxntxm/Bonfire as the original creator",
+    "TAGS" : ["game", "hangman"],
+    "HIDDEN" : false
+}
