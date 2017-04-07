@@ -134,7 +134,7 @@ class Gw2tp:
 		#For each item returned, add to the data table
 		counter = 0
 		for name in shiniesresults:
-			if counter < 10
+			if counter < 10:
 				data.add_field(name=name['name'], value=name['item_id'])
 				counter += 1	
 		try:
