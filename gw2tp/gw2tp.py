@@ -51,7 +51,7 @@ class Gw2tp:
 			await self.bot.say(e)
 			return
 		except APIError as e:
-			await self.bot.say("{0.mention}, Item possibly not found on the Commerce API, try searching by id instead with !tplistids then !tpdataid - API has responded with the following error: "
+			await self.bot.say("{0.mention}, Item possibly not found on the Commerce API, try searching by id instead with !tplist then !tpid - API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
 		buyprice = results["buys"]["unit_price"]
@@ -68,7 +68,7 @@ class Gw2tp:
 			await self.bot.say("Need permission to embed links")
 
 	@commands.command(pass_context=True)
-	async def tpdataid(self, ctx, *, tpdataid: str):
+	async def tpid(self, ctx, *, tpdataid: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
@@ -97,7 +97,7 @@ class Gw2tp:
 			await self.bot.say("Need permission to embed links")
 
 	@commands.command(pass_context=True)
-	async def tplistids(self, ctx, *, tpitemname: str):
+	async def tplist(self, ctx, *, tpitemname: str):
 		"""This lists the ids and names of all matching items to the entered name"""
 		user = ctx.message.author
 		tpitemname = tpitemname.replace(" ", "%20")
