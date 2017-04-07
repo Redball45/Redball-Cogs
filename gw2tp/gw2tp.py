@@ -84,12 +84,12 @@ class Gw2tp:
 		url = shinyapiserv + shiniesendpoint
 		async with self.session.get(url) as r:
 			shiniesresults = await r.json()
+		if shiniesresults is None:
+			raise APIError("Could not find an item by that name")
 		if "error" in shiniesresults:
 			raise APIError("The API is dead!")
 		if "text" in shiniesresults:
 			raise APIError(shiniesresults["text"])
-		if shiniesresults is None:
-			raise APIError("Could not find an item by that name")
 		return shiniesresults	
 
 	def gold_to_coins(self, money):
