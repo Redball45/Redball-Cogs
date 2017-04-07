@@ -36,7 +36,7 @@ class Gw2tp:
 
 	@commands.command(pass_context=True)
 	async def tpdata(self, ctx, *, tpitemname: str):
-		"""This finds the current buy price of an item
+		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
 		tpitemname = tpitemname.replace(" ", "%20")
