@@ -150,7 +150,8 @@ class Gw2tp:
 		silver, copper = divmod(remainder, 100)
 		if gold == 0:
 			gold_string = ""
-		else gold_string = str(gold) + "g"
+		else:
+			gold_string = str(gold) + "g"
 		if silver == 0:
 			silver_string = ""
 		else:
