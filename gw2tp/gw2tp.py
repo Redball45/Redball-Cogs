@@ -154,7 +154,7 @@ class Gw2tp:
 			else:
 				return "{0} s {1} c".format(silver, copper)
 		else:
-			return "{0} g, {1} s and {2} c".format(gold, silver, copper)
+			return "{0}g {1}s {2} c".format(gold, silver, copper)
 
 
 def check_folders():
