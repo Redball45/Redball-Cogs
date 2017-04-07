@@ -109,7 +109,6 @@ class Hangman:
 
 		@commands.group(aliases=['hm'], pass_context=True, no_pm=True, invoke_without_command=True)
 		@commands.cooldown(1, 7, BucketType.user)
-		@checks.custom_perms(send_messages=True)
 		async def hangman(self, ctx, *, guess):
 				"""Makes a guess towards the server's currently running hangman game
 
@@ -153,7 +152,6 @@ class Hangman:
 				await self.bot.say(fmt)
 
 		@hangman.command(name='create', aliases=['start'], no_pm=True, pass_context=True)
-		@checks.custom_perms(send_messages=True)
 		async def create_hangman(self, ctx):
 				"""This is used to create a new hangman game
 				A predefined phrase will be randomly chosen as the phrase to use
@@ -173,7 +171,6 @@ class Hangman:
 						"Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
 
 		@hangman.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
-		@checks.custom_perms(kick_members=True)
 		async def stop_game(self, ctx):
 				"""Force stops a game of hangman
 				This should realistically only be used in a situation like one player leaves
