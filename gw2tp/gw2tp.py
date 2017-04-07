@@ -76,6 +76,10 @@ class Gw2tp:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpdataid
 			results = await self.call_api(endpoint)
+			items = 'items'
+			itemsendpoint = items + tpdataid
+			itemsresults = await self.callapi(itemsendpoint)
+			itemnameresult = itemsresult["name"]	
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -87,7 +91,7 @@ class Gw2tp:
 		sellprice = results ["sells"]["unit_price"]
 		buyprice = self.gold_to_coins(buyprice)
 		sellprice = self.gold_to_coins(sellprice)
-		data = discord.Embed(description=results["name"])
+		data = discord.Embed(description=itemnameresult)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
