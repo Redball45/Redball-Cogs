@@ -41,7 +41,7 @@ class Gw2tp:
 		user = ctx.message.author
 		try:
 			shiniesendpoint = tpitemname
-			shiniesresults = await.self.call_shiniesapi(shiniesendpoint)
+			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 			tpbuyid = results["item_id"]
 		try:
 			commerce = 'commerce/prices/'
