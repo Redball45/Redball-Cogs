@@ -148,14 +148,18 @@ class Gw2tp:
 	def gold_to_coins(self, money):
 		gold, remainder = divmod(money, 10000)
 		silver, copper = divmod(remainder, 100)
-		if not gold:
-			if not silver:
-				return "{0} c".format(copper)
-			else:
-				return "{0} s {1} c".format(silver, copper)
+		if gold == 0:
+			gold_string = ""
+		else gold_string = str(gold) + "g"
+		if silver == 0:
+			silver_string = ""
 		else:
-			return "{0}g {1}s {2} c".format(gold, silver, copper)
-
+			silver_string = " " + str(silver) + "s"
+		if copper == 0:
+			copper_string = ""
+		else:
+			copper_string = " " + str(copper) + "c" 
+		return gold_string + silver_string + copper_string
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
