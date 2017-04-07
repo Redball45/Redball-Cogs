@@ -139,7 +139,7 @@ class Gw2tp:
 				counter += 1	
 		try:
 			await self.bot.say(embed=data)
-			if counter > 9:
+			if counter > 10:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
