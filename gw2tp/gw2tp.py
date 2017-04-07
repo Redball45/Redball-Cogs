@@ -52,8 +52,7 @@ class Gw2tp:
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]
-		color = self.getColor(user)
-		data = discord.Embed(description=None, colour=color)
+		data = discord.Embed(description=None)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
