@@ -45,7 +45,7 @@ class Gw2tp:
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-			itemnameresult = shiniesresult[0]["name"]
+			itemnameresult = shiniesresults[0]["name"]
 			tpbuyid = shiniesresults[0]["item_id"]
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpbuyid
