@@ -112,14 +112,9 @@ class Gw2tp:
 							   "`{1}`".format(user, e))
 			return
 		data = discord.Embed(description='Matching IDs')
-		counter = 0
-		itemorder_id = 1
 		#For each item returned, add to the data table
-		for ["name"] in shiniesresults
+		for ["name"] in shiniesresults:
 			data.add_field(name=Item['name'], value=ID['item_id'])
-			counter += 1
-		itemorder_id += 1			
-		data.add_field(name="Sell price", value=sellprice)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
