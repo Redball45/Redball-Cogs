@@ -78,7 +78,7 @@ class Gw2tp:
 			results = await self.call_api(endpoint)
 			items = 'items/'
 			endpoint = items + tpdataid
-			itemsresults = await self.call_api(endpoint)
+			itemsresult = await self.call_api(endpoint)
 			itemnameresult = itemsresult["name"]	
 		except APIKeyError as e:
 			await self.bot.say(e)
