@@ -76,7 +76,7 @@ class Gw2tp:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpdataid
 			results = await self.call_api(endpoint)
-			items = 'items'
+			items = 'items/'
 			endpoint = items + tpdataid
 			itemsresults = await self.call_api(endpoint)
 			itemnameresult = itemsresult["name"]	
