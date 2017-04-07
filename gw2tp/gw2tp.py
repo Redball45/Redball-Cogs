@@ -150,11 +150,11 @@ class Gw2tp:
 		silver, copper = divmod(remainder, 100)
 		if not gold:
 			if not silver:
-				return "{0} copper".format(copper)
+				return "{0} c".format(copper)
 			else:
-				return "{0} silver and {1} copper".format(silver, copper)
+				return "{0} s {1} c".format(silver, copper)
 		else:
-			return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
+			return "{0} g, {1} s and {2} c".format(gold, silver, copper)
 
 
 def check_folders():
