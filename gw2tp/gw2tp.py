@@ -33,7 +33,7 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-        result = str(result).strip("['")
+		result = str(result).strip("['")
 		result = str(result).strip("']")
 
  await self.bot.say('ID of the guild {0} is: {1}'.format(tpbuyid, result))
