@@ -58,6 +58,10 @@ class Gw2tp:
 				data.add_field(name=name['name'], value=name['item_id'])
 			try:
 				await self.bot.say(embed=data)
+			except APIError as e:
+				await self.bot.say("{0.mention}, API has responded with the following error: "
+									"`{1}`".format(user, e))
+				return
 			except discord.HTTPException:
 				await self.bot.say("Need permission to embed links")
 
