@@ -58,7 +58,7 @@ class Gw2tp:
 							   "`{1}`".format(user, e))
 			return
 		except APIError as e:
-			data = discord.Embed(description='I was unable match that to an item on the TP , listing all - use !tpid (id) to select one')
+			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tpid (id) to select one')
 			#For each item returned, add to the data table
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
