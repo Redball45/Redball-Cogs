@@ -45,6 +45,7 @@ class Gw2tp:
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
+			itemnameresult = shiniesresult[0]["name"]
 			tpbuyid = shiniesresults[0]["item_id"]
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpbuyid
@@ -72,7 +73,7 @@ class Gw2tp:
 		sellprice = results ["sells"]["unit_price"]
 		buyprice = self.gold_to_coins(buyprice)
 		sellprice = self.gold_to_coins(sellprice)
-		data = discord.Embed(description=None)
+		data = discord.Embed(title=itemnameresult)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
