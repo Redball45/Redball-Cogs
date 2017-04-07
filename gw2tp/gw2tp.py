@@ -42,7 +42,7 @@ class Gw2tp:
 		try:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpbuyid
-			result = await self.call_api(endpoint)
+			results = await self.call_api(endpoint)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -76,23 +76,23 @@ class Gw2tp:
 		return results
 
 def check_folders():
-    if not os.path.exists("data/guildwars2"):
-        print("Creating data/guildwars2")
-        os.makedirs("data/guildwars2")
+	if not os.path.exists("data/guildwars2"):
+		print("Creating data/guildwars2")
+		os.makedirs("data/guildwars2")
 
 
 def check_files():
-    files = {
-        "gamedata.json": {},
-        "settings.json": {"ENABLED": False},
-        "language.json": {},
-        "keys.json": {},
-        "build.json": {"id": None}  # Yay legacy support
-    }
+	files = {
+		"gamedata.json": {},
+		"settings.json": {"ENABLED": False},
+		"language.json": {},
+		"keys.json": {},
+		"build.json": {"id": None}  # Yay legacy support
+	}
 
-    for filename, value in files.items():
-        if not os.path.isfile("data/guildwars2/{}".format(filename)):
-            print("Creating empty {}".format(filename))
+	for filename, value in files.items():
+		if not os.path.isfile("data/guildwars2/{}".format(filename)):
+			print("Creating empty {}".format(filename))
 			dataIO.save_json("data/guildwars2/{}".format(filename), value)
 
 def setup(bot):
@@ -100,5 +100,5 @@ def setup(bot):
 		bot.add_cog(Gw2tp(bot))
 	else:
 		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
-    check_folders()
-    check_files()
+	check_folders()
+	check_files()
