@@ -58,7 +58,7 @@ class Gw2tp:
 							   "`{1}`".format(user, e))
 			return
 		except APIError as e:
-			data = discord.Embed(description='Direct match not found, listing all - use !tpid (id)')
+			data = discord.Embed(description='Not found on the TP API, listing all - use !tpid (id)')
 			#For each item returned, add to the data table
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
