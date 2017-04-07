@@ -159,7 +159,29 @@ class Gw2tp:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
+	@commands.command(pass_context=True)
+	async def gemprice(self, ctx):
+		"""This lists current gold/gem prices"""
+		user = ctx.message.author
+		try:
+			endpoint = "commerce/exchange/coins?quantity=10000000"
+			gemsresult = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+			
+		# Display data
+		data = discord.Embed(title="Gem / Gold price")
+		data.add_field(name="1 Gem",value=gemsresult['coins_per_gem'])
 
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC3")
 
 	async def call_api(self, endpoint):
 		apiserv = 'https://api.guildwars2.com/v2/'
