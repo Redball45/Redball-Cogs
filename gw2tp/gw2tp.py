@@ -74,9 +74,9 @@ class Gw2tp:
 		if sellprice != 0:
 			sellprice = self.gold_to_coins(sellprice)
 		if buyprice = 0:
-			buyprice = "No buy orders"
+			buyprice = 'No buy orders'
 		if sellprice = 0:
-			sellprice = "No sell orders"				
+			sellprice = 'No sell orders'				
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]
 		buyprice = self.gold_to_coins(buyprice)
@@ -117,9 +117,9 @@ class Gw2tp:
 		if sellprice != 0:
 			sellprice = self.gold_to_coins(sellprice)
 		if buyprice = 0:
-			buyprice = "No buy orders"
+			buyprice = 'No buy orders'
 		if sellprice = 0:
-			sellprice = "No sell orders"
+			sellprice = 'No sell orders'
 		data = discord.Embed(title=itemnameresult)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
