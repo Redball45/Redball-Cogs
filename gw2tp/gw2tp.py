@@ -50,8 +50,8 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		buyprice = results["unit_price"]
-		sellprice = results ["unit_price"]
+		buyprice = results["buys"]["unit_price"]
+		sellprice = results ["sells"]["unit_price"]
 		color = self.getColor(user)
 		data = discord.Embed(description=None, colour=color)
 		data.add_field(name="Buy price", value=buyprice)
