@@ -1,12 +1,22 @@
 import discord
 from discord.ext import commands
+from .utils import checks
+from cogs.utils.dataIO import dataIO, fileIO
+from __main__ import send_cmd_help
+
+
+import json
+import os
+import asyncio
+import aiohttp
+import datetime
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
 	soupAvailable = True
 except:
 	soupAvailable = False
-import aiohttp
+
 ...
 
 
@@ -65,10 +75,30 @@ class Gw2tp:
 			raise APIError(results["text"])
 		return results
 
+def check_folders():
+    if not os.path.exists("data/guildwars2"):
+        print("Creating data/guildwars2")
+        os.makedirs("data/guildwars2")
 
+
+def check_files():
+    files = {
+        "gamedata.json": {},
+        "settings.json": {"ENABLED": False},
+        "language.json": {},
+        "keys.json": {},
+        "build.json": {"id": None}  # Yay legacy support
+    }
+
+    for filename, value in files.items():
+        if not os.path.isfile("data/guildwars2/{}".format(filename)):
+            print("Creating empty {}".format(filename))
+			dataIO.save_json("data/guildwars2/{}".format(filename), value)
 
 def setup(bot):
 	if soupAvailable:
 		bot.add_cog(Gw2tp(bot))
 	else:
 		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
+    check_folders()
+    check_files()
