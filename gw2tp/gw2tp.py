@@ -108,7 +108,7 @@ class Gw2tp:
 			await self.bot.say(e)
 			return
 		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
+			await self.bot.say("{0.mention}, Item possibly not found on the Commerce API, try searching by id instead with !tplistids then !tpdataid - API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
 		data = discord.Embed(description='Matching IDs')
