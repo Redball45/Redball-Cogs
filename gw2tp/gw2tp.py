@@ -100,8 +100,8 @@ def gold_to_coins(self, money):
 	gold, remainder = divmod(money, 10000)
 	silver, copper = divmod(remainder, 100)
 	if not gold:
-	   if not silver:
-		   return "{0} copper".format(copper)
+		if not silver:
+			return "{0} copper".format(copper)
 		else:
 			return "{0} silver and {1} copper".format(silver, copper)
 	else:
