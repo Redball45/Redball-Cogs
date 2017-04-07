@@ -66,7 +66,7 @@ class Gw2tp:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
-			
+
 	@commands.command(pass_context=True)
 	async def tpdataid(self, ctx, *, tpdataid: str):
 		"""This finds the current buy and sell prices of an item
@@ -91,6 +91,35 @@ class Gw2tp:
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
+
+	@commands.command(pass_context=True)
+	async def tplistids(self, ctx, *, tpitemname: str):
+		"""This lists the ids and names of all matching items to the entered name"""
+		user = ctx.message.author
+		tpitemname = tpitemname.replace(" ", "%20")
+		try:
+			shiniesendpoint = tpitemname
+			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		data = discord.Embed(description='Matching IDs')
+		counter = 0
+		itemorder_id = 1
+		#For each item returned, add to the data table
+		for ["name"] in shiniesresults
+			data.add_field(name=Item['name'], value=ID['item_id'])
+			counter += 1
+		itemorder_id += 1			
+		data.add_field(name="Sell price", value=sellprice)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
