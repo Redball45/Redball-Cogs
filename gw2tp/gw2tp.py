@@ -87,7 +87,7 @@ class Gw2tp:
 		sellprice = results ["sells"]["unit_price"]
 		buyprice = self.gold_to_coins(buyprice)
 		sellprice = self.gold_to_coins(sellprice)
-		data = discord.Embed(description=None)
+		data = discord.Embed(description=results["name"])
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
