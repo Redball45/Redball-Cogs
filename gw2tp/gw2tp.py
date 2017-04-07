@@ -10,6 +10,12 @@ import aiohttp
 ...
 
 
+class APIError(Exception):
+	pass
+
+
+class APIKeyError(Exception):
+	pass
 
 class Gw2tp:
 	"""This cog finds tp prices"""
