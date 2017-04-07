@@ -160,7 +160,7 @@ class Gw2tp:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
 	@commands.command(pass_context=True)
-	async def gemprice(self, ctx):
+	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		try:
@@ -173,10 +173,12 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-			
+
+		gemCost = gemsresult['coins_per_gem']*numberOfGems
+
 		# Display data
 		data = discord.Embed(title="Gem / Gold price")
-		data.add_field(name="1 Gem",value=gemsresult['coins_per_gem'])
+		data.add_field(name=numberOfGems + " Gems",value=self.gold_to_coins(gemCost))
 
 		try:
 			await self.bot.say(embed=data)
