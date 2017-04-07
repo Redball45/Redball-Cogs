@@ -178,7 +178,7 @@ class Gw2tp:
 
 		# Display data
 		data = discord.Embed(title="Gem / Gold price")
-		data.add_field(name=numberOfGems + " Gems",value=self.gold_to_coins(gemCost))
+		data.add_field(name=str(numberOfGems) + " Gems",value=self.gold_to_coins(gemCost))
 
 		try:
 			await self.bot.say(embed=data)
