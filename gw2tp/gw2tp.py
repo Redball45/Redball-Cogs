@@ -23,7 +23,8 @@ class Gw2tp:
         Doesn't require any keys/scopes"""
         user = ctx.message.author
         try:
-            endpoint = "commerce/prices/"ctx
+        	commerce = "commerce/prices/"
+            endpoint = commerce + ctx
             result = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
