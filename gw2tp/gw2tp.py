@@ -35,7 +35,7 @@ class Gw2tp:
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
 	@commands.command(pass_context=True)
-	async def tp(self, ctx, tpbuyid: str):
+	async def tpdata(self, ctx, tpbuyid: str):
 		"""This finds the current buy price of an item
 		Doesn't require any keys/scopes"""
 		user = ctx.message.author
