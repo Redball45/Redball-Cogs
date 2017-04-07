@@ -66,6 +66,35 @@ class Gw2tp:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
+			
+	@commands.command(pass_context=True)
+	async def tpdataid(self, ctx, *, tpdataid: str):
+		"""This finds the current buy and sell prices of an item
+		If multiple matches are found, displays the first"""
+		user = ctx.message.author
+		try:
+			commerce = 'commerce/prices/'
+			endpoint = commerce + tpdataid
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		buyprice = results["buys"]["unit_price"]
+		sellprice = results ["sells"]["unit_price"]
+		buyprice = self.gold_to_coins(buyprice)
+		sellprice = self.gold_to_coins(sellprice)
+		data = discord.Embed(description=None)
+		data.add_field(name="Buy price", value=buyprice)
+		data.add_field(name="Sell price", value=sellprice)
+
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
 
 
 
