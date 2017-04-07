@@ -52,6 +52,8 @@ class Gw2tp:
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]
+		buyprice = self.gold_to_coins(buyprice)
+		sellprice = self.gold_to_coins(sellprice)
 		data = discord.Embed(description=None)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
@@ -93,6 +95,17 @@ def check_files():
 		if not os.path.isfile("data/guildwars2/{}".format(filename)):
 			print("Creating empty {}".format(filename))
 			dataIO.save_json("data/guildwars2/{}".format(filename), value)
+
+def gold_to_coins(self, money):
+	gold, remainder = divmod(money, 10000)
+	silver, copper = divmod(remainder, 100)
+	if not gold:
+	   if not silver:
+		   return "{0} copper".format(copper)
+		else:
+			return "{0} silver and {1} copper".format(silver, copper)
+	else:
+		return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
 
 def setup(bot):
 	if soupAvailable:
