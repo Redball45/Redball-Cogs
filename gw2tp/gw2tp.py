@@ -163,7 +163,7 @@ class Gw2tp:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
 	@commands.command(pass_context=True)
-	async def quaggan(self, ctx, *, quaggan_name : str = "random"):
+	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
 		"""This displays a quaggan"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -171,11 +171,11 @@ class Gw2tp:
 		base_quaggan = 'https://static.staticwars.com/quaggans/'
 		try:
 			l_quaggans = await self.call_api(endpoint)
-			if quaggan_name == "random":
+			if quaggan_name == 'random':
 				quaggan_name = random.choice(l_quaggans)
 				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
-			elif quaggan_name == "list":
+			elif quaggan_name == 'list':
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 				try:
