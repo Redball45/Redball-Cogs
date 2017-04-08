@@ -270,7 +270,7 @@ class Gw2tp:
 		data.add_field(value=URL_quaggan)
 		
 	def display_list_quaggans():
-		data = discord.Embed(title=Available quaggans, colour=color)
+		data = discord.Embed(title='Available quaggans', colour=color)
 		data.add_field(value=', '.join(l_quaggans))
 
 def check_folders():
