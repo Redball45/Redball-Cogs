@@ -265,7 +265,7 @@ class Gw2tp:
 			color = discord.Embed.Empty
 		return color
 
-	def display_given_quaggan(quaggan):
+	def display_given_quaggan(self, quaggan):
 		base_quaggan = r'https://static.staticwars.com/quaggans/'
 		URL_quaggan = base_quaggan + quaggan + '.jpg'
 		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list')
