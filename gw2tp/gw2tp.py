@@ -268,7 +268,7 @@ class Gw2tp:
 	def display_given_quaggan(self, quaggan):
 		base_quaggan = r'https://static.staticwars.com/quaggans/'
 		URL_quaggan = base_quaggan + quaggan + '.jpg'
-		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list')
+		data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
 		data.add_field(value=URL_quaggan)
 	
 
