@@ -168,7 +168,7 @@ class Gw2tp:
 		user = ctx.message.author
 		color = self.getColor(user)
 		try:
-			endpoint = 'quaggans/'
+			endpoint = 'quaggans'
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == "":
 				quaggan = random.choice(l_quaggans)
@@ -178,7 +178,7 @@ class Gw2tp:
 			elif quaggan_name == list:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
-			elif quaggan_name.lower() in l_quaggans:
+			elif quaggan_name in l_quaggans:
 				quagresult = await self.display_given_quaggan(quaggan_name)
 				data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
 				data.add_field(name=quaggan, value=URL_quaggan)
