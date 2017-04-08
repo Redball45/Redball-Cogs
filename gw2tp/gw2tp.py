@@ -167,16 +167,17 @@ class Gw2tp:
 			"""This displays a quaggan"""
 			user = ctx.message.author
 			color = self.getColor(user)
+			quaggan_n = quaggan_name
 			try:
 				endpoint = 'quaggans/'
 				l_quaggans = await self.call_api(endpoint)
-				if quaggan_name == '':
+				if quaggan_nn == '':
 					quaggan = random.choice(l_quaggans)
 					display_given_quaggan(quaggan)
-				elif quaggan_name == list:
+				elif quaggan_n == list:
 					display_list_quaggans()
-				elif quaggan_name.lower() in l_quaggans:
-					display_given_quaggan(quaggan_name.lower())
+				elif quaggan_n.lower() in l_quaggans:
+					display_given_quaggan(quaggan_n.lower())
 				else:
 					await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 					display_list_quaggans()
