@@ -10,6 +10,7 @@ import os
 import asyncio
 import aiohttp
 import datetime
+import random
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -172,7 +173,7 @@ class Gw2tp:
 		try:
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == 'random':
-				quaggan_name = (random.choice(l_quaggans))
+				quaggan_name = random.choice(l_quaggans)
 				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
 			elif quaggan_name == 'list':
