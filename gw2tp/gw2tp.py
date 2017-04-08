@@ -269,7 +269,7 @@ class Gw2tp:
 		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list', colour=color)
 		data.add_field(value=URL_quaggan)
 		
-	def display_list_quaggans():
+	def display_list_quaggans(self):
 		data = discord.Embed(title='Available quaggans', colour=color)
 		data.add_field(value=', '.join(l_quaggans))
 
