@@ -167,18 +167,19 @@ class Gw2tp:
 		"""This displays a quaggan"""
 		user = ctx.message.author
 		color = self.getColor(user)
+		endpoint = 'quaggans'
+		base_quaggan = 'https://static.staticwars.com/quaggans/'
 		try:
-			endpoint = 'quaggans'
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == "":
-				quaggan = random.choice(l_quaggans)
-				URL_quaggan = await self.display_given_quaggan(quaggan_name)
+				quaggan_name = random.choice(l_quaggans)
+				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
 			elif quaggan_name == list:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name in l_quaggans:
-				URL_quaggan = self.display_given_quaggan(quaggan_name)
+				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
@@ -266,11 +267,6 @@ class Gw2tp:
 		except:
 			color = discord.Embed.Empty
 		return color
-
-	def display_given_quaggan(self, quaggan_name):
-		base_quaggan = 'https://static.staticwars.com/quaggans/'
-		URL_quaggan = base_quaggan + quaggan_name + '.jpg'
-
 	
 
 def check_folders():
