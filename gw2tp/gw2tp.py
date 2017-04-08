@@ -266,11 +266,11 @@ class Gw2tp:
 	def display_given_quaggan(quaggan):
 		base_quaggan = r'https://static.staticwars.com/quaggans/'
 		URL_quaggan = base_quaggan + quaggan + '.jpg'
-		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list', colour=color)
+		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list')
 		data.add_field(value=URL_quaggan)
 		
 	def display_list_quaggans(self):
-		data = discord.Embed(title='Available quaggans', colour=color)
+		data = discord.Embed(title='Available quaggans')
 		data.add_field(value=', '.join(l_quaggans))
 
 def check_folders():
