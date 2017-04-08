@@ -163,7 +163,7 @@ class Gw2tp:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
 	@commands.command(pass_context=True)
-	async def quaggan(ctx, *, quaggan_name : str):
+	async def quaggan(self, ctx, *, quaggan_name : str):
 		"""This displays a quaggan"""
 		user = ctx.message.author
 		color = self.getColor(user)
