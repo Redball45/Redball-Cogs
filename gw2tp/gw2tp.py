@@ -163,7 +163,7 @@ class Gw2tp:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
 	@commands.command(pass_context=True)
-	async def quaggan(self, ctx, quaggan_name : str):
+	async def quaggan(self, ctx, *, quaggan_name : str):
 		"""This displays a quaggan"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -179,7 +179,7 @@ class Gw2tp:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name in l_quaggans:
-				quagresult = await self.display_given_quaggan(quaggan_name)
+				quagresult = self.display_given_quaggan(quaggan_name)
 				data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
 				data.add_field(name=quaggan, value=URL_quaggan)
 			else:
@@ -270,7 +270,7 @@ class Gw2tp:
 		return color
 
 	def display_given_quaggan(self, quaggan_name):
-		base_quaggan = r'https://static.staticwars.com/'
+		base_quaggan = 'https://static.staticwars.com/'
 		URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 
 	
