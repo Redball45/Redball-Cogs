@@ -42,6 +42,7 @@ class Gw2tp:
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
 		tpitemname = tpitemname.replace(" ", "%20")
+		color = self.getColor(user)
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
@@ -58,7 +59,7 @@ class Gw2tp:
 							   "`{1}`".format(user, e))
 			return
 		except APIError as e:
-			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tpid (id) to select one')
+			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tpid (id) to select one', colour=color)
 			#For each item returned, add to the data table
 			counter = 0
 			for name in shiniesresults:
@@ -82,7 +83,7 @@ class Gw2tp:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'				
-		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tplist (name) instead')
+		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tplist (name) instead', colour=color)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
@@ -96,6 +97,7 @@ class Gw2tp:
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
+		color = self.getColor(user)
 		try:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + tpdataid
@@ -121,7 +123,7 @@ class Gw2tp:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'
-		data = discord.Embed(title=itemnameresult)
+		data = discord.Embed(title=itemnameresult, colour=color)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
@@ -134,6 +136,7 @@ class Gw2tp:
 	async def tplist(self, ctx, *, tpitemname: str):
 		"""This lists the ids and names of all matching items to the entered name"""
 		user = ctx.message.author
+		color = self.getColor(user)
 		tpitemname = tpitemname.replace(" ", "%20")
 		try:
 			shiniesendpoint = tpitemname
@@ -145,7 +148,7 @@ class Gw2tp:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		data = discord.Embed(description='Matching IDs, use !tpid (id) to see prices for a specific item')
+		data = discord.Embed(description='Matching IDs, use !tpid (id) to see prices for a specific item', colour=color)
 		#For each item returned, add to the data table
 		counter = 0
 		for name in shiniesresults:
@@ -177,7 +180,7 @@ class Gw2tp:
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 
 		# Display data
-		data = discord.Embed(title="Gem / Gold price")
+		data = discord.Embed(title="Gem / Gold price", colour=color)
 		data.add_field(name=str(numberOfGems) + " Gems",value=self.gold_to_coins(gemCost))
 
 		try:
@@ -224,6 +227,13 @@ class Gw2tp:
 		else:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
+
+    def getColor(self, user):
+        try:
+            color = user.colour
+        except:
+            color = discord.Embed.Empty
+		return color
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
