@@ -178,6 +178,10 @@ class Gw2tp:
 			elif quaggan_name == list:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
+				try:
+					await self.bot.say(embed=data)
+				except discord.HTTPException:
+					await self.bot.say("Issue embedding data into discord - EC4")	
 			elif quaggan_name in l_quaggans:
 				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
@@ -185,14 +189,14 @@ class Gw2tp:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(name="List of quaggans", value=', '.join(l_quaggans))
+				try:
+					await self.bot.say(embed=data)
+				except discord.HTTPException:
+					await self.bot.say("Issue embedding data into discord - EC5")				
 		except APIError as e:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
-		try:
-			await self.bot.say(embed=data)
-		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord - EC3")
 
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
