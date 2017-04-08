@@ -172,7 +172,7 @@ class Gw2tp:
 		try:
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == 'random':
-				quaggan_name = random.choice(l_quaggans)
+				quaggan_name = (random.choice(l_quaggans))
 				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
 			elif quaggan_name == 'list':
