@@ -172,19 +172,23 @@ class Gw2tp:
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == "":
 				quaggan = random.choice(l_quaggans)
-				await self.display_given_quaggan(quaggan)
+				quagresult = await self.display_given_quaggan(quaggan)
+				data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
+				data.add_field(name=quaggan, value=URL_quaggan)
 			elif quaggan_name == list:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name.lower() in l_quaggans:
-				await self.display_given_quaggan(quaggan_name)
+				quagresult = await self.display_given_quaggan(quaggan_name)
+				data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
+				data.add_field(name=quaggan, value=URL_quaggan)
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(name="List of quaggans", value=', '.join(l_quaggans))
 		except APIError as e:
 			await self.bot.say("{0.mention}, API returned the following error:  "
-						   	"`{1}`".format(user, e))
+							"`{1}`".format(user, e))
 			return
 		try:
 			await self.bot.say(embed=data)
@@ -268,8 +272,7 @@ class Gw2tp:
 	def display_given_quaggan(self, quaggan):
 		base_quaggan = r'https://static.staticwars.com/'
 		URL_quaggan = base_quaggan + quaggan + '.jpg'
-		data = discord.Embed(name=quaggan, title=quaggan, description='For a list of all quaggans, type !quaggan list')
-		data.add_field(name=quaggan, value=URL_quaggan)
+
 	
 
 def check_folders():
