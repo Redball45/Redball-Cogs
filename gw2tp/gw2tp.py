@@ -269,9 +269,9 @@ class Gw2tp:
 			color = discord.Embed.Empty
 		return color
 
-	def display_given_quaggan(self, quaggan):
+	def display_given_quaggan(self, quaggan_name):
 		base_quaggan = r'https://static.staticwars.com/'
-		URL_quaggan = base_quaggan + quaggan + '.jpg'
+		URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 
 	
 
