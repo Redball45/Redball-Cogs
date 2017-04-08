@@ -168,9 +168,9 @@ class Gw2tp:
 			user = ctx.message.author
 			color = self.getColor(user)
 			try:
-				endpoint = "quaggans/"
+				endpoint = 'quaggans/'
 				l_quaggans = await self.call_api(endpoint)
-			if quaggan_name == "":
+			if quaggan_name == '':
 				quaggan = random.choice(l_quaggans)
 				display_given_quaggan(quaggan)
 			elif quaggan_name == list:
