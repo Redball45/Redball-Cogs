@@ -166,6 +166,7 @@ class Gw2tp:
 	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
+		color = self.getColor(user)
 		try:
 			endpoint = "commerce/exchange/coins?quantity=10000000"
 			gemsresult = await self.call_api(endpoint)
