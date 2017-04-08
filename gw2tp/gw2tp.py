@@ -178,7 +178,7 @@ class Gw2tp:
 				await self.bot.say(URL_quaggan)
 			elif quaggan_name == 'list':
 				data = discord.Embed(title='Available quaggans')
-				data.add_field(value=', '.join(l_quaggans))
+				data.add_field(name="List of quaggans", value=', '.join(l_quaggans))
 				try:
 					await self.bot.say(embed=data)
 				except discord.HTTPException:
