@@ -177,7 +177,7 @@ class Gw2tp:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name.lower() in l_quaggans:
-				await self.display_given_quaggan(quaggan_name.lower())
+				await self.display_given_quaggan(quaggan_name)
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 				data = discord.Embed(title='Available quaggans')
