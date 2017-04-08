@@ -173,15 +173,13 @@ class Gw2tp:
 			if quaggan_name == "":
 				quaggan = random.choice(l_quaggans)
 				URL_quaggan = await self.display_given_quaggan(quaggan_name)
-				data = discord.Embed(name=quaggan_name, title=quaggan_name, description='For a list of all quaggans, type !quaggan list')
-				data.add_field(name=quaggan_name, value=URL_quaggan)
+				await self.bot.say(URL_quaggan)
 			elif quaggan_name == list:
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name in l_quaggans:
 				URL_quaggan = self.display_given_quaggan(quaggan_name)
-				data = discord.Embed(name=quaggan_name, title=quaggan_name, description='For a list of all quaggans, type !quaggan list')
-				data.add_field(name=quaggan_name, value=URL_quaggan)
+				await self.bot.say(URL_quaggan)
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 				data = discord.Embed(title='Available quaggans')
