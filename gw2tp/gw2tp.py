@@ -228,11 +228,11 @@ class Gw2tp:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
 
-    def getColor(self, user):
-        try:
-            color = user.colour
-        except:
-            color = discord.Embed.Empty
+	def getColor(self, user):
+		try:
+			color = user.colour
+		except:
+			color = discord.Embed.Empty
 		return color
 
 def check_folders():
