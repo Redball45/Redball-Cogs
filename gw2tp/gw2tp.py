@@ -172,14 +172,14 @@ class Gw2tp:
 			l_quaggans = await self.call_api(endpoint)
 			if quaggan_name == "":
 				quaggan = random.choice(l_quaggans)
-				display_given_quaggan(quaggan)
+				await self.display_given_quaggan(quaggan)
 			elif quaggan_name == list:
-				display_list_quaggans()
+				await self.display_list_quaggans()
 			elif quaggan_name.lower() in l_quaggans:
-				display_given_quaggan(quaggan_name.lower())
+				await self.display_given_quaggan(quaggan_name.lower())
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
-				display_list_quaggans()
+				await self.display_list_quaggans()
 		except APIError as e:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 						   	"`{1}`".format(user, e))
