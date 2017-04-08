@@ -175,7 +175,7 @@ class Gw2tp:
 				quaggan_name = random.choice(l_quaggans)
 				URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 				await self.bot.say(URL_quaggan)
-			elif quaggan_name == list:
+			elif quaggan_name == "list":
 				data = discord.Embed(title='Available quaggans')
 				data.add_field(value=', '.join(l_quaggans))
 				try:
