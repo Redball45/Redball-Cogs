@@ -174,12 +174,14 @@ class Gw2tp:
 				quaggan = random.choice(l_quaggans)
 				await self.display_given_quaggan(quaggan)
 			elif quaggan_name == list:
-				await self.display_list_quaggans()
+				data = discord.Embed(title='Available quaggans')
+				data.add_field(value=', '.join(l_quaggans))
 			elif quaggan_name.lower() in l_quaggans:
 				await self.display_given_quaggan(quaggan_name.lower())
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
-				await self.display_list_quaggans()
+				data = discord.Embed(title='Available quaggans')
+				data.add_field(value=', '.join(l_quaggans))
 		except APIError as e:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 						   	"`{1}`".format(user, e))
@@ -268,10 +270,7 @@ class Gw2tp:
 		URL_quaggan = base_quaggan + quaggan + '.jpg'
 		data = discord.Embed(title=quaggan, description='For a list of all quaggans, type !quaggan list')
 		data.add_field(value=URL_quaggan)
-		
-	def display_list_quaggans(self):
-		data = discord.Embed(title='Available quaggans')
-		data.add_field(value=', '.join(l_quaggans))
+	
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
