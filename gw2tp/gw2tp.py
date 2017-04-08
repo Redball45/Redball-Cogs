@@ -181,7 +181,7 @@ class Gw2tp:
 			else:
 				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
 				data = discord.Embed(title='Available quaggans')
-				data.add_field(value=', '.join(l_quaggans))
+				data.add_field(name="List of quaggans", value=', '.join(l_quaggans))
 		except APIError as e:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 						   	"`{1}`".format(user, e))
