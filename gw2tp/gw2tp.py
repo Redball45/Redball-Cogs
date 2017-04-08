@@ -268,7 +268,7 @@ class Gw2tp:
 		return color
 
 	def display_given_quaggan(self, quaggan_name):
-		base_quaggan = 'https://static.staticwars.com/'
+		base_quaggan = 'https://static.staticwars.com/quaggans/'
 		URL_quaggan = base_quaggan + quaggan_name + '.jpg'
 
 	
