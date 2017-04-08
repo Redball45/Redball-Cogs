@@ -171,7 +171,7 @@ class Gw2tp:
 			try:
 				endpoint = 'quaggans/'
 				l_quaggans = await self.call_api(endpoint)
-				if quaggan_nn == '':
+				if quaggan_n == '':
 					quaggan = random.choice(l_quaggans)
 					display_given_quaggan(quaggan)
 				elif quaggan_n == list:
