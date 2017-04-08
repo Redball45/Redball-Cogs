@@ -164,30 +164,30 @@ class Gw2tp:
 			
 	@commands.command(pass_context=True)
 	async def quaggan(ctx, quaggan_name : str):
-			"""This displays a quaggan"""
-			user = ctx.message.author
-			color = self.getColor(user)
-			try:
-				endpoint = 'quaggans/'
-				l_quaggans = await self.call_api(endpoint)
-				if quaggan_name == '':
-					quaggan = random.choice(l_quaggans)
-					display_given_quaggan(quaggan)
-				elif quaggan_name == list:
-					display_list_quaggans()
-				elif quaggan_name.lower() in l_quaggans:
-					display_given_quaggan(quaggan_name.lower())
-				else:
-					await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
-					display_list_quaggans()
-			except APIError as e:
-				await self.bot.say("{0.mention}, API returned the following error:  "
-							   	"`{1}`".format(user, e))
-				return
-			try:
-				await self.bot.say(embed=data)
-			except discord.HTTPException:
-				await self.bot.say("Issue embedding data into discord - EC3")
+		"""This displays a quaggan"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		try:
+			endpoint = 'quaggans/'
+			l_quaggans = await self.call_api(endpoint)
+			if quaggan_name == '':
+				quaggan = random.choice(l_quaggans)
+				display_given_quaggan(quaggan)
+			elif quaggan_name == list:
+				display_list_quaggans()
+			elif quaggan_name.lower() in l_quaggans:
+				display_given_quaggan(quaggan_name.lower())
+			else:
+				await self.bot.say("I couldn't find the requested quaggan. List of all available quaggans:")
+				display_list_quaggans()
+		except APIError as e:
+			await self.bot.say("{0.mention}, API returned the following error:  "
+						   	"`{1}`".format(user, e))
+			return
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC3")
 
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
