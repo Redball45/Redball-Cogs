@@ -209,7 +209,7 @@ class Gw2:
 		color = self.getColor(user)
 		display = Display(visible=0, size=(800,600))
 		display.start()
-		browser = webdriver.Firefox(executable_path='/home/ubuntu/bin/geckodriver')
+		browser = webdriver.Firefox(executable_path='/home/ubuntu/geckodriver')
 		url = "http://silverwastes.loltools.net/" #build the web address
 		browser.get(url)
 		time.sleep(5)
