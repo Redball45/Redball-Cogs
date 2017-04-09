@@ -211,8 +211,8 @@ class Gw2:
 			bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
 			output = bagprice.text.strip()
 			await self.bot.say('Current best levels to open bags at is' + output)
-		#except:
-		#	await self.bot.say("Error, unable to load data - EC6")	
+		"""except:
+		#await self.bot.say("Error, unable to load data - EC6")	"""
 			
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
