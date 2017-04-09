@@ -208,8 +208,9 @@ class Gw2:
 		async with aiohttp.get(url) as response:
 			soupObject = BeautifulSoup(await response.text(), "html.parser")
 		try:
-			bagprice = soupObject.find(class_='col-md-8 text-center').find('bestLevels').get_text()
-			await self.bot.say('Current best levels to open bags at is' + bagprice)
+			bagprice = soupObject.find(attrs={"name": "bestLevels"})
+			output = bagprice[0]['value']
+			await self.bot.say('Current best levels to open bags at is' + output)
 		except:
 			await self.bot.say("Error, unable to load data - EC6")	
 			
