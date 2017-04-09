@@ -211,8 +211,7 @@ class Gw2:
 		browser.get(url)
 		time.sleep(5)
 		html_source = browser.page_source
-		soupObject = BeautifulSoup(await html_source.text(), "html.parser")
-		bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
+		bagprice = browser.page_source.find('div', attrs={'class':'col-md-8 text-center'})
 		output = bagprice.text.strip()
 		await self.bot.say('Current best levels to open bags at is' + output)
 			
