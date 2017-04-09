@@ -214,18 +214,24 @@ class Gw2:
 			url = "http://silverwastes.loltools.net/" #build the web address
 		except discord.HTTPException:
 			await self.bot.say("EC7")
+			browser.quit()
+			display.stop()
+			return
 		try:
 			browser.get(url)
-			time.sleep(1)
+			time.sleep(10)
 			html = browser.page_source
 			soup = BeautifulSoup(html)
 			bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
 			output = bagprice.text.strip()
 		except discord.HTTPException:
-			await self.bot.say("EC8")	
+			await self.bot.say("EC8")
+			browser.quit()
+			display.stop()
+			return	
+		await self.bot.say(output)	
 		browser.quit()
 		display.stop()
-		await self.bot.say(output)
 			
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
