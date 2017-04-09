@@ -200,6 +200,20 @@ class Gw2:
 			return
 
 	@commands.command(pass_context=True)
+	async def baglevel(self, ctx):
+		"""this displays the best level to open bags at"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		url = "http://silverwastes.loltools.net/" #build the web address
+		async with aiohttp.get(url) as response:
+			soupObject = BeautifulSoup(await.response.text(), "html.parser")
+		try:
+			bagprice = soupObject.find(class_='col-md-8 text-center').find('bestLevels').get_text()
+			await self.bot.say('Current best levels to open bags at is' + bagprice)
+		except:
+			await self.bot.say("Error, unable to load data - EC6")	
+			
+	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
