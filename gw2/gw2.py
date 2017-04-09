@@ -3,6 +3,8 @@ from discord.ext import commands
 from .utils import checks
 from cogs.utils.dataIO import dataIO, fileIO
 from __main__ import send_cmd_help
+from pyvirtualdisplay import Display
+from selenium import webdriver
 
 
 import json
@@ -204,12 +206,17 @@ class Gw2:
 		"""this displays the best level to open bags at"""
 		user = ctx.message.author
 		color = self.getColor(user)
+		display = Display(visible=0, size=(800, 600))
+		display.start()
+		browser = webdriver.Firefox()
 		url = "http://silverwastes.loltools.net/" #build the web address
-		async with aiohttp.get(url) as response:
-			soupObject = BeautifulSoup(await response.text(), "html.parser")
-			bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
-			output = bagprice.text.strip()
-			await self.bot.say('Current best levels to open bags at is' + output)
+		browser.get(url)
+		time.sleep(5)
+		html_source = browser.page_source
+		html_source = BeautifulSoup(await response.text(), "html.parser")
+		bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
+		output = bagprice.text.strip()
+		await self.bot.say('Current best levels to open bags at is' + output)
 			
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
