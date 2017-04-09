@@ -3,8 +3,6 @@ from discord.ext import commands
 from .utils import checks
 from cogs.utils.dataIO import dataIO, fileIO
 from __main__ import send_cmd_help
-from pyvirtualdisplay import Display
-from selenium import webdriver
 
 
 import json
@@ -201,38 +199,7 @@ class Gw2:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
-
-	@commands.command(pass_context=True)
-	async def baglevel(self, ctx):
-		"""this displays the best level to open bags at"""
-		try :
-			display = Display(visible=0, size=(800, 600))
-			display.start()
-			user = ctx.message.author
-			color = self.getColor(user)
-			browser = webdriver.Firefox(executable_path='/home/ubuntu/geckodriver')
-			url = "http://silverwastes.loltools.net/" #build the web address
-		except discord.HTTPException:
-			await self.bot.say("EC7")
-			browser.quit()
-			display.stop()
-			return
-		try:
-			browser.get(url)
-			time.sleep(10)
-			html = browser.page_source
-			soup = BeautifulSoup(html)
-			bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
-			output = bagprice.text.strip()
-		except discord.HTTPException:
-			await self.bot.say("EC8")
-			browser.quit()
-			display.stop()
-			return	
-		await self.bot.say(output)	
-		browser.quit()
-		display.stop()
-			
+	
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
