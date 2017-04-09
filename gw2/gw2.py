@@ -214,7 +214,7 @@ class Gw2:
 		soup = BeautifulSoup(html)
 		bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
 		output = bagprice.text.strip()
-		await self.bot.say('Current best levels to open bags at is' + output)
+		await self.bot.say(output)
 			
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
