@@ -207,7 +207,7 @@ class Gw2:
 		"""this displays the best level to open bags at"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		display = Display(visible=0, size(800,600))
+		display = Display(visible=0, size=(800,600))
 		display.start()
 		browser = webdriver.Firefox()
 		url = "http://silverwastes.loltools.net/" #build the web address
