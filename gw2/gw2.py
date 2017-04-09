@@ -12,6 +12,7 @@ import asyncio
 import aiohttp
 import datetime
 import random
+import time
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
