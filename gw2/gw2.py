@@ -209,7 +209,7 @@ class Gw2:
 			soupObject = BeautifulSoup(await response.text(), "html.parser")
 		try:
 			bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
-			output = bagprice['value']
+			output = bagprice
 			await self.bot.say('Current best levels to open bags at is' + output)
 		except:
 			await self.bot.say("Error, unable to load data - EC6")	
