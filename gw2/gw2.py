@@ -3,6 +3,7 @@ from discord.ext import commands
 from .utils import checks
 from cogs.utils.dataIO import dataIO, fileIO
 from __main__ import send_cmd_help
+from pyvirtualdisplay import Display
 from selenium import webdriver
 
 
@@ -204,17 +205,26 @@ class Gw2:
 	@commands.command(pass_context=True)
 	async def baglevel(self, ctx):
 		"""this displays the best level to open bags at"""
-		user = ctx.message.author
-		color = self.getColor(user)
-		browser = webdriver.Firefox(executable_path='/home/ubuntu/geckodriver')
-		url = "http://silverwastes.loltools.net/" #build the web address
-		browser.get(url)
-		time.sleep(1)
-		html = browser.page_source
-		soup = BeautifulSoup(html)
-		bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
-		output = bagprice.text.strip()
+		try :
+			display = Display(visible=0, size=(800, 600))
+			display.start()
+			user = ctx.message.author
+			color = self.getColor(user)
+			browser = webdriver.Firefox(executable_path='/home/ubuntu/geckodriver')
+			url = "http://silverwastes.loltools.net/" #build the web address
+		except discord.HTTPException:
+			await self.bot.say("EC7")
+		try:
+			browser.get(url)
+			time.sleep(1)
+			html = browser.page_source
+			soup = BeautifulSoup(html)
+			bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
+			output = bagprice.text.strip()
+		except discord.HTTPException:
+			await self.bot.say("EC8")	
 		browser.quit()
+		display.stop()
 		await self.bot.say(output)
 			
 	@commands.command(pass_context=True)
