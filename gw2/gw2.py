@@ -209,13 +209,13 @@ class Gw2:
 		browser = webdriver.Firefox(executable_path='/home/ubuntu/geckodriver')
 		url = "http://silverwastes.loltools.net/" #build the web address
 		browser.get(url)
-		time.sleep(5)
+		time.sleep(1)
 		html = browser.page_source
 		soup = BeautifulSoup(html)
 		bagprice = soup.find('div', attrs={'class':'col-md-8 text-center'})
 		output = bagprice.text.strip()
-		await self.bot.say(output)
 		browser.quit()
+		await self.bot.say(output)
 			
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
