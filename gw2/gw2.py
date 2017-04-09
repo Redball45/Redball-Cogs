@@ -208,7 +208,7 @@ class Gw2:
 		async with aiohttp.get(url) as response:
 			soupObject = BeautifulSoup(await response.text(), "html.parser")
 		try:
-			bagprice = soupObject.find(attrs={"name": "bestLevels"})
+			bagprice = soupObject.find('div', attrs={'class':'col-md-8 text-center'})
 			output = bagprice['value']
 			await self.bot.say('Current best levels to open bags at is' + output)
 		except:
