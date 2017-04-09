@@ -1,9 +1,0 @@
-{
-    "AUTHOR" : "Redball45",
-    "INSTALL_MSG" : "GW2TP Cog Installed",
-    "NAME" : "gw2tp",
-    "SHORT" : "GW2TP related commands",
-    "DESCRIPTION" : "Trading post commands for Guild Wars 2",
-    "TAGS" : ["tp", "gw2"],
-    "HIDDEN" : false
-}

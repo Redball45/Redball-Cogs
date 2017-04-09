@@ -30,7 +30,7 @@ class ShinyAPIError(Exception):
 class APIKeyError(Exception):
 	pass
 
-class Gw2tp:
+class Gw2:
 	"""This cog finds tp prices"""
 
 	def __init__(self, bot):
@@ -297,7 +297,7 @@ def check_files():
 
 def setup(bot):
 	if soupAvailable:
-		bot.add_cog(Gw2tp(bot))
+		bot.add_cog(Gw2(bot))
 	else:
 		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
 	check_folders()
