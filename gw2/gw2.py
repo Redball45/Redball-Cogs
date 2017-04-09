@@ -206,7 +206,7 @@ class Gw2:
 		color = self.getColor(user)
 		url = "http://silverwastes.loltools.net/" #build the web address
 		async with aiohttp.get(url) as response:
-			soupObject = BeautifulSoup(await.response.text(), "html.parser")
+			soupObject = BeautifulSoup(await response.text(), "html.parser")
 		try:
 			bagprice = soupObject.find(class_='col-md-8 text-center').find('bestLevels').get_text()
 			await self.bot.say('Current best levels to open bags at is' + bagprice)
