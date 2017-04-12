@@ -265,7 +265,7 @@ class Gw2:
 		l_mats = ["wood", "metal", "leather", "cloth"]
 		TP_prices = {mat:{} for mat in l_mats}
 		try:
-			endpoint = ','.join(l_IDs)
+			endpoint = "commerce/prices?ids=" + ','.join(l_IDs)
 			l_prices = await self.call_api(endpoint)
 		except APIKeyError as e:
 			await self.bot.say(e)
