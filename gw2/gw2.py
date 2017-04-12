@@ -323,13 +323,13 @@ def check_files():
 
 
 def setup(bot):
-	if soupAvailable:
-		bot.add_cog(Gw2(bot))
-	else:
-		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
 	check_folders()
 	check_files()
 	n = Gw2(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
 	bot.add_cog(n)
+	if soupAvailable:
+		bot.add_cog(Gw2(bot))
+	else:
+		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")	
