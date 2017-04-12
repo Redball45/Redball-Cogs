@@ -44,11 +44,11 @@ class Gw2:
 		try:
 			endpoint = "commerce/exchange/coins?quantity=10000000"
 			gemsresult = await self.call_api(endpoint)
-			price = gemsresult['coins_per_gem']*numberOfGems
-			return price
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return 0
+			
+		return gemsresult['coins_per_gem']*numberOfGems
 
 	@commands.command(pass_context=True)
 	async def gemtrack(self, ctx, price : int):
