@@ -76,7 +76,7 @@ class Gw2:
 				for user_id, data in self.gemtrack.items():
 					if gemCost < data["price"]:
 						user = await self.bot.get_user_info(user_id)
-						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}! \o/".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
+						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
 						self.gemtrack[user_id]["price"] = 0
 						doCleanup = True;
 			
