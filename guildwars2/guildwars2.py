@@ -1209,6 +1209,7 @@ class Guildwars2:
 
 	@commands.command(pass_context=True)
 	async def daily(self, ctx, pve_pvp_wvw_fractals):
+		"""Returns current GW2 dailies for pve, pvp, wvw or fractals"""
 		valid_dailies = ["pvp", "wvw", "pve", "fractals"]
 		user = ctx.message.author
 		search = pve_pvp_wvw_fractals.lower()
