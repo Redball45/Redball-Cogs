@@ -1688,6 +1688,12 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
+	@commands.group(pass_context=True)
+	async def gems(self, ctx):
+		"""Gem - Gold transfer related commands"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+
 	@commands.command(pass_context=True)
 	async def baglevel(self, ctx):
 		"""This computes the best level for opening champion bags"""
