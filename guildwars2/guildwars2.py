@@ -1597,7 +1597,7 @@ class Guildwars2:
 
 	@commands.command(pass_context=True)
 	async def cats(self, ctx):
-		"""This displays unlocked home instance for your account
+		"""This displays unlocked home instance cats for your account
 		Requires an API key with characters and progression"""
 		user = ctx.message.author
 		scopes = ["progression"]
