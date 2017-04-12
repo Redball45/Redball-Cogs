@@ -1397,6 +1397,12 @@ class Guildwars2:
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 		return gemCost
 
+	@commands.group(pass_context=True)
+	async def gems(self, ctx):
+		"""Gem - Gold transfer related commands"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+
 	@gems.command(pass_context=True)
 	async def track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
@@ -1687,12 +1693,6 @@ class Guildwars2:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
-
-	@commands.group(pass_context=True)
-	async def gems(self, ctx):
-		"""Gem - Gold transfer related commands"""
-		if ctx.invoked_subcommand is None:
-			await send_cmd_help(ctx)
 
 	@commands.command(pass_context=True)
 	async def baglevel(self, ctx):
