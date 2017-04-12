@@ -312,11 +312,7 @@ def check_folders():
 
 def check_files():
 	files = {
-		"gamedata.json": {},
-		"settings.json": {"ENABLED": False},
-		"language.json": {},
-		"keys.json": {},
-		"build.json": {"id": None}  # Yay legacy support
+		"gemtrack.json": {},
 	}
 
 	for filename, value in files.items():
