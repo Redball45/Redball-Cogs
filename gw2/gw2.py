@@ -240,6 +240,10 @@ class Gw2:
 		if "chain_stick" in results:
 			chainstick = 'Unlocked'
 			data.add_field(name="Chain Sticks", value=chainstick)
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
 
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
