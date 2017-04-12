@@ -228,7 +228,7 @@ class Gw2:
 			key = self.keylist[user.id]["key"]
 			endpoint = "characters/" +  charactername + "/sab/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
-			self.bot.say("No API errors")
+			await self.bot.say("No API errors")
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
