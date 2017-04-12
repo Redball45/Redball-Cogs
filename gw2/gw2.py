@@ -429,18 +429,18 @@ class Gw2:
 			color = discord.Embed.Empty
 		return color
 
-    def _check_scopes_(self, user, scopes):
-        if user.id not in self.keylist:
-            raise APIKeyError(
-                "No API key associated with {0.mention}".format(user))
-        if scopes:
-            missing = []
-            for scope in scopes:
-                if scope not in self.keylist[user.id]["permissions"]:
-                    missing.append(scope)
-            if missing:
-                missing = ", ".join(missing)
-                raise APIKeyError(
+	def _check_scopes_(self, user, scopes):
+		if user.id not in self.keylist:
+			raise APIKeyError(
+				"No API key associated with {0.mention}".format(user))
+		if scopes:
+			missing = []
+			for scope in scopes:
+				if scope not in self.keylist[user.id]["permissions"]:
+					missing.append(scope)
+			if missing:
+				missing = ", ".join(missing)
+				raise APIKeyError(
 					"{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 	
 
