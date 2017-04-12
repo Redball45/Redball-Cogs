@@ -304,8 +304,8 @@ class Gw2:
 
 
 		# Display data
-		data = discord.Embed(title="Best bag levels", colour=color)
-		data.add_field(name="Best bag levels",value=', '.join([str(elem) for elem in profit_levels]))
+		data = discord.Embed(title="Best character levels to open champion bags", colour=color)
+		data.add_field(name="Best levels",value=', '.join([str(elem) for elem in profit_levels]))
 		data.add_field(name="Estimated profit",value=self.gold_to_coins(int(100*max_profit)))
 
 		try:
