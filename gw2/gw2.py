@@ -227,7 +227,7 @@ class Gw2:
 							"`{1}`".format(user, e))
 			return
 
-	def getGemPrice(self, numberOfGems : int = 400):
+	async def getGemPrice(self, numberOfGems : int = 400):
 		try:
 			endpoint = "commerce/exchange/coins?quantity=10000000"
 			gemsresult = await self.call_api(endpoint)
