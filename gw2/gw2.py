@@ -237,6 +237,7 @@ class Gw2:
 		#chainsticksunlock = 
 		#data = discord.Embed(description='SAB Character Info', colour =color)
 		#data.add_field(name=)
+		
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
 		"""This displays a quaggan"""
