@@ -19,8 +19,6 @@ try: # check if BeautifulSoup4 is installed
 except:
 	soupAvailable = False
 
-...
-
 
 class APIError(Exception):
 	pass
@@ -37,6 +35,34 @@ class Gw2:
 	def __init__(self, bot):
 		self.bot = bot
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
+		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
+
+	def save_gemtrack(self):
+        dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
+
+    @commands.command(pass_context=True)
+	async def gemtrack(self, ctx, price : int):
+		"""This requests to be notified when the cost of 400 gems drops below a specified price"""
+		user = ctx.message.author
+		color = self.getColor(user)
+
+		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
+		self.save_gemtrack();
+
+		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(threshold)))
+
+	# tracks gemprices and notifies people
+	async def _gemprice_tracker(self):
+        while self is self.bot.get_cog("Gw2"):
+        	gemPrice = getGemPrice()
+        	for user_id, data in self.gemtrack:
+        		if (gemPrice < data["price"])
+        			user = get_user_info(user_id)
+        			await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, data["price"]))
+        			self.gemtrack.pop(user_id)
+        			self.save_gemtrack()
+
+            await asyncio.sleep(60)
 
 	@commands.command(pass_context=True)
 	async def tpdata(self, ctx, *, tpitemname: str):
@@ -199,24 +225,27 @@ class Gw2:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
-	
+
+	def getGemPrice(numberOfGems : int = 400):
+		try:
+			endpoint = "commerce/exchange/coins?quantity=10000000"
+			gemsresult = await self.call_api(endpoint)
+			return gemsresult['coins_per_gem']*numberOfGems
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return 0
+
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		try:
-			endpoint = "commerce/exchange/coins?quantity=10000000"
-			gemsresult = await self.call_api(endpoint)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return
-		except ShinyAPIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
 
-		gemCost = gemsresult['coins_per_gem']*numberOfGems
+		gemCost = getGemPrice(numberOfGems)
+		
+		# If this is zero then the API is down (OR GEMS ARE FREE!!! OMG \o/)
+		if (gemCost == 0)
+			return
 
 		# Display data
 		data = discord.Embed(title="Gem / Gold price", colour=color)
@@ -303,3 +332,7 @@ def setup(bot):
 		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
 	check_folders()
 	check_files()
+	n = Gw2(bot)
+	loop = asyncio.get_event_loop()
+	loop.create_task(n._gemprice_tracker())
+	bot.add_cog(n)
