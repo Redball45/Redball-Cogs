@@ -293,7 +293,7 @@ class Gw2:
 							coef[tier] += 0.9
 							coef[tier + 1] += 0.1
 					except KeyError:
-					pass
+						pass
 				for tier in r_tier:
 					mat_price = float(TP_prices[mat][tier])
 					temp = coef[tier] * mat_price / nb
