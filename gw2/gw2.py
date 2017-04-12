@@ -60,7 +60,7 @@ class Gw2:
 		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
 		self.save_gemtrack();
 		
-		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(threshold)))
+		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
 
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
