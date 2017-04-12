@@ -237,8 +237,8 @@ class Gw2:
 			return
 
 		data = discord.Embed(description='SAB Character Info', colour =color)
-		for elem in data["unlocks"]:
-			data.add_field(name=elem["name"], value="Unlocked")
+		for elem in results["unlocks"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
