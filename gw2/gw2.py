@@ -55,7 +55,7 @@ class Gw2:
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
 			gemPrice = getGemPrice()
-			if (gemPrice != 0)
+			if gemPrice != 0:
 				for user_id, data in self.gemtrack:
 					if gemPrice < data["price"]:
 						user = get_user_info(user_id)
