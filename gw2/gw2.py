@@ -76,6 +76,7 @@ class Gw2:
 					if gemCost < data["price"]:
 						user = await self.bot.get_user_info(user_id)
 						await self.bot.send_message(user, "Hey, {0.mention}. Gem prices have dropped below {1}!".format(user, data["price"]))
+						self.gemtrack[user_id]["price"] = 0
 						doCleanup = true;
 			
 			if doCleanup:			
