@@ -57,7 +57,7 @@
     "saffron_mango_icecream" :  { "name" : "Bowl of Saffron-Mango Ice Cream WP: [&BH8HAAA=]", "order" : 7 },
     "peach_raspberry_icecream" :  { "name" : "Bowl of Peach Raspberry Swirl Ice Cream WP: [&BKwHAAA=]", "order" : 8 },
     "chicken_day" :  { "name" : "Slab of Poultry Meat WP: [&BLwEAAA=]", "order" : 9 },
-    "chicken_night" : { "name" : "Slab of Poultry Meat WP: [&BLwEAAA=]", : 10 },
+    "chicken_night" : { "name" : "Slab of Poultry Meat WP: [&BLwEAAA=]", "order" : 10 },
     "warrior" :  { "name" : "Cheeseburger WP: [&BO8AAAA=]", "order" : 11 },
     "mesmer" :  { "name" : "Mystery Tonic WP: [&BO8AAAA=]", "order" : 12 },
     "ranger" :  { "name" : "Healing Seed Pod WP: [&BDQBAAA=]", "order" : 13 },
