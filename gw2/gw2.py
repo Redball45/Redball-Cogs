@@ -259,11 +259,6 @@ class Gw2:
 			key = self.keylist[user.id]["key"]
 			endpoint = "account/home/cats/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
-		listofcats = []
-		for cat in results:
-    		id = cat["id"]
-    		hint = cat["hint"]
-    		listofcats.append(hint)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -272,6 +267,11 @@ class Gw2:
 								"`{1}`".format(user, e))
 			return
 		else:
+			listofcats = []
+			for cat in results:
+				id = cat["id"]
+				hint = cat["hint"]
+				listofcats.append(hint)			
 			catslist = list(
 				set(list(self.gamedata["cats"])) ^ set(listofcats))
 			if not catslist:
