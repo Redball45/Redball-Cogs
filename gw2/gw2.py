@@ -484,7 +484,7 @@ class Gw2:
 	def _check_scopes_(self, user, scopes):
 		if user.id not in self.keylist:
 			raise APIKeyError(
-				"No API key associated with {0.mention}".format(user))
+				"No API key associated with {0.mention}, add one with [p]key add (key)".format(user))
 		if scopes:
 			missing = []
 			for scope in scopes:
