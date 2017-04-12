@@ -36,6 +36,9 @@ class Gw2:
 		self.bot = bot
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
+		
+	def __unload(self):
+		self.session.close()
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
@@ -65,17 +68,14 @@ class Gw2:
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
-			gemCost = await self.getGemPrice()
-			user = await self.bot.get_user_info(99253329003044864)
-			await self.bot.send_message(user, "Hey, {0}. Gem prices are currently {1}!".format(user.name, self.gold_to_coins(gemCost)))
-			
+			gemCost = await self.getGemPrice()			
 			doCleanup = False
 			
 			if gemCost != 0:
 				for user_id, data in self.gemtrack.items():
 					if gemCost < data["price"]:
 						user = await self.bot.get_user_info(user_id)
-						await self.bot.send_message(user, "Hey, {0.mention}. Gem prices have dropped below {1}!".format(user, data["price"]))
+						await self.bot.send_message(user, "Hey, {0.mention}! The price of 400 gems has dropped to {1}.".format(user, self.gold_to_coins(gemCost)))
 						self.gemtrack[user_id]["price"] = 0
 						doCleanup = True;
 			
@@ -85,7 +85,7 @@ class Gw2:
 						del self.gemtrack[x]
 					self.save_gemtrack()
 			
-			await asyncio.sleep(60)
+			await asyncio.sleep(300)
 
 	@commands.command(pass_context=True)
 	async def tpdata(self, ctx, *, tpitemname: str):
