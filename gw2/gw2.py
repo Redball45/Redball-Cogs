@@ -66,7 +66,7 @@ class Gw2:
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
 			gemCost = await self.getGemPrice()
-			user = get_user_info(99253329003044864)
+			user = self.bot.get_user_info(99253329003044864)
 			await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, gemCost))
 			
 			if gemCost != 0:
