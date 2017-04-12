@@ -271,6 +271,93 @@ class Gw2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
+	@commands.command(pass_context=True)
+	async def baglevel(self, ctx):
+		"""This computes the best level for opening champion bags"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		
+		d_gains = {}
+		global_coefs = {"wood": 19*0.949/37,
+				"metal": (6*1.53 + 19*0.578)/37,
+				"leather": 6*2.26/37,
+				"cloth": 6*2.26/37}
+		d_IDs = {"wood": [19723, 19726, 19727, 19724, 19722, 19725],
+			"metal": [19697, 19699, 19702, 19700, 19701],
+			"leather": [19719, 19728, 19730, 19731, 19729, 19732],
+			"cloth": [19718, 19739, 19741, 19743, 19748, 19745]}
+		l_IDs =  [str(item) for sublist in d_IDs.values() for item in sublist]
+		max_tier = {"wood": 6, "metal": 5, "leather": 6, "cloth": 6}
+		d_bounds = {"wood":{1: {"min":1, "max":20},
+				2: {"min":16, "max":33},
+				3: {"min":31, "max":48},
+				4: {"min":46, "max":63},
+				5: {"min":59, "max":80},},
+			"metal": {1: {"min": 1, "max": 23},
+				2: {"min": 19, "max": 53},
+				3: {"min": 49, "max": 62},
+				4: {"min": 63, "max": 80},},
+			"leather": {1: {"min": 1, "max": 18},
+				2: {"min": 16, "max": 33},
+				3: {"min": 31, "max": 48},
+				4: {"min": 46, "max": 63},
+				5: {"min": 61, "max": 80},},
+			"cloth": {1: {"min": 1, "max": 20},
+				2: {"min": 16, "max": 33},
+				3: {"min": 31, "max": 48},
+				4: {"min": 44, "max": 63},
+				5: {"min": 58, "max": 80},},}
+		l_mats = ["wood", "metal", "leather", "cloth"]
+		TP_prices = {mat:{} for mat in l_mats}
+		try:
+			endpoint = "commerce/prices?ids=" + ','.join(l_IDs)
+			l_prices = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+					   "`{1}`".format(user, e))
+			return
+		d_prices = {elem["id"]: elem for elem in l_prices}
+		for mat in l_mats:
+			for i, ID in enumerate(d_IDs[mat]):
+				mat_price = d_prices[ID]["sells"]["unit_price"]/float(100)
+				TP_prices[mat][i+1] = mat_price
+		for lvl in range(1, 81):
+			gain = 0
+			for mat in l_mats:
+				r_tier = range(1, max_tier[mat] + 1)
+				nb = 0
+				coef = {elem: 0 for elem in r_tier}
+				for tier in r_tier[:-1]:
+					try:
+						lb = d_bounds[mat][tier]
+						if lb["min"] <= lvl <= lb["max"]:
+							nb += 1
+							coef[tier] += 0.9
+							coef[tier + 1] += 0.1
+					except KeyError:
+						pass
+				for tier in r_tier:
+					mat_price = float(TP_prices[mat][tier])
+					temp = coef[tier] * mat_price / nb
+					gain += global_coefs[mat] * temp
+			d_gains[lvl] = gain
+		max_profit = max(d_gains.values())
+		profit_levels = [lv for lv in range(1, 81) if d_gains[lv] == max_profit]
+
+
+		# Display data
+		data = discord.Embed(title="Best character levels to open champion bags", colour=color)
+		data.add_field(name="Best levels",value=', '.join([str(elem) for elem in profit_levels]))
+		data.add_field(name="Estimated profit",value=self.gold_to_coins(int(100*max_profit)))
+
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC3")
+
 	async def call_api(self, endpoint):
 		apiserv = 'https://api.guildwars2.com/v2/'
 		url = apiserv + endpoint
@@ -345,4 +432,4 @@ def setup(bot):
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
-		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")	
+		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
