@@ -79,12 +79,12 @@ class Gw2:
 						self.gemtrack[user_id]["price"] = 0
 						doCleanup = true;
 			
-			if doCleanup:			
-				keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
-				for x in keys:
-    				del self.gemtrack[x]	
-    			self.save_gemtrack()
-					
+				if doCleanup:
+					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
+					for x in keys:
+						del self.gemtrack[x]
+					self.save_gemtrack()
+			
 			await asyncio.sleep(60)
 
 	@commands.command(pass_context=True)
