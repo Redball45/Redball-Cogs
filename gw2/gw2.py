@@ -11,14 +11,13 @@ import asyncio
 import aiohttp
 import datetime
 import random
+import time
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
 	soupAvailable = True
 except:
 	soupAvailable = False
-
-...
 
 
 class APIError(Exception):
@@ -36,6 +35,58 @@ class Gw2:
 	def __init__(self, bot):
 		self.bot = bot
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
+		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
+		
+	def __unload(self):
+		self.session.close()
+
+	def save_gemtrack(self):
+		dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
+	
+	async def getGemPrice(self, numberOfGems : int = 400):
+		try:
+			endpoint = "commerce/exchange/coins?quantity=10000000"
+			gemsresult = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return 0
+		
+		gemCost = gemsresult['coins_per_gem']*numberOfGems
+		return gemCost
+
+	@commands.command(pass_context=True)
+	async def trackgems(self, ctx, gold : int):
+		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		price = gold * 10000
+		
+		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
+		self.save_gemtrack()
+		
+		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
+
+	# tracks gemprices and notifies people
+	async def _gemprice_tracker(self):
+		while self is self.bot.get_cog("Gw2"):
+			gemCost = await self.getGemPrice()			
+			doCleanup = False
+			
+			if gemCost != 0:
+				for user_id, data in self.gemtrack.items():
+					if gemCost < data["price"]:
+						user = await self.bot.get_user_info(user_id)
+						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
+						self.gemtrack[user_id]["price"] = 0
+						doCleanup = True;
+			
+				if doCleanup:
+					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
+					for x in keys:
+						del self.gemtrack[x]
+					self.save_gemtrack()
+			
+			await asyncio.sleep(300)
 
 	@commands.command(pass_context=True)
 	async def tpdata(self, ctx, *, tpitemname: str):
@@ -204,18 +255,12 @@ class Gw2:
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		try:
-			endpoint = "commerce/exchange/coins?quantity=10000000"
-			gemsresult = await self.call_api(endpoint)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return
-		except ShinyAPIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
 
-		gemCost = gemsresult['coins_per_gem']*numberOfGems
+		gemCost = await self.getGemPrice(numberOfGems)
+		
+		# If this is zero then the API is down (OR GEMS ARE FREE!!! OMG \o/)
+		if gemCost == 0:
+			return
 
 		# Display data
 		data = discord.Embed(title="Gem / Gold price", colour=color)
@@ -362,30 +407,29 @@ class Gw2:
 	
 
 def check_folders():
-	if not os.path.exists("data/guildwars2"):
-		print("Creating data/guildwars2")
-		os.makedirs("data/guildwars2")
+	if not os.path.exists("data/gw2"):
+		print("Creating data/gw2")
+		os.makedirs("data/gw2")
 
 
 def check_files():
 	files = {
-		"gamedata.json": {},
-		"settings.json": {"ENABLED": False},
-		"language.json": {},
-		"keys.json": {},
-		"build.json": {"id": None}  # Yay legacy support
+		"gemtrack.json": {}
 	}
 
 	for filename, value in files.items():
-		if not os.path.isfile("data/guildwars2/{}".format(filename)):
+		if not os.path.isfile("data/gw2/{}".format(filename)):
 			print("Creating empty {}".format(filename))
-			dataIO.save_json("data/guildwars2/{}".format(filename), value)
+			dataIO.save_json("data/gw2/{}".format(filename), value)
 
 
 def setup(bot):
-	if soupAvailable:
-		bot.add_cog(Gw2(bot))
-	else:
-		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
 	check_folders()
 	check_files()
+	n = Gw2(bot)
+	loop = asyncio.get_event_loop()
+	loop.create_task(n._gemprice_tracker())
+	if soupAvailable:
+		bot.add_cog(n)
+	else:
+		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")
