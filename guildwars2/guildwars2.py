@@ -1667,8 +1667,8 @@ class Guildwars2:
 							"`{1}`".format(user, e))
 			return
 
-	@(pass_context=True)
-	asyngem.commandc def price(self, ctx, numberOfGems : int = 400):
+	@gems.command(pass_context=True)
+	async def price(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
