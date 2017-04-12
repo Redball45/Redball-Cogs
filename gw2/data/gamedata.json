@@ -1,0 +1,82 @@
+{
+    "professions" : {
+        "elementalist" : {
+            "color" : "0xDC423E",
+            "icon" : "https://wiki.guildwars2.com/images/a/a0/Elementalist_tango_icon_200px.png",
+            "name" : "Elementalist"
+        },
+        "engineer" : {
+            "color" : "0x87581D",
+            "icon" : "https://wiki.guildwars2.com/images/2/2f/Engineer_tango_icon_200px.png",
+            "name" : "Engineer"
+        },
+        "guardian" : {
+            "color" : "0x186885",
+            "icon" : "https://wiki.guildwars2.com/images/6/6c/Guardian_tango_icon_200px.png",
+            "name" : "Guardian"
+        },
+        "mesmer" : {
+            "color" : "0x69278A",
+            "icon" : "https://wiki.guildwars2.com/images/7/73/Mesmer_tango_icon_200px.png",
+            "name" : "Mesmer"
+        },
+        "necromancer" : {
+            "color" : "0x2C9D5D",
+            "icon" : "https://wiki.guildwars2.com/images/c/cd/Necromancer_tango_icon_200px.png",
+            "name" : "Necromancer"
+        },
+        "ranger" : {
+            "color" : "0x67A833",
+            "icon" : "https://wiki.guildwars2.com/images/5/51/Ranger_tango_icon_200px.png",
+            "name" : "Necromancer"
+        },
+        "revenant" : {
+            "color" : "0xA66356",
+            "icon" : "https://wiki.guildwars2.com/images/a/a8/Revenant_tango_icon_200px.png",
+            "name" : "Revenant"
+        },
+        "thief" : {
+            "color" : "0x974550",
+            "icon" : "https://wiki.guildwars2.com/images/1/19/Thief_tango_icon_200px.png",
+            "name" : "Thief"
+        },
+        "warrior" : {
+            "color" : "0xCAAA2A",
+            "icon" : "https://wiki.guildwars2.com/images/d/db/Warrior_tango_icon_200px.png",
+            "name" : "Warrior"
+        }
+    },
+    "cats" : {
+    "chicken" : { "name" : "Vale Guardian", "order" : 0 },
+    "grilled_chicken" : { "name" : "Spirit Woods", "order" : 1 },
+    "spicy_flank" : { "name" : "Gorseval the Multifarious", "order" : 2 },
+    "spicier_flank" : { "name" : "Sabetha the Saboteur", "order" : 3 },
+    "fire_flank" :  { "name" : "Slothasor", "order" : 4 },
+    "prickley_pear_sorbet" :  { "name" : "Bandit Trio", "order" : 5 },
+    "ginger_lime_icecream" : { "name" : "Matthias Gabrel", "order" : 6 },
+    "saffron_mango_icecream" :  { "name" : "Siege the Stronghold", "order" : 7 },
+    "peach_raspberry_icecream" :  { "name" : "Keep Construct", "order" : 8 },
+    "chicken_day" :  { "name" : "Twisted Castle", "order" : 9 },
+    "chicken_night" : { "name" : "Xera", "order" : 10 },
+    "warrior" :  { "name" : "Cairn the Indomitable", "order" : 11 },
+    "mesmer" :  { "name" : "Mursaat Overseer", "order" : 12 },
+    "ranger" :  { "name" : "Samarog", "order" : 13 },
+    "guardian" :  { "name" : "Samarog", "order" : 13 },    
+    "elementalist" :  { "name" : "Deimos", "order" : 14 },
+    "engineer" :  { "name" : "Deimos", "order" : 15 },
+    "revenant" :  { "name" : "Deimos", "order" : 16 },
+    "thief" :  { "name" : "Deimos", "order" : 17 },
+    "necromancer" :  { "name" : "Deimos", "order" : 18 },
+    "lava_skritt" :  { "name" : "Deimos", "order" : 19 },
+    "ghost_peppers" :  { "name" : "Deimos", "order" : 20 }, 
+    "halloween" :  { "name" : "Deimos", "order" : 20 },    
+    "snow_leopard" :  { "name" : "Deimos", "order" : 21 },
+    "frozen" :  { "name" : "Deimos", "order" : 22 },
+    "ice" :  { "name" : "Deimos", "order" : 23 },
+    "freezer" :  { "name" : "Deimos", "order" : 24 },
+    "cold" :  { "name" : "Deimos", "order" : 25 },
+    "cadeucus" :  { "name" : "Deimos", "order" : 26 },
+    "ghost" :  { "name" : "Deimos", "order" : 27 },
+    "sab" :  { "name" : "Deimos", "order" : 28 }
+  }
+}

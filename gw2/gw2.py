@@ -239,10 +239,50 @@ class Gw2:
 		data = discord.Embed(title='SAB Character Info', colour =color)
 		for elem in results["unlocks"]:
 			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
+		for elem in results["songs"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
+
+	@commands.command(pass_context=True)
+	async def cats(self, ctx):
+		"""This displays unlocked home instance for your account
+		Requires an API key with characters and progression"""
+		user = ctx.message.author
+		scopes = ["progression"]
+		color = self.getColor(user)
+		try:
+			self._check_scopes_(user, scopes)
+			key = self.keylist[user.id]["key"]
+			endpoint = "account/home/cats/?access_token={0}".format(key)
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+		else:
+			catslist = list(
+				set(list(self.gamedata["cats"])) ^ set(results))
+			if not catslist:
+				await self.bot.say("Congratulations {0.mention}, "
+									"you've collected all the cats. Here's a gold star: "
+									":star:".format(user))
+			else
+				formattedlist = []
+				output = "{0.mention}, you haven't collected the following cats yet: ```"
+				catslist.sort(
+					key=lambda val: self.gamedata["cats"][val]["order"])
+				for cat in catslist:
+					formattedlist.append(self.gamedata["cats"][cat]["name"])
+				for x in formattedlist:
+					output += "\n" + x
+				output += "```"
+				await self.bot.say(output.format(user))
 
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
