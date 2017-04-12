@@ -67,12 +67,12 @@ class Gw2:
 		while self is self.bot.get_cog("Gw2"):
 			gemCost = await self.getGemPrice()
 			user = await self.bot.get_user_info(99253329003044864)
-			await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, gemCost))
+			await self.bot.send_message(user, "Hey, {0}. Gem prices are currently {1}!".format(user.name, self.gold_to_coins(gemCost)))
 			
 			if gemCost != 0:
-				for user_id, data in self.gemtrack:
+				for user_id, data in self.gemtrack.items():
 					if gemCost < data["price"]:
-						user = get_user_info(user_id)
+						user = await self.bot.get_user_info(user_id)
 						await self.bot.send_message(user, "Hey, {0.mention}. Gem prices have dropped below {1}!".format(user, data["price"]))
 						self.gemtrack.pop(user_id)
 						self.save_gemtrack()
