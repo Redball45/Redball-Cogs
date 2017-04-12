@@ -1397,7 +1397,7 @@ class Guildwars2:
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 		return gemCost
 
-	@gem.command(pass_context=True)
+	@gems.command(pass_context=True)
 	async def track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
 		user = ctx.message.author
