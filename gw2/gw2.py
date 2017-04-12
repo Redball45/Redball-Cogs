@@ -69,7 +69,7 @@ class Gw2:
 			user = await self.bot.get_user_info(99253329003044864)
 			await self.bot.send_message(user, "Hey, {0}. Gem prices are currently {1}!".format(user.name, self.gold_to_coins(gemCost)))
 			
-			doCleanup = false;
+			doCleanup = False
 			
 			if gemCost != 0:
 				for user_id, data in self.gemtrack.items():
@@ -77,7 +77,7 @@ class Gw2:
 						user = await self.bot.get_user_info(user_id)
 						await self.bot.send_message(user, "Hey, {0.mention}. Gem prices have dropped below {1}!".format(user, data["price"]))
 						self.gemtrack[user_id]["price"] = 0
-						doCleanup = true;
+						doCleanup = True;
 			
 				if doCleanup:
 					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
