@@ -65,7 +65,7 @@ class Gw2:
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
-			gemCost = self.getGemPrice()
+			gemCost = await self.getGemPrice()
 			if gemCost != 0:
 				for user_id, data in self.gemtrack:
 					if gemCost < data["price"]:
@@ -244,7 +244,7 @@ class Gw2:
 		user = ctx.message.author
 		color = self.getColor(user)
 
-		gemCost = self.getGemPrice(numberOfGems)
+		gemCost = await self.getGemPrice(numberOfGems)
 		
 		# If this is zero then the API is down (OR GEMS ARE FREE!!! OMG \o/)
 		if gemCost == 0:
