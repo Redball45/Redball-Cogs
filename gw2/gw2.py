@@ -39,8 +39,7 @@ class Gw2:
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
-		
-			
+	
 	async def getGemPrice(self, numberOfGems : int = 400):
 		try:
 			endpoint = "commerce/exchange/coins?quantity=10000000"
@@ -329,8 +328,7 @@ def setup(bot):
 	n = Gw2(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
-	bot.add_cog(n)
 	if soupAvailable:
-		bot.add_cog(Gw2(bot))
+		bot.add_cog(n)
 	else:
 		raise RuntimeError("You need to run `pip3 install beautifulsoup4`")	
