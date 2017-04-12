@@ -300,10 +300,7 @@ class Gw2:
 					gain += global_coefs[mat] * temp
 			d_gains[lvl] = gain
 		max_profit = max(d_gains.values())
-		profit_levels = [lv for lv in range(1, 81)
-				if d_gains[lv] == max_profit]
-
-		print max_profit, profit_levels
+		profit_levels = [lv for lv in range(1, 81) if d_gains[lv] == max_profit]
 
 
 		# Display data
