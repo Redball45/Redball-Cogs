@@ -236,7 +236,7 @@ class Gw2:
 								"`{1}`".format(user, e))
 			return
 
-		data = discord.Embed(description='SAB Character Info', colour =color)
+		data = discord.Embed(title='SAB Character Info', colour =color)
 		for elem in results["unlocks"]:
 			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
 		try:
