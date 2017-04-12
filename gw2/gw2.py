@@ -226,7 +226,7 @@ class Gw2:
 		try:
 			self._check_scopes_(user, scopes)
 			key = self.keylist[user.id]["key"]
-			endpoint = "characters/" +  charactername + "sab/?access_token={0}".format(key)
+			endpoint = "characters/" +  charactername + "/sab/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
 			self.bot.say("No API errors")
 		except APIKeyError as e:
