@@ -1397,8 +1397,8 @@ class Guildwars2:
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 		return gemCost
 
-	@commands.command(pass_context=True)
-	async def trackgems(self, ctx, gold : int):
+	@gems.command(pass_context=True)
+	async def track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -1431,8 +1431,8 @@ class Guildwars2:
 			
 			await asyncio.sleep(300)
 
-	@commands.command(pass_context=True)
-	async def tpdata(self, ctx, *, tpitemname: str):
+	@tp.command(pass_context=True)
+	async def data(self, ctx, *, tpitemname: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
@@ -1487,8 +1487,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC2")
 
-	@commands.command(pass_context=True)
-	async def tpid(self, ctx, *, tpdataid: str):
+	@tp.command(pass_context=True)
+	async def id(self, ctx, *, tpdataid: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
@@ -1527,8 +1527,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Iss")
 
-	@commands.command(pass_context=True)
-	async def tplist(self, ctx, *, tpitemname: str):
+	@tp.command(pass_context=True)
+	async def list(self, ctx, *, tpitemname: str):
 		"""This lists the ids and names of all matching items to the entered name"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -1667,8 +1667,8 @@ class Guildwars2:
 							"`{1}`".format(user, e))
 			return
 
-	@commands.command(pass_context=True)
-	async def gemprice(self, ctx, numberOfGems : int = 400):
+	@gem.command(pass_context=True)
+	async def price(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
