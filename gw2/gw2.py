@@ -54,10 +54,10 @@ class Gw2:
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
-			gemPrice = getGemPrice()
-			if gemPrice != 0:
+			gemCost = getGemPrice()
+			if gemCost != 0:
 				for user_id, data in self.gemtrack:
-					if gemPrice < data["price"]:
+					if gemCost < data["price"]:
 						user = get_user_info(user_id)
 						await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, data["price"]))
 						self.gemtrack.pop(user_id)
