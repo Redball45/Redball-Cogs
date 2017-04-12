@@ -306,7 +306,7 @@ class Gw2:
 	
 
 def check_folders():
-	if not os.path.exists("data/gw22"):
+	if not os.path.exists("data/gw2"):
 		print("Creating data/gw2")
 		os.makedirs("data/gw2")
 
