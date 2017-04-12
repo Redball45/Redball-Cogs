@@ -259,7 +259,11 @@ class Gw2:
 			key = self.keylist[user.id]["key"]
 			endpoint = "account/home/cats/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
-			resultslist = np.array([[0, 0]]).tolist()
+		listofcats = []
+		for cat in results:
+    		id = cat["id"]
+    		hint = cat["hint"]
+    		listofcats.append(hint)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -269,7 +273,7 @@ class Gw2:
 			return
 		else:
 			catslist = list(
-				set(list(self.gamedata["cats"])) ^ set(results))
+				set(list(self.gamedata["cats"])) ^ set(listofcats))
 			if not catslist:
 				await self.bot.say("Congratulations {0.mention}, "
 									"you've collected all the cats. Here's a gold star: "
