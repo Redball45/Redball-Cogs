@@ -305,9 +305,9 @@ class Gw2:
 	
 
 def check_folders():
-	if not os.path.exists("data/guildwars2"):
-		print("Creating data/guildwars2")
-		os.makedirs("data/guildwars2")
+	if not os.path.exists("data/gw22"):
+		print("Creating data/gw2")
+		os.makedirs("data/gw2")
 
 
 def check_files():
@@ -316,9 +316,9 @@ def check_files():
 	}
 
 	for filename, value in files.items():
-		if not os.path.isfile("data/guildwars2/{}".format(filename)):
+		if not os.path.isfile("data/gw2/{}".format(filename)):
 			print("Creating empty {}".format(filename))
-			dataIO.save_json("data/guildwars2/{}".format(filename), value)
+			dataIO.save_json("data/gw2/{}".format(filename), value)
 
 
 def setup(bot):
