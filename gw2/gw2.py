@@ -39,6 +39,16 @@ class Gw2:
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
+		
+			
+	async def getGemPrice(self, numberOfGems : int = 400):
+		try:
+			endpoint = "commerce/exchange/coins?quantity=10000000"
+			gemsresult = await self.call_api(endpoint)
+			return gemsresult['coins_per_gem']*numberOfGems
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return 0
 
 	@commands.command(pass_context=True)
 	async def gemtrack(self, ctx, price : int):
@@ -227,15 +237,6 @@ class Gw2:
 							"`{1}`".format(user, e))
 			return
 
-	async def getGemPrice(self, numberOfGems : int = 400):
-		try:
-			endpoint = "commerce/exchange/coins?quantity=10000000"
-			gemsresult = await self.call_api(endpoint)
-			return gemsresult['coins_per_gem']*numberOfGems
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return 0
-
 	@commands.command(pass_context=True)
 	async def gemprice(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
@@ -313,7 +314,7 @@ def check_folders():
 
 def check_files():
 	files = {
-		"gemtrack.json": {},
+		"gemtrack.json": {}
 	}
 
 	for filename, value in files.items():
