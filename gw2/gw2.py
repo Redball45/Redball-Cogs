@@ -47,8 +47,9 @@ class Gw2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return 0
-			
-		return gemsresult['coins_per_gem']*numberOfGems
+		
+		gemCost = gemsresult['coins_per_gem']*numberOfGems
+		return gemCost
 
 	@commands.command(pass_context=True)
 	async def gemtrack(self, ctx, price : int):
