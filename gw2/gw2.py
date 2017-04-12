@@ -216,16 +216,17 @@ class Gw2:
 			await self.bot.say("Issue embedding data into discord - EC3")
 	
 	@commands.command(pass_context=True)
-	async def sab(self, ctx, *, character_name : str):
+	async def sab(self, ctx, *, charactername : str):
 		"""This displays unlocked SAB items for the character specified
 		Requires an API key with characters and progression"""
 		user = ctx.message.author
 		scopes = ["characters", "progression"]
 		color = self.getColor(user)
+		charactername = charactername.replace(" ", "%20")
 		try:
 			self._check_scopes_(user, scopes)
 			key = self.keylist[user.id]["key"]
-			endpoint = "characters/" +  character_name + "sab/?access_token={0}".format(key)
+			endpoint = "characters/" +  charactername + "sab/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
 			self.bot.say("No API errors")
 		except APIKeyError as e:
