@@ -58,7 +58,7 @@ class Gw2:
 		color = self.getColor(user)
 		
 		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
-		self.save_gemtrack();
+		self.save_gemtrack()
 		
 		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
 
@@ -69,13 +69,20 @@ class Gw2:
 			user = await self.bot.get_user_info(99253329003044864)
 			await self.bot.send_message(user, "Hey, {0}. Gem prices are currently {1}!".format(user.name, self.gold_to_coins(gemCost)))
 			
+			doCleanup = false;
+			
 			if gemCost != 0:
 				for user_id, data in self.gemtrack.items():
 					if gemCost < data["price"]:
 						user = await self.bot.get_user_info(user_id)
 						await self.bot.send_message(user, "Hey, {0.mention}. Gem prices have dropped below {1}!".format(user, data["price"]))
-						self.gemtrack.pop(user_id)
-						self.save_gemtrack()
+						doCleanup = true;
+			
+			if doCleanup:			
+				keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
+				for x in keys:
+    				del self.gemtrack[x]	
+    			self.save_gemtrack()
 					
 			await asyncio.sleep(60)
 
