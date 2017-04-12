@@ -55,12 +55,13 @@ class Gw2:
 	async def _gemprice_tracker(self):
 		while self is self.bot.get_cog("Gw2"):
 			gemPrice = getGemPrice()
-			for user_id, data in self.gemtrack:
-				if gemPrice < data["price"]:
-					user = get_user_info(user_id)
-					await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, data["price"]))
-					self.gemtrack.pop(user_id)
-					self.save_gemtrack()
+			if (gemPrice != 0)
+				for user_id, data in self.gemtrack:
+					if gemPrice < data["price"]:
+						user = get_user_info(user_id)
+						await self.bot.send_message(user, "Hey, {0}. Gem prices have dropped below {1}!".format(user.name, data["price"]))
+						self.gemtrack.pop(user_id)
+						self.save_gemtrack()
 					
 			await asyncio.sleep(60)
 
@@ -244,7 +245,7 @@ class Gw2:
 		gemCost = getGemPrice(numberOfGems)
 		
 		# If this is zero then the API is down (OR GEMS ARE FREE!!! OMG \o/)
-		if (gemCost == 0)
+		if gemCost == 0:
 			return
 
 		# Display data
