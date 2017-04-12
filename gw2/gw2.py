@@ -34,6 +34,7 @@ class Gw2:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
 		
