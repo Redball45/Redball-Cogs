@@ -272,7 +272,7 @@ class Gw2:
 				await self.bot.say("Congratulations {0.mention}, "
 									"you've collected all the cats. Here's a gold star: "
 									":star:".format(user))
-			else
+			else:
 				formattedlist = []
 				output = "{0.mention}, you haven't collected the following cats yet: ```"
 				catslist.sort(
@@ -502,7 +502,8 @@ def check_folders():
 
 def check_files():
 	files = {
-		"gemtrack.json": {}
+		"gemtrack.json": {},
+		"gamedata.json": {}
 	}
 
 	for filename, value in files.items():
