@@ -228,7 +228,6 @@ class Gw2:
 			key = self.keylist[user.id]["key"]
 			endpoint = "characters/" +  charactername + "/sab/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
-			await self.bot.say("No API errors")
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -236,10 +235,12 @@ class Gw2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 								"`{1}`".format(user, e))
 			return
-		#chainsticksunlock = 
-		#data = discord.Embed(description='SAB Character Info', colour =color)
-		#data.add_field(name=)
-		
+
+		data = discord.Embed(description='SAB Character Info', colour =color)
+		if "chain_stick" in results:
+			chainstick = 'Unlocked'
+			data.add_field(name="Chain Sticks", value=chainstick)
+
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
 		"""This displays a quaggan"""
