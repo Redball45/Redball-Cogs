@@ -259,6 +259,7 @@ class Gw2:
 			key = self.keylist[user.id]["key"]
 			endpoint = "account/home/cats/?access_token={0}".format(key)
 			results = await self.call_api(endpoint)
+			resultslist = np.array([[0, 0]]).tolist()
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -518,9 +519,9 @@ def check_keyfiles():
 	}
 
 	for filename, value in files.items():
-		if not os.path.isfile("data/gw2/{}".format(filename)):
+		if not os.path.isfile("data/guildwars2/{}".format(filename)):
 			print("Creating empty {}".format(filename))
-			dataIO.save_json("data/gw2/{}".format(filename), value)
+			dataIO.save_json("data/guildwars2/{}".format(filename), value)
 
 
 def setup(bot):
