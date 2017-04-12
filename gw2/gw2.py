@@ -34,8 +34,10 @@ class Gw2:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
+		self.gamedata = dataIO.load_json("data/gw2/gamedata.json")
 		
 	def __unload(self):
 		self.session.close()
@@ -213,7 +215,81 @@ class Gw2:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
-			
+	
+	@commands.command(pass_context=True)
+	async def sab(self, ctx, *, charactername : str):
+		"""This displays unlocked SAB items for the character specified
+		Requires an API key with characters and progression"""
+		user = ctx.message.author
+		scopes = ["characters", "progression"]
+		color = self.getColor(user)
+		charactername = charactername.replace(" ", "%20")
+		try:
+			self._check_scopes_(user, scopes)
+			key = self.keylist[user.id]["key"]
+			endpoint = "characters/" +  charactername + "/sab/?access_token={0}".format(key)
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+
+		data = discord.Embed(title='SAB Character Info', colour =color)
+		for elem in results["unlocks"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
+		for elem in results["songs"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
+
+	@commands.command(pass_context=True)
+	async def cats(self, ctx):
+		"""This displays unlocked home instance for your account
+		Requires an API key with characters and progression"""
+		user = ctx.message.author
+		scopes = ["progression"]
+		color = self.getColor(user)
+		try:
+			self._check_scopes_(user, scopes)
+			key = self.keylist[user.id]["key"]
+			endpoint = "account/home/cats/?access_token={0}".format(key)
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+		else:
+			listofcats = []
+			for cat in results:
+				id = cat["id"]
+				hint = cat["hint"]
+				listofcats.append(hint)			
+			catslist = list(
+				set(list(self.gamedata["cats"])) ^ set(listofcats))
+			if not catslist:
+				await self.bot.say("Congratulations {0.mention}, "
+									"you've collected all the cats. Here's a gold star: "
+									":star:".format(user))
+			else:
+				formattedlist = []
+				output = "{0.mention}, you haven't collected the following cats yet: ```"
+				catslist.sort(
+					key=lambda val: self.gamedata["cats"][val]["order"])
+				for cat in catslist:
+					formattedlist.append(self.gamedata["cats"][cat]["name"])
+				for x in formattedlist:
+					output += "\n" + x
+				output += "```"
+				await self.bot.say(output.format(user))
+
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
 		"""This displays a quaggan"""
@@ -404,17 +480,36 @@ class Gw2:
 		except:
 			color = discord.Embed.Empty
 		return color
+
+	def _check_scopes_(self, user, scopes):
+		if user.id not in self.keylist:
+			raise APIKeyError(
+				"No API key associated with {0.mention}".format(user))
+		if scopes:
+			missing = []
+			for scope in scopes:
+				if scope not in self.keylist[user.id]["permissions"]:
+					missing.append(scope)
+			if missing:
+				missing = ", ".join(missing)
+				raise APIKeyError(
+					"{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 	
+
+def check_keyfolder():
+	if not os.path.exists("data/guildwars2"):
+		print("Creating data/guildwars2")
+		os.makedirs("data/guildwars2")
 
 def check_folders():
 	if not os.path.exists("data/gw2"):
 		print("Creating data/gw2")
 		os.makedirs("data/gw2")
 
-
 def check_files():
 	files = {
-		"gemtrack.json": {}
+		"gemtrack.json": {},
+		"gamedata.json": {}
 	}
 
 	for filename, value in files.items():
@@ -422,10 +517,22 @@ def check_files():
 			print("Creating empty {}".format(filename))
 			dataIO.save_json("data/gw2/{}".format(filename), value)
 
+def check_keyfiles():
+	files = {
+		"keys.json": {}
+	}
+
+	for filename, value in files.items():
+		if not os.path.isfile("data/guildwars2/{}".format(filename)):
+			print("Creating empty {}".format(filename))
+			dataIO.save_json("data/guildwars2/{}".format(filename), value)
+
 
 def setup(bot):
 	check_folders()
 	check_files()
+	check_keyfolder()
+	check_keyfiles()
 	n = Gw2(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())

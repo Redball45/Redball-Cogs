@@ -1,0 +1,82 @@
+{
+    "professions" : {
+        "elementalist" : {
+            "color" : "0xDC423E",
+            "icon" : "https://wiki.guildwars2.com/images/a/a0/Elementalist_tango_icon_200px.png",
+            "name" : "Elementalist"
+        },
+        "engineer" : {
+            "color" : "0x87581D",
+            "icon" : "https://wiki.guildwars2.com/images/2/2f/Engineer_tango_icon_200px.png",
+            "name" : "Engineer"
+        },
+        "guardian" : {
+            "color" : "0x186885",
+            "icon" : "https://wiki.guildwars2.com/images/6/6c/Guardian_tango_icon_200px.png",
+            "name" : "Guardian"
+        },
+        "mesmer" : {
+            "color" : "0x69278A",
+            "icon" : "https://wiki.guildwars2.com/images/7/73/Mesmer_tango_icon_200px.png",
+            "name" : "Mesmer"
+        },
+        "necromancer" : {
+            "color" : "0x2C9D5D",
+            "icon" : "https://wiki.guildwars2.com/images/c/cd/Necromancer_tango_icon_200px.png",
+            "name" : "Necromancer"
+        },
+        "ranger" : {
+            "color" : "0x67A833",
+            "icon" : "https://wiki.guildwars2.com/images/5/51/Ranger_tango_icon_200px.png",
+            "name" : "Necromancer"
+        },
+        "revenant" : {
+            "color" : "0xA66356",
+            "icon" : "https://wiki.guildwars2.com/images/a/a8/Revenant_tango_icon_200px.png",
+            "name" : "Revenant"
+        },
+        "thief" : {
+            "color" : "0x974550",
+            "icon" : "https://wiki.guildwars2.com/images/1/19/Thief_tango_icon_200px.png",
+            "name" : "Thief"
+        },
+        "warrior" : {
+            "color" : "0xCAAA2A",
+            "icon" : "https://wiki.guildwars2.com/images/d/db/Warrior_tango_icon_200px.png",
+            "name" : "Warrior"
+        }
+    },
+    "cats" : {
+    "chicken" : { "name" : "Slab of Poultry Meat - WP: [&BPoAAAA=]", "order" : 0 },
+    "grilled_chicken" : { "name" : "Grilled Poultry - WP: [&BDEEAAA=]", "order" : 1 },
+    "spicy_flank" : { "name" : "Spicy Flank Steak - WP: [&BBAEAAA=]", "order" : 2 },
+    "spicier_flank" : { "name" : "Spicier Flank Steak - WP: [&BNMAAAA=]", "order" : 3 },
+    "fire_flank" :  { "name" : "Plate of Fire Flank Steak - WP: [&BCoDAAA=]", "order" : 4 },
+    "prickley_pear_sorbet" :  { "name" : "Bowl of Prickly Pear Sorbet - WP: [&BIAHAAA=]", "order" : 5 },
+    "ginger_lime_icecream" : { "name" : "Bowl of Ginger-Lime Ice Cream - WP: [&BHoHAAA=]", "order" : 6 },
+    "saffron_mango_icecream" :  { "name" : "Bowl of Saffron-Mango Ice Cream WP: [&BH8HAAA=]", "order" : 7 },
+    "peach_raspberry_icecream" :  { "name" : "Bowl of Peach Raspberry Swirl Ice Cream WP: [&BKwHAAA=]", "order" : 8 },
+    "chicken_day" :  { "name" : "Slab of Poultry Meat WP: [&BLwEAAA=]", "order" : 9 },
+    "chicken_night" : { "name" : "Slab of Poultry Meat WP: [&BLwEAAA=]", "order" : 10 },
+    "warrior" :  { "name" : "Cheeseburger WP: [&BO8AAAA=]", "order" : 11 },
+    "mesmer" :  { "name" : "Mystery Tonic WP: [&BO8AAAA=]", "order" : 12 },
+    "ranger" :  { "name" : "Healing Seed Pod WP: [&BDQBAAA=]", "order" : 13 },
+    "guardian" :  { "name" : "Bowl of Curry Mussel Soup WP: [&BEAAAAA=]", "order" : 14 },    
+    "elementalist" :  { "name" : "Slice of Rainbow Cake WP: [&BDQBAAA=]", "order" : 15 },
+    "engineer" :  { "name" : "Flask of Pumpkin Oil WP: [&BIABAAA=]", "order" : 16 },
+    "revenant" :  { "name" : "39 Carrots - PvP Lobby", "order" : 17 },
+    "thief" :  { "name" : "Harpy Feathers - WP: [&BIABAAA=]", "order" : 18 },
+    "necromancer" :  { "name" : "Grumble Cake - WP: [&BHQBAAA=]", "order" : 19 },
+    "lava_skritt" :  { "name" : "Fire Flank Steak + Skritt WP: [&BFUJAAA=]", "order" : 20 },
+    "ghost_peppers" :  { "name" : "3 Ghost Peppers: [&BHgJAAA=]", "order" : 21 }, 
+    "halloween" :  { "name" : "Frog in a Jar - Feline Familiar from Enchanted Broom", "order" : 22 },    
+    "snow_leopard" :  { "name" : "Use Koda's Flame to unfreeze - WP: [&BH0JAAA=]", "order" : 23 },
+    "frozen" :  { "name" : "frozen", "order" : 24 },
+    "ice" :  { "name" : "ice", "order" : 25 },
+    "freezer" :  { "name" : "freezer", "order" : 26 },
+    "cold" :  { "name" : "cold", "order" : 27 },
+    "cadeucus" :  { "name" : "cadeucus", "order" : 28 },
+    "ghost" :  { "name" : "Strawberry Ghost - Also need effect on player - WP: [&BK8JAAA=]", "order" : 29 },
+    "sab" :  { "name" : "SAB World 2 Zone 2 - Bring piranha to cat", "order" : 30 }
+  }
+}
