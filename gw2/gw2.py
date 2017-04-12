@@ -55,12 +55,13 @@ class Gw2:
 		return gemCost
 
 	@commands.command(pass_context=True)
-	async def trackgems(self, ctx, price : int):
+	async def trackgems(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
 		user = ctx.message.author
 		color = self.getColor(user)
+		price = gold * 10000
 		
-		self.gemtrack[user.id] = { "user_id": user.id, "price": price * 10000 }
+		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
 		self.save_gemtrack()
 		
 		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
