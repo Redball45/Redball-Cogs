@@ -1397,7 +1397,7 @@ class Guildwars2:
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 		return gemCost
 
-	@gems.command(pass_context=True)
+	@gem.command(pass_context=True)
 	async def track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
 		user = ctx.message.author
@@ -1667,8 +1667,8 @@ class Guildwars2:
 							"`{1}`".format(user, e))
 			return
 
-	@gem.command(pass_context=True)
-	async def price(self, ctx, numberOfGems : int = 400):
+	@(pass_context=True)
+	asyngem.commandc def price(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
