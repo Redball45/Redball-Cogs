@@ -38,9 +38,9 @@ class Gw2:
 		self.gemtrack = dataIO.load_json("data/gw2/gemtrack.json")
 
 	def save_gemtrack(self):
-        dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
+		dataIO.save_json("data/gw2/gemtrack.json", self.gemtrack)
 
-    @commands.command(pass_context=True)
+	@commands.command(pass_context=True)
 	async def gemtrack(self, ctx, price : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price"""
 		user = ctx.message.author
