@@ -1773,7 +1773,7 @@ class Guildwars2:
 		return shiniesresults
 
 	async def _gamebuild_checker(self):
-		while self is self.bot.get_cog("GuildWars2"):
+		while self is self.bot.get_cog("Guildwars2"):
 			if self.settings["ENABLED"]:
 				if await self.update_build():
 					channels = self.get_channels()
