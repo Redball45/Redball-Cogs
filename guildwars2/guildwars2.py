@@ -1984,6 +1984,7 @@ def setup(bot):
 	n = Guildwars2(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
+	loop.create_task(n._gamebuild_checker())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
