@@ -1615,7 +1615,7 @@ class Guildwars2:
 		clean_name = INPUT_NAME.strip('[]')
 		# Make sure it's a single item 
 		if clean_name[0] in [str(i) for i in range(10)]:
-			print "Plz copy the name of a single box. You don't want me to handle plurals, do you?"
+			await self.bot.say("Plz copy the name of a single box. You don't want me to handle plurals, do you?")
 			return
 		try:
 			# Hope the container is in the database
