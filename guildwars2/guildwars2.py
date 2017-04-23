@@ -1681,10 +1681,10 @@ class Guildwars2:
 		data = discord.Embed(title='Most expensive items')
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
 		data.add_field(name="Best sell price", 
-				   "value"="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
+				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
 		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
 		data.add_field(name="Best buy price", 
-				   "value"="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
+				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
