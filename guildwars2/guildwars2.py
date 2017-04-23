@@ -1605,12 +1605,63 @@ class Guildwars2:
 				output += "```"
 				await self.bot.say(output.format(user))
 
-	@commands.command(pass_context=True)
-	async def container(self, ctx, *, input_name : str):
+	@commands.group(pass_context=True)
+	async def container(self, ctx):
+		"""Commands related to containers"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+			return
+	
+	@container.command(hidden=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def add(self, ctx, *, input_data: str):
+		"""Add a container data. Format is !container add name;data (data in JSON format)"""
+		try:
+			name, data = input_data.split(';',1)
+		except IndexError:
+			await self.bot.say("Plz format as !container add name;data (data in JSON format)")
+			return
+		try:
+			self.containers[name] = json.loads(data)
+		except ValueError:
+			await self.bot.say("Error in reading the JSON format")
+			return
+		self.save_containers()
+		await self.bot.say("Data added")
+	
+	@container.command(hidden=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def delete(self, ctx, *, input_data: str):
+		"""Remove a container data. Format is !container del name"""
+		try:
+			del self.containers[input_data]
+		except KeyError:
+			await self.bot.say("Couldn't find the required container")
+			return
+		self.save_containers()
+		await self.bot.say("Data removed")
+	
+	@container.command(hidden=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def list(self, ctx, *, input_data: str=None):
+		"""List container data.
+		List either all container names (without argument) or a specific container (with the name as argument)"""
+		if input_data == None:
+			await self.bot.say(', '.join(self.containers.keys()))
+			return
+		else:
+			try:
+				await self.bot.say(str(self.containers[input_data]))
+			except KeyError:
+				await self.bot.say("Couldn't find the required container")
+				return
+	
+	@container.command(pass_context=True)
+	async def check(self, ctx, *, input_name: str):
 		"""Gets the prices of a container's contents and give the most expensive ones"""
+		Aikan_ID = 180491225839697920
 		user = ctx.message.author
 		color = self.getColor(user)
-		d_containers = self.containers
 		# Remove the [] around the copied name
 		clean_name = input_name.strip('[]')
 		# Make sure it's a single item 
@@ -1619,11 +1670,12 @@ class Guildwars2:
 			return
 		try:
 			# Hope the container is in the database
-			l_contents = d_containers[clean_name]
+			l_contents = self.containers[clean_name]
 		except KeyError:
+			# Report and ban
 			await self.bot.say("Couldn't find said item in the container database."
 					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
-			Aikan = await self.bot.get_user_info(180491225839697920)
+			Aikan = await self.bot.get_user_info(Aikan_ID)
 			await self.bot.send_message(Aikan, "Issue with container " + input_name)
 			return 
 		# Add prices to l_contents, result is l_tot
@@ -1648,10 +1700,12 @@ class Guildwars2:
 		data = discord.Embed(title='Most expensive items')
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
 		data.add_field(name="Best sell price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])),
+			      inline=False)
 		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
 		data.add_field(name="Best buy price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])),
+			      inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
@@ -2010,6 +2064,8 @@ class Guildwars2:
 	def save_keys(self):
 		dataIO.save_json('data/guildwars2/keys.json', self.keylist)
 	
+	def save_containers(self):
+		dataIO.save_json('data/guildwars2/containers.json', self.containers)
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
