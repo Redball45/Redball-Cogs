@@ -2075,7 +2075,7 @@ def check_files():
 		"settings.json": {"ENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
-		"keys.json": {}
+		"keys.json": {},
 		"containers.json": {}
 	}
 
