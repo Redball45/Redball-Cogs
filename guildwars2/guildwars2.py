@@ -1625,7 +1625,8 @@ class Guildwars2:
 			await self.bot.say("Couldn't find said item in the container database."
 					   + "Your bullying has been reported to Aikan, who will take appropriate measures")
 			Aikan = await self.bot.get_user_info(180491225839697920)
-			await self.bot.send_message(Aikan, "Issue with container " + input_name) 
+			await self.bot.send_message(Aikan, "Issue with container " + input_name)
+			return 
 		# Add prices to l_contents, result is l_tot
 		# The items will look like {'sell_price': -, 'buy_price': -, u'name': -, u'id': -}
 		base_URL = "commerce/prices?ids="
