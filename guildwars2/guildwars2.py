@@ -42,6 +42,7 @@ class Guildwars2:
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.settings = dataIO.load_json("data/guildwars2/settings.json")
 		self.language = dataIO.load_json("data/guildwars2/language.json")
+		self.containers = dataIO.load_json("data/guildwars2/containers.json")
 		
 	def __unload(self):
 		self.session.close()
