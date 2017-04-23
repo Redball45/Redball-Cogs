@@ -14,7 +14,6 @@ import random
 import time
 import urllib
 
-
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
 	soupAvailable = True
@@ -36,7 +35,6 @@ class Guildwars2:
 
 	def __init__(self, bot):
 		self.bot = bot
-		self.containers = dataIO.load_json("data/guildwars2/containers.json")
 		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/guildwars2/gemtrack.json")
@@ -2025,7 +2023,8 @@ def check_files():
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
-		"containers.json": {}
+		"containers.json": {},
+		"keys.json": {}
 	}
 
 	for filename, value in files.items():
