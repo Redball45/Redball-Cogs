@@ -12,6 +12,7 @@ import aiohttp
 import datetime
 import random
 import time
+import urllib
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -1604,6 +1605,58 @@ class Guildwars2:
 				await self.bot.say(output.format(user))
 
 	@commands.command(pass_context=True)
+	async def container(self, ctx, *, input_name : str):
+		"""Gets the prices of a container's contents and give the most expensive ones"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		d_containers = self.containers
+		# Remove the [] around the copied name
+		clean_name = input_name.strip('[]')
+		# Make sure it's a single item 
+		if clean_name[0] in [str(i) for i in range(10)]:
+			await self.bot.say("Please copy the name of a single box. You don't want me to handle plurals, do you?")
+			return
+		try:
+			# Hope the container is in the database
+			l_contents = d_containers[clean_name]
+		except KeyError:
+			await self.bot.say("Couldn't find said item in the container database."
+					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
+			Aikan = await self.bot.get_user_info(180491225839697920)
+			await self.bot.send_message(Aikan, "Issue with container " + input_name)
+			return 
+		# Add prices to l_contents, result is l_tot
+		# The items will look like {'sell_price': -, 'buy_price': -, u'name': -, u'id': -}
+		base_URL = "commerce/prices?ids="
+		comma_IDs = ','.join([elem["id"] for elem in l_contents])
+		endpoint = base_URL + comma_IDs
+		data_prices = await self.call_api(endpoint)
+		l_prices = {str(elem["id"]): elem for elem in data_prices}
+		l_tot = []
+		for elem in l_contents:
+			try:
+				p = l_prices[elem["id"]]
+				d = dict.copy(elem)
+				d["sell_price"] = p["sells"]["unit_price"]
+				d["buy_price"] = p["buys"]["unit_price"]
+				l_tot.append(d)
+			except KeyError:
+				# Happens if the content is account bound
+				pass
+		# Sort l_tot in various ways to get best items 
+		data = discord.Embed(title='Most expensive items')
+		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
+		data.add_field(name="Best sell price", 
+				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
+		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
+		data.add_field(name="Best buy price", 
+				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC5")	
+
+	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
 		"""This displays a quaggan"""
 		user = ctx.message.author
@@ -1969,6 +2022,8 @@ def check_files():
 		"settings.json": {"ENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
+		"keys.json": {},
+		"containers.json": {},
 		"keys.json": {}
 	}
 
