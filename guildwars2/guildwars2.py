@@ -1612,7 +1612,7 @@ class Guildwars2:
 		user = ctx.message.author
 		color = self.getColor(user)
 		# Remove the [] around the copied name
-		clean_name = INPUT_NAME.strip('[]')
+		clean_name = input_name.strip('[]')
 		# Make sure it's a single item 
 		if clean_name[0] in [str(i) for i in range(10)]:
 			await self.bot.say("Please copy the name of a single box. You don't want me to handle plurals, do you?")
