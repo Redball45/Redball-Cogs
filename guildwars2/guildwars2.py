@@ -1615,48 +1615,48 @@ class Guildwars2:
 		clean_name = INPUT_NAME.strip('[]')
 		# Make sure it's a single item 
 		if clean_name[0] in [str(i) for i in range(10)]:
-			await self.bot.say("Plz copy the name of a single box. You don't want me to handle plurals, do you?")
+			await self.bot.say("Please copy the name of a single box. You don't want me to handle plurals, do you?")
 			return
 		try:
 			# Hope the container is in the database
 			l_contents = d_containers[clean_name]
 		except KeyError:
-		try:
-			# Fetch its content reading the wiki
-			msg = await self.bot.say("Fetching contents from wiki")
-			# Get the container name from the wiki (not sure why) and the contents names & wiki URLS 
-			wiki_URL = r"https://wiki.guildwars2.com"
-			container_URL = wiki_URL + '/wiki/' + urllib.quote(clean_name)
-			soup = self._get_soup_(container_URL)
-			container_true_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
-			blob = soup.find(attrs={"id":"Contents"}).parent
-			l_li = blob.find_next_sibling().findAll("li")
-			list_contents_URL = []
-			for elem in l_li:
-				try:
-					list_contents_URL.append(elem.contents[3]["href"])
-				except IndexError:
-					pass
-			await self.bot.edit_message(msg, "{} items found".format(len(list_contents_URL)))
-			# Check every content URL to get the name and the ID
-			l_contents = []
-			current_item = 1
-			for elem in list_contents_URL:
-				soup = self._get_soup_(wiki_URL + elem)
-				content_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
-				content_ID = soup.find("span", attrs={"class":"gamelink"})["data-id"]
-				l_contents.append({"name":content_name, "id":content_ID})
-				await self.bot.edit_message(msg, "Fetched item {1} of {2}".format(current_item, 
-												  len(list_contents_URL)))
-				current_item += 1
-			await self.bot.edit_message(msg, "Contents fetched")
-			# Save the result in the database
-			d_containers[container_true_name] = l_contents
-			dataIO.save_json('data/guildwars2/containers.json', d_containers)
-		except urllib2.URLError:
-			# Ask the user to make the wiki wiki-compliant
-			await self.bot.say("Something went wrong in the acquisition. Plz fix the wiki")
-			return
+			try:
+				# Fetch its content reading the wiki
+				msg = await self.bot.say("Fetching contents from wiki")
+				# Get the container name from the wiki (not sure why) and the contents names & wiki URLS 
+				wiki_URL = r"https://wiki.guildwars2.com"
+				container_URL = wiki_URL + '/wiki/' + urllib.quote(clean_name)
+				soup = self._get_soup_(container_URL)
+				container_true_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
+				blob = soup.find(attrs={"id":"Contents"}).parent
+				l_li = blob.find_next_sibling().findAll("li")
+				list_contents_URL = []
+				for elem in l_li:
+					try:
+						list_contents_URL.append(elem.contents[3]["href"])
+					except IndexError:
+						pass
+				await self.bot.edit_message(msg, "{} items found".format(len(list_contents_URL)))
+				# Check every content URL to get the name and the ID
+				l_contents = []
+				current_item = 1
+				for elem in list_contents_URL:
+					soup = self._get_soup_(wiki_URL + elem)
+					content_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
+					content_ID = soup.find("span", attrs={"class":"gamelink"})["data-id"]
+					l_contents.append({"name":content_name, "id":content_ID})
+					await self.bot.edit_message(msg, "Fetched item {1} of {2}".format(current_item, 
+													len(list_contents_URL)))
+					current_item += 1
+				await self.bot.edit_message(msg, "Contents fetched")
+				# Save the result in the database
+				d_containers[container_true_name] = l_contents
+				dataIO.save_json('data/guildwars2/containers.json', d_containers)
+			except urllib2.URLError:
+				# Ask the user to make the wiki wiki-compliant
+				await self.bot.say("Something went wrong in the acquisition. Please fix the wiki")
+				return
  
 		# Add prices to l_contents, result is l_tot
 		# The items will look like {'sell_price': -, 'buy_price': -, u'name': -, u'id': -}
