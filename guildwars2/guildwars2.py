@@ -13,7 +13,7 @@ import datetime
 import random
 import time
 import urllib
-import urllib.request
+
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -1622,43 +1622,10 @@ class Guildwars2:
 			# Hope the container is in the database
 			l_contents = d_containers[clean_name]
 		except KeyError:
-			try:
-				# Fetch its content reading the wiki
-				msg = await self.bot.say("Fetching contents from wiki")
-				# Get the container name from the wiki (not sure why) and the contents names & wiki URLS 
-				wiki_URL = r"https://wiki.guildwars2.com"
-				container_URL = wiki_URL + '/wiki/' + urllib.quote(clean_name)
-				soup = self._get_soup_(container_URL)
-				container_true_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
-				blob = soup.find(attrs={"id":"Contents"}).parent
-				l_li = blob.find_next_sibling().findAll("li")
-				list_contents_URL = []
-				for elem in l_li:
-					try:
-						list_contents_URL.append(elem.contents[3]["href"])
-					except IndexError:
-						pass
-				await self.bot.edit_message(msg, "{} items found".format(len(list_contents_URL)))
-				# Check every content URL to get the name and the ID
-				l_contents = []
-				current_item = 1
-				for elem in list_contents_URL:
-					soup = self._get_soup_(wiki_URL + elem)
-					content_name = soup.find("h1", attrs={"class":"firstHeading"}).contents[0]
-					content_ID = soup.find("span", attrs={"class":"gamelink"})["data-id"]
-					l_contents.append({"name":content_name, "id":content_ID})
-					await self.bot.edit_message(msg, "Fetched item {1} of {2}".format(current_item, 
-													len(list_contents_URL)))
-					current_item += 1
-				await self.bot.edit_message(msg, "Contents fetched")
-				# Save the result in the database
-				d_containers[container_true_name] = l_contents
-				dataIO.save_json('data/guildwars2/containers.json', d_containers)
-			except urllib2.URLError:
-				# Ask the user to make the wiki wiki-compliant
-				await self.bot.say("Something went wrong in the acquisition. Please fix the wiki")
-				return
- 
+			await self.bot.say("Couldn't find said item in the container database."
+					   + "Your bullying has been reported to Aikan, who will take appropriate measures")
+			Aikan = await self.bot.get_user_info(180491225839697920)
+			await self.bot.send_message(Aikan, "Issue with container " + input_name) 
 		# Add prices to l_contents, result is l_tot
 		# The items will look like {'sell_price': -, 'buy_price': -, u'name': -, u'id': -}
 		base_URL = "commerce/prices?ids="
@@ -1677,7 +1644,6 @@ class Guildwars2:
 			except KeyError:
 				# Happens if the content is account bound
 				pass
-
 		# Sort l_tot in various ways to get best items 
 		data = discord.Embed(title='Most expensive items')
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
@@ -2002,25 +1968,6 @@ class Guildwars2:
 			return True
 		else:
 			return False
-	
-	def _get_soup_(self, URL):
-		# The wiki is capricious. If reading from it doesn't work at first, retry a couple of times
-		max_tries = 3
-		n_try = 1
-		got = False
-		while not got:
-			try:
-				code = urllib2.urlopen(URL).read()
-				got = True
-			except urllib2.URLError as e:
-				if n_try > max_tries:
-					print ("Could not open\n") + URL
-					raise urllib2.URLError(e)
-				else:
-					n_try += 1
-		soup = bs4.BeautifulSoup(code)
-		return soup
-
 
 	def gold_to_coins(self, money):
 		gold, remainder = divmod(money, 10000)
