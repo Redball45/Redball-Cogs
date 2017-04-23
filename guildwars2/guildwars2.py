@@ -2013,7 +2013,7 @@ class Guildwars2:
 				got = True
 			except urllib2.URLError as e:
 				if n_try > max_tries:
-					print "Could not open\n" + URL
+					print ("Could not open\n") + URL
 					raise urllib2.URLError(e)
 				else:
 					n_try += 1
