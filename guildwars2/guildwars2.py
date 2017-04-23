@@ -1623,7 +1623,7 @@ class Guildwars2:
 			l_contents = d_containers[clean_name]
 		except KeyError:
 			await self.bot.say("Couldn't find said item in the container database."
-					   + "Your bullying has been reported to Aikan, who will take appropriate measures")
+					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
 			Aikan = await self.bot.get_user_info(180491225839697920)
 			await self.bot.send_message(Aikan, "Issue with container " + input_name)
 			return 
