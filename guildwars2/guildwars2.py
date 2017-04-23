@@ -1611,6 +1611,7 @@ class Guildwars2:
 		"""Gets the prices of a container's contents and give the most expensive ones"""
 		user = ctx.message.author
 		color = self.getColor(user)
+		d_containers = self.containers
 		# Remove the [] around the copied name
 		clean_name = input_name.strip('[]')
 		# Make sure it's a single item 
