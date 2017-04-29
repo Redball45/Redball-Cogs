@@ -1746,7 +1746,85 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
+	
+	@commands.command(pass_context=True)
+	async def UBM(self, ctx, MC_price_str : str = "0"):
+		"""This displays which way of converting unbound magic to gold is the most profitable.
+		It takes as an optional argument the value the user gives to mystic coins (in copper), defaults to 0"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		# The result will be the coin return per that amount of UBM
+		UBM_UNIT = 1000
+		# Mystic coin data. Required because they're not sellable on TP
+		MC_ID = "19675"
+		MC_price = self.coins_to_gold(MC_price_str)
+		# Container prices
+		packet_price_coin = 5000
+		packet_price_magic = 250
+		bundle_price_coin_1 = 10000
+		bundle_price_magic_1 = 500
+		bundle_price_coin_2 = 4000
+		bundle_price_magic_2 = 1250
+		# Data agglomerated from various sources. "Item_ID": "number of such items obtained" 
+		# in ["samples"]["container"] tries
+		d_data = {
+			"bundle": {
+				"70957": 33, "72315": 28, "24330": 88, "24277": 700,
+				"24335": 126, "75654": 16, "24315": 96, "24310": 96,
+				"24358": 810, "24351": 490, "24357": 780, "24370": 24,
+				"76491": 31, "37897": 810, "68942": 102, "19721": 310,
+				"24320": 204, "70842": 84, "24325": 110, "24300": 630,
+				"74988": 16, "24305": 106, "72504": 23, "68063": 64,
+				"19675": 58, "24289": 760, "76179": 19, "24283": 730,
+				"24295": 780, "48884": 950},
+			"packet": {
+				"19719": 330, "19718": 260, "19739": 590, "19731": 620,
+				"19730": 1010, "19732": 465, "19697": 290, "19698": 250,
+				"19699": 1300, "19748": 240, "19700": 670, "19701": 155,
+				"19702": 670, "19703": 250, "19741": 1090, "19743": 870,
+				"19745": 95, "46736": 43, "46739": 47, "46738": 42,
+				"19728": 810, "19729": 580, "19726": 860, "19727": 920,
+				"19724": 890, "19725": 285, "19722": 640, "19723": 300,
+				"46741": 44},
+			"samples": {"packet": 1720, "bundle": 1595}}
+		# Build the price list
+		URL = "http://api.guildwars2.com/v2/commerce/prices?ids="
+		l_IDs = d_data["packet"].keys() + d_data["bundle"].keys()
+		# For now, the API doesn't take non-sellable IDs into account when using ?ids=
+		# It's still safer to explicitely remove that ID
+		l_IDs.remove("19675")
+		endpoint = URL + ','.join(l_IDs)
+		prices_data = await self.call_api(endpoint)
+		d_prices = {str(elem["id"]): int(0.85 * elem["sells"]["unit_price"])
+					for elem in prices_data}
+		d_prices[MC_ID] = MC_price
+		# Get raw content of containers
+		numerator = sum([d_prices[elem] * d_data["packet"][elem]
+						 for elem in  d_data["packet"].keys()])
+		packet_content = int(numerator/float(d_data["samples"]["packet"]))
 
+		numerator = sum([d_prices[elem] * d_data["bundle"][elem]
+						 for elem in  d_data["bundle"].keys()])
+		bundle_content = int(numerator/float(d_data["samples"]["bundle"]))
+		# Compute net returns
+		return_per_packet = (packet_content - packet_price_coin)
+		return_per_bunch_p = int(return_per_packet * float(UBM_UNIT) / packet_price_magic)
+		return_per_bundle_1 = (bundle_content - bundle_price_coin_1)
+		return_per_bunch_b_1 = int(return_per_bundle_1 * float(UBM_UNIT) / bundle_price_magic_1)
+		return_per_bundle_2 = (bundle_content - bundle_price_coin_2)
+		return_per_bunch_b_2 = int(return_per_bundle_2 * float(UBM_UNIT) / bundle_price_magic_2)
+		# Display said returns
+		r1 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_p))
+		r2 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_1))
+		r3 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_2))
+		data = discord.Embed(title='Unbound magic conversion returns')
+		data.add_field(name="Packets (50s/250UBM)", value=r1)
+		data.add_field(name="Bundles (1g/500UBM)", value=r2)
+		data.add_field(name="Bundles (40s/1250UBM)", value=r3)
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC5")		
 
 	@gem.command(pass_context=True)
 	async def price(self, ctx, numberOfGems : int = 400):
@@ -2039,6 +2117,21 @@ class Guildwars2:
 		else:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
+	
+	def coins_to_gold(self, input_string):
+		current_string = input_string.replace(",", "").replace(" ", "")
+		l_separators = [
+			{"symbol": "g", "value": 100**2},
+			{"symbol": "s", "value": 100**1},
+			{"symbol": "c", "value": 100**0}]
+		total = 0
+		for elem in l_separators:
+			if elem["symbol"] in current_string:
+				amount, current_string = current_string.split(elem["symbol"])
+				total += int(amount) * elem["value"]
+		if current_string != "":
+			total += int(current_string)
+		return total
 
 	def getColor(self, user):
 		try:
