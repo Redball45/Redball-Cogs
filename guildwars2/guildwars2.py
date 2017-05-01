@@ -1607,7 +1607,7 @@ class Guildwars2:
 
 	@commands.group(pass_context=True)
 	async def container(self, ctx):
-		"""Commands related to containers"""
+		"""Command used to find out what's the most expensive item inside a container"""
 		if ctx.invoked_subcommand is None:
 			await send_cmd_help(ctx)
 			return
@@ -1624,7 +1624,7 @@ class Guildwars2:
 		try:
 			self.containers[name] = json.loads(data)
 		except ValueError:
-			await self.bot.say("Error in reading the JSON format. I read name = {0} and data = {1}".format(name, data))
+			await self.bot.say("Error in reading the JSON format")
 			return
 		self.save_containers()
 		await self.bot.say("Data added")
@@ -1658,7 +1658,8 @@ class Guildwars2:
 	
 	@container.command(pass_context=True, name="check")
 	async def containercheck(self, ctx, *, input_name: str):
-		"""Gets the prices of a container's contents and give the most expensive ones"""
+		"""Gets the prices of a container's contents and give the most expensive ones.
+		container check [Container name] (copy-paste from in-game chat), also works without []"""
 		Aikan_ID = 180491225839697920
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -1817,10 +1818,10 @@ class Guildwars2:
 		r1 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_p))
 		r2 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_1))
 		r3 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_2))
-		data = discord.Embed(title='Unbound magic conversion returns')
-		data.add_field(name="Packets (50s/250UBM)", value=r1)
-		data.add_field(name="Bundles (1g/500UBM)", value=r2)
-		data.add_field(name="Bundles (40s/1250UBM)", value=r3)
+		data = discord.Embed(title="Unbound magic conversion returns using Magic-Warped...")
+		data.add_field(name="Packets", value=r1, inline=False)
+		data.add_field(name="Bundles", value=r2, inline=False)
+		data.add_field(name="Bundles (Ember Bay)", value=r3, inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
@@ -2119,6 +2120,11 @@ class Guildwars2:
 		return gold_string + silver_string + copper_string
 	
 	def coins_to_gold(self, input_string):
+		# Convert a gold string into a gold int
+		# You can use , or spaces as million/thousand/unit separators and g, s and c (lower-case)
+		# "1,234g 56s 78c" -> 12345678
+		# "1g 3c" -> 10003
+		# "1 234 567" -> 1234567
 		current_string = input_string.replace(",", "").replace(" ", "")
 		l_separators = [
 			{"symbol": "g", "value": 100**2},
