@@ -1605,12 +1605,64 @@ class Guildwars2:
 				output += "```"
 				await self.bot.say(output.format(user))
 
-	@commands.command(pass_context=True)
-	async def container(self, ctx, *, input_name : str):
-		"""Gets the prices of a container's contents and give the most expensive ones"""
+	@commands.group(pass_context=True)
+	async def container(self, ctx):
+		"""Command used to find out what's the most expensive item inside a container"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+			return
+	
+	@container.command(hidden=True, pass_context=True, name="add")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containeradd(self, ctx, *, input_data: str):
+		"""Add a container data. Format is !container add name;data (data in JSON format)"""
+		try:
+			name, data = input_data.split(';',1)
+		except IndexError:
+			await self.bot.say("Plz format as !container add name;data (data in JSON format)")
+			return
+		try:
+			self.containers[name] = json.loads(data)
+		except ValueError:
+			await self.bot.say("Error in reading the JSON format")
+			return
+		self.save_containers()
+		await self.bot.say("Data added")
+	
+	@container.command(hidden=True, pass_context=True, name="del")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containerdelete(self, ctx, *, input_data: str):
+		"""Remove a container data. Format is !container del name"""
+		try:
+			del self.containers[input_data]
+		except KeyError:
+			await self.bot.say("Couldn't find the required container")
+			return
+		self.save_containers()
+		await self.bot.say("Data removed")
+	
+	@container.command(hidden=True, pass_context=True, name="list")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containerlist(self, ctx, *, input_data: str=""):
+		"""List container data.
+		List either all container names (without argument) or a specific container (with the name as argument)"""
+		if input_data == "":
+			await self.bot.say(', '.join(self.containers.keys()))
+			return
+		else:
+			try:
+				await self.bot.say(json.dumps(self.containers[input_data]))
+			except KeyError:
+				await self.bot.say("Couldn't find the required container")
+				return
+	
+	@container.command(pass_context=True, name="check")
+	async def containercheck(self, ctx, *, input_name: str):
+		"""Gets the prices of a container's contents and give the most expensive ones.
+		container check [Container name] (copy-paste from in-game chat), also works without []"""
+		Aikan_ID = 180491225839697920
 		user = ctx.message.author
 		color = self.getColor(user)
-		d_containers = self.containers
 		# Remove the [] around the copied name
 		clean_name = input_name.strip('[]')
 		# Make sure it's a single item 
@@ -1619,11 +1671,12 @@ class Guildwars2:
 			return
 		try:
 			# Hope the container is in the database
-			l_contents = d_containers[clean_name]
+			l_contents = self.containers[clean_name]
 		except KeyError:
+			# Report and ban
 			await self.bot.say("Couldn't find said item in the container database."
 					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
-			Aikan = await self.bot.get_user_info(180491225839697920)
+			Aikan = await self.bot.get_user_info(Aikan_ID)
 			await self.bot.send_message(Aikan, "Issue with container " + input_name)
 			return 
 		# Add prices to l_contents, result is l_tot
@@ -1648,10 +1701,12 @@ class Guildwars2:
 		data = discord.Embed(title='Most expensive items')
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
 		data.add_field(name="Best sell price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])),
+			      inline=False)
 		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
 		data.add_field(name="Best buy price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])),
+			      inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
@@ -1692,7 +1747,85 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
+	
+	@commands.command(pass_context=True)
+	async def UBM(self, ctx, MC_price_str : str = "0"):
+		"""This displays which way of converting unbound magic to gold is the most profitable.
+		It takes as an optional argument the value the user gives to mystic coins (in copper), defaults to 0"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		# The result will be the coin return per that amount of UBM
+		UBM_UNIT = 1000
+		# Mystic coin data. Required because they're not sellable on TP
+		MC_ID = "19675"
+		MC_price = self.coins_to_gold(MC_price_str)
+		# Container prices
+		packet_price_coin = 5000
+		packet_price_magic = 250
+		bundle_price_coin_1 = 10000
+		bundle_price_magic_1 = 500
+		bundle_price_coin_2 = 4000
+		bundle_price_magic_2 = 1250
+		# Data agglomerated from various sources. "Item_ID": "number of such items obtained" 
+		# in ["samples"]["container"] tries
+		d_data = {
+			"bundle": {
+				"70957": 33, "72315": 28, "24330": 88, "24277": 700,
+				"24335": 126, "75654": 16, "24315": 96, "24310": 96,
+				"24358": 810, "24351": 490, "24357": 780, "24370": 24,
+				"76491": 31, "37897": 810, "68942": 102, "19721": 310,
+				"24320": 204, "70842": 84, "24325": 110, "24300": 630,
+				"74988": 16, "24305": 106, "72504": 23, "68063": 64,
+				"19675": 58, "24289": 760, "76179": 19, "24283": 730,
+				"24295": 780, "48884": 950},
+			"packet": {
+				"19719": 330, "19718": 260, "19739": 590, "19731": 620,
+				"19730": 1010, "19732": 465, "19697": 290, "19698": 250,
+				"19699": 1300, "19748": 240, "19700": 670, "19701": 155,
+				"19702": 670, "19703": 250, "19741": 1090, "19743": 870,
+				"19745": 95, "46736": 43, "46739": 47, "46738": 42,
+				"19728": 810, "19729": 580, "19726": 860, "19727": 920,
+				"19724": 890, "19725": 285, "19722": 640, "19723": 300,
+				"46741": 44},
+			"samples": {"packet": 1720, "bundle": 1595}}
+		# Build the price list
+		URL = "commerce/prices?ids="
+		l_IDs = list(d_data["packet"].keys()) + list(d_data["bundle"].keys())
+		# For now, the API doesn't take non-sellable IDs into account when using ?ids=
+		# It's still safer to explicitely remove that ID
+		l_IDs.remove("19675")
+		endpoint = URL + ','.join(l_IDs)
+		prices_data = await self.call_api(endpoint)
+		d_prices = {str(elem["id"]): int(0.85 * elem["sells"]["unit_price"])
+					for elem in prices_data}
+		d_prices[MC_ID] = MC_price
+		# Get raw content of containers
+		numerator = sum([d_prices[elem] * d_data["packet"][elem]
+						 for elem in  d_data["packet"].keys()])
+		packet_content = int(numerator/float(d_data["samples"]["packet"]))
 
+		numerator = sum([d_prices[elem] * d_data["bundle"][elem]
+						 for elem in  d_data["bundle"].keys()])
+		bundle_content = int(numerator/float(d_data["samples"]["bundle"]))
+		# Compute net returns
+		return_per_packet = (packet_content - packet_price_coin)
+		return_per_bunch_p = int(return_per_packet * float(UBM_UNIT) / packet_price_magic)
+		return_per_bundle_1 = (bundle_content - bundle_price_coin_1)
+		return_per_bunch_b_1 = int(return_per_bundle_1 * float(UBM_UNIT) / bundle_price_magic_1)
+		return_per_bundle_2 = (bundle_content - bundle_price_coin_2)
+		return_per_bunch_b_2 = int(return_per_bundle_2 * float(UBM_UNIT) / bundle_price_magic_2)
+		# Display said returns
+		r1 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_p))
+		r2 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_1))
+		r3 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_2))
+		data = discord.Embed(title="Unbound magic conversion returns using Magic-Warped...")
+		data.add_field(name="Packets", value=r1, inline=False)
+		data.add_field(name="Bundles", value=r2, inline=False)
+		data.add_field(name="Bundles (Ember Bay)", value=r3, inline=False)
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC5")		
 
 	@gem.command(pass_context=True)
 	async def price(self, ctx, numberOfGems : int = 400):
@@ -1808,7 +1941,7 @@ class Guildwars2:
 		async with self.session.get(url) as r:
 			results = await r.json()
 		if "error" in results:
-			raise APIError("The API is dead!")
+			raise APIError("The API is dead! Endpoint: {0}".format(endpoint))
 		if "text" in results:
 			raise APIError(results["text"])
 		return results
@@ -1985,6 +2118,26 @@ class Guildwars2:
 		else:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
+	
+	def coins_to_gold(self, input_string):
+		# Convert a gold string into a gold int
+		# You can use , or spaces as million/thousand/unit separators and g, s and c (lower-case)
+		# "1,234g 56s 78c" -> 12345678
+		# "1g 3c" -> 10003
+		# "1 234 567" -> 1234567
+		current_string = input_string.replace(",", "").replace(" ", "")
+		l_separators = [
+			{"symbol": "g", "value": 100**2},
+			{"symbol": "s", "value": 100**1},
+			{"symbol": "c", "value": 100**0}]
+		total = 0
+		for elem in l_separators:
+			if elem["symbol"] in current_string:
+				amount, current_string = current_string.split(elem["symbol"])
+				total += int(amount) * elem["value"]
+		if current_string != "":
+			total += int(current_string)
+		return total
 
 	def getColor(self, user):
 		try:
@@ -2010,6 +2163,8 @@ class Guildwars2:
 	def save_keys(self):
 		dataIO.save_json('data/guildwars2/keys.json', self.keylist)
 	
+	def save_containers(self):
+		dataIO.save_json('data/guildwars2/containers.json', self.containers)
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
