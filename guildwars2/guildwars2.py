@@ -1940,7 +1940,7 @@ class Guildwars2:
 		async with self.session.get(url) as r:
 			results = await r.json()
 		if "error" in results:
-			raise APIError("The API is dead!")
+			raise APIError("The API is dead! Endpoint: {0}".format(endpoint))
 		if "text" in results:
 			raise APIError(results["text"])
 		return results
