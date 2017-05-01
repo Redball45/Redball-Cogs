@@ -1789,7 +1789,7 @@ class Guildwars2:
 			"samples": {"packet": 1720, "bundle": 1595}}
 		# Build the price list
 		URL = "http://api.guildwars2.com/v2/commerce/prices?ids="
-		l_IDs = d_data["packet"].keys() + d_data["bundle"].keys()
+		l_IDs = list(d_data["packet"].keys()) + list(d_data["bundle"].keys())
 		# For now, the API doesn't take non-sellable IDs into account when using ?ids=
 		# It's still safer to explicitely remove that ID
 		l_IDs.remove("19675")
