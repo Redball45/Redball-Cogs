@@ -1656,7 +1656,7 @@ class Guildwars2:
 				await self.bot.say("Couldn't find the required container")
 				return
 	
-	@container.command(pass_context=True, pass_context=True, name="check")
+	@container.command(pass_context=True, name="check")
 	async def containercheck(self, ctx, *, input_name: str):
 		"""Gets the prices of a container's contents and give the most expensive ones"""
 		Aikan_ID = 180491225839697920
