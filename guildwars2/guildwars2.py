@@ -1624,7 +1624,7 @@ class Guildwars2:
 		try:
 			self.containers[name] = json.loads(data)
 		except ValueError:
-			await self.bot.say("Error in reading the JSON format")
+			await self.bot.say("Error in reading the JSON format. I read name = {0} and data = {1}".format(name, data))
 			return
 		self.save_containers()
 		await self.bot.say("Data added")
