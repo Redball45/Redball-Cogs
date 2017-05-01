@@ -1643,10 +1643,10 @@ class Guildwars2:
 	
 	@container.command(hidden=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def list(self, ctx, *, input_data: str=None):
+	async def list(self, ctx, *, input_data: str=""):
 		"""List container data.
 		List either all container names (without argument) or a specific container (with the name as argument)"""
-		if input_data == None:
+		if input_data == "":
 			await self.bot.say(', '.join(self.containers.keys()))
 			return
 		else:
