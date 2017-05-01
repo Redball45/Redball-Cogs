@@ -1651,7 +1651,7 @@ class Guildwars2:
 			return
 		else:
 			try:
-				await self.bot.say(str(self.containers[input_data]))
+				await self.bot.say(json.dumps(self.containers[input_data]))
 			except KeyError:
 				await self.bot.say("Couldn't find the required container")
 				return
