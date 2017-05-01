@@ -1612,9 +1612,9 @@ class Guildwars2:
 			await send_cmd_help(ctx)
 			return
 	
-	@container.command(hidden=True)
+	@container.command(hidden=True, pass_context=True, name="add")
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def add(self, ctx, *, input_data: str):
+	async def containeradd(self, ctx, *, input_data: str):
 		"""Add a container data. Format is !container add name;data (data in JSON format)"""
 		try:
 			name, data = input_data.split(';',1)
@@ -1629,9 +1629,9 @@ class Guildwars2:
 		self.save_containers()
 		await self.bot.say("Data added")
 	
-	@container.command(hidden=True)
+	@container.command(hidden=True, pass_context=True, name="del")
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def delete(self, ctx, *, input_data: str):
+	async def containerdelete(self, ctx, *, input_data: str):
 		"""Remove a container data. Format is !container del name"""
 		try:
 			del self.containers[input_data]
@@ -1641,9 +1641,9 @@ class Guildwars2:
 		self.save_containers()
 		await self.bot.say("Data removed")
 	
-	@container.command(hidden=True)
+	@container.command(hidden=True, pass_context=True, name="list")
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def list(self, ctx, *, input_data: str=""):
+	async def containerlist(self, ctx, *, input_data: str=""):
 		"""List container data.
 		List either all container names (without argument) or a specific container (with the name as argument)"""
 		if input_data == "":
@@ -1656,8 +1656,8 @@ class Guildwars2:
 				await self.bot.say("Couldn't find the required container")
 				return
 	
-	@container.command(pass_context=True)
-	async def check(self, ctx, *, input_name: str):
+	@container.command(pass_context=True, pass_context=True, name="check")
+	async def containercheck(self, ctx, *, input_name: str):
 		"""Gets the prices of a container's contents and give the most expensive ones"""
 		Aikan_ID = 180491225839697920
 		user = ctx.message.author
