@@ -1175,9 +1175,12 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		"""item_sanitized = re.escape(item)
+		item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
-		cursor = self.db.items.find({"name": search})
+		shiniesendpoint = search
+		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
+
+		"""cursor = self.db.items.find({"name": search})
 		number = await cursor.count()
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
@@ -1187,7 +1190,7 @@ class Guildwars2:
 			return
 		items = []
 		msg = "Which one of these interests you? Type it's number```"
-		async for item in cursor:
+		async for item in shiniesresults:
 			items.append(item)
 		if number != 1:
 			for c, m in enumerate(items):
