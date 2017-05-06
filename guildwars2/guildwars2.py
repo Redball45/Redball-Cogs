@@ -2252,36 +2252,6 @@ class Guildwars2:
 		else:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
-
-	def skill_embed(self, skill):
-		#Very inconsistent endpoint, playing it safe
-		description = None
-		if "description" in skill:
-			description = skill["description"]
-		data = discord.Embed(title=skill["name"], description=description)
-		if "icon" in skill:
-			data.set_thumbnail(url=skill["icon"])
-		if "professions" in skill:
-			if skill["professions"]:
-				professions = skill["professions"]
-				if len(professions) != 1:
-					data.add_field(name="Professions", value=", ".join(professions))
-				elif len(professions) == 9:
-					data.add_field(name="Professions", value="All")
-				else:
-					data.add_field(name="Profession", value=", ".join(professions))
-		if "facts" in skill:
-			for fact in skill["facts"]:
-				try:
-					if fact["type"] == "Recharge":
-						data.add_field(name="Cooldown", value=fact["value"])
-					if fact["type"] == "Distance" or fact["type"] == "Number":
-						data.add_field(name=fact["text"], value=fact["value"])
-					if fact["type"] == "ComboField":
-						data.add_field(name=fact["text"], value=fact["field_type"])
-				except:
-					pass
-		return data
 	
 	def coins_to_gold(self, input_string):
 		# Convert a gold string into a gold int
