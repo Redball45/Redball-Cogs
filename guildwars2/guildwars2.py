@@ -42,6 +42,7 @@ class Guildwars2:
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.settings = dataIO.load_json("data/guildwars2/settings.json")
 		self.language = dataIO.load_json("data/guildwars2/language.json")
+		self.containers = dataIO.load_json("data/guildwars2/containers.json")
 		
 	def __unload(self):
 		self.session.close()
@@ -1427,7 +1428,7 @@ class Guildwars2:
 							   "`{1}`".format(user, e))
 			return
 		except APIError as e:
-			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tpid (id) to select one', colour=color)
+			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tp id (id) to select one', colour=color)
 			#For each item returned, add to the data table
 			counter = 0
 			for name in shiniesresults:
@@ -1529,6 +1530,140 @@ class Guildwars2:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
+
+	@commands.cooldown(1, 15, BucketType.user)
+	@commands.command(pass_context=True)
+	async def search(self, ctx, *, item):
+		"""Find items on your account!"""
+		user = ctx.message.author
+		scopes = ["inventories", "characters"]
+		keydoc = await self.fetch_key(user)
+		try:
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			endpoint_bank = "account/bank"
+			endpoint_shared = "account/inventory"
+			endpoint_char = "characters?page=0"
+			endpoint_material = "account/materials"
+			bank = await self.call_api(endpoint_bank, headers)
+			shared = await self.call_api(endpoint_shared, headers)
+			material = await self.call_api(endpoint_material, headers)
+			characters = await self.call_api(endpoint_char, headers)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		item_sanitized = re.escape(item)
+		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.items.find({"name": search})
+		number = await cursor.count()
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type it's number```"
+		async for item in cursor:
+			items.append(item)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
+			try:
+				num = int(answer.content)
+				choice = items[num]
+			except:
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Searching far and wide...")
+			choice = items[0]
+		output = ""
+		await self.bot.edit_message(message, "Searching far and wide...")
+		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+		results["bank"] = sum(bankresults)
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+		results["shared"] = sum(sharedresults)
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+		results["material"] = sum(materialresults)
+		for character in characters:
+			results["characters"][character["name"]] = 0
+			bags = [bag for bag in character["bags"] if bag != None]
+			for bag in bags:
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+				results["characters"][character["name"]] += sum(inv)
+		if results["bank"]:
+			output += "BANK: Found {0}\n".format(results["bank"])
+		if results["material"]:
+			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+		if results["shared"]:
+			output += "SHARED: Found {0}\n".format(results["shared"])
+		if results["characters"]:
+			for char, value in results["characters"].items():
+				if value:
+					output += "{0}: Found {1}\n".format(char.upper(), value)
+		if not output:
+			await self.bot.edit_message(message, "Sorry, nothing found")
+		else:
+			await self.bot.edit_message(message, "```" + output + "```")
+
+	@commands.cooldown(1, 5, BucketType.user)
+	@commands.command(pass_context=True)
+	async def skillinfo(self, ctx, *, skill):
+		"""Information about a given skill"""
+		user = ctx.message.author
+		skill_sanitized = re.escape(skill)
+		search = re.compile(skill_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.skills.find({"name": search})
+		number = await cursor.count()
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type it's number```"
+		async for item in cursor:
+			items.append(item)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {}".format(c, m["name"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
+			output = ""
+			try:
+				num = int(answer.content)
+				choice = items[num]
+			except:
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Searching far and wide...")
+			choice = items[0]
+		data = self.skill_embed(choice)
+		try:
+			await self.bot.edit_message(message, new_content=" ", embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
 	
 	@commands.command(pass_context=True)
 	async def sab(self, ctx, *, charactername : str):
@@ -1604,12 +1739,64 @@ class Guildwars2:
 				output += "```"
 				await self.bot.say(output.format(user))
 
-	@commands.command(pass_context=True)
-	async def container(self, ctx, *, input_name : str):
-		"""Gets the prices of a container's contents and give the most expensive ones"""
+	@commands.group(pass_context=True)
+	async def container(self, ctx):
+		"""Command used to find out what's the most expensive item inside a container"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+			return
+	
+	@container.command(hidden=True, pass_context=True, name="add")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containeradd(self, ctx, *, input_data: str):
+		"""Add a container data. Format is !container add name;data (data in JSON format)"""
+		try:
+			name, data = input_data.split(';',1)
+		except IndexError:
+			await self.bot.say("Plz format as !container add name;data (data in JSON format)")
+			return
+		try:
+			self.containers[name] = json.loads(data)
+		except ValueError:
+			await self.bot.say("Error in reading the JSON format")
+			return
+		self.save_containers()
+		await self.bot.say("Data added")
+	
+	@container.command(hidden=True, pass_context=True, name="del")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containerdelete(self, ctx, *, input_data: str):
+		"""Remove a container data. Format is !container del name"""
+		try:
+			del self.containers[input_data]
+		except KeyError:
+			await self.bot.say("Couldn't find the required container")
+			return
+		self.save_containers()
+		await self.bot.say("Data removed")
+	
+	@container.command(hidden=True, pass_context=True, name="list")
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def containerlist(self, ctx, *, input_data: str=""):
+		"""List container data.
+		List either all container names (without argument) or a specific container (with the name as argument)"""
+		if input_data == "":
+			await self.bot.say(', '.join(self.containers.keys()))
+			return
+		else:
+			try:
+				await self.bot.say(json.dumps(self.containers[input_data]))
+			except KeyError:
+				await self.bot.say("Couldn't find the required container")
+				return
+	
+	@container.command(pass_context=True, name="check")
+	async def containercheck(self, ctx, *, input_name: str):
+		"""Gets the prices of a container's contents and give the most expensive ones.
+		container check [Container name] (copy-paste from in-game chat), also works without []"""
+		Aikan_ID = 180491225839697920
 		user = ctx.message.author
 		color = self.getColor(user)
-		d_containers = self.containers
 		# Remove the [] around the copied name
 		clean_name = input_name.strip('[]')
 		# Make sure it's a single item 
@@ -1618,11 +1805,12 @@ class Guildwars2:
 			return
 		try:
 			# Hope the container is in the database
-			l_contents = d_containers[clean_name]
+			l_contents = self.containers[clean_name]
 		except KeyError:
+			# Report and ban
 			await self.bot.say("Couldn't find said item in the container database."
 					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
-			Aikan = await self.bot.get_user_info(180491225839697920)
+			Aikan = await self.bot.get_user_info(Aikan_ID)
 			await self.bot.send_message(Aikan, "Issue with container " + input_name)
 			return 
 		# Add prices to l_contents, result is l_tot
@@ -1647,10 +1835,12 @@ class Guildwars2:
 		data = discord.Embed(title='Most expensive items')
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
 		data.add_field(name="Best sell price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])),
+				  inline=False)
 		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
 		data.add_field(name="Best buy price", 
-				   value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])))
+				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])),
+				  inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
@@ -1691,7 +1881,85 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API returned the following error:  "
 							"`{1}`".format(user, e))
 			return
+	
+	@commands.command(pass_context=True)
+	async def UBM(self, ctx, MC_price_str : str = "0"):
+		"""This displays which way of converting unbound magic to gold is the most profitable.
+		It takes as an optional argument the value the user gives to mystic coins (in copper), defaults to 0"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		# The result will be the coin return per that amount of UBM
+		UBM_UNIT = 1000
+		# Mystic coin data. Required because they're not sellable on TP
+		MC_ID = "19675"
+		MC_price = self.coins_to_gold(MC_price_str)
+		# Container prices
+		packet_price_coin = 5000
+		packet_price_magic = 250
+		bundle_price_coin_1 = 10000
+		bundle_price_magic_1 = 500
+		bundle_price_coin_2 = 4000
+		bundle_price_magic_2 = 1250
+		# Data agglomerated from various sources. "Item_ID": "number of such items obtained" 
+		# in ["samples"]["container"] tries
+		d_data = {
+			"bundle": {
+				"70957": 33, "72315": 28, "24330": 88, "24277": 700,
+				"24335": 126, "75654": 16, "24315": 96, "24310": 96,
+				"24358": 810, "24351": 490, "24357": 780, "24370": 24,
+				"76491": 31, "37897": 810, "68942": 102, "19721": 310,
+				"24320": 204, "70842": 84, "24325": 110, "24300": 630,
+				"74988": 16, "24305": 106, "72504": 23, "68063": 64,
+				"19675": 58, "24289": 760, "76179": 19, "24283": 730,
+				"24295": 780, "48884": 950},
+			"packet": {
+				"19719": 330, "19718": 260, "19739": 590, "19731": 620,
+				"19730": 1010, "19732": 465, "19697": 290, "19698": 250,
+				"19699": 1300, "19748": 240, "19700": 670, "19701": 155,
+				"19702": 670, "19703": 250, "19741": 1090, "19743": 870,
+				"19745": 95, "46736": 43, "46739": 47, "46738": 42,
+				"19728": 810, "19729": 580, "19726": 860, "19727": 920,
+				"19724": 890, "19725": 285, "19722": 640, "19723": 300,
+				"46741": 44},
+			"samples": {"packet": 1720, "bundle": 1595}}
+		# Build the price list
+		URL = "commerce/prices?ids="
+		l_IDs = list(d_data["packet"].keys()) + list(d_data["bundle"].keys())
+		# For now, the API doesn't take non-sellable IDs into account when using ?ids=
+		# It's still safer to explicitely remove that ID
+		l_IDs.remove("19675")
+		endpoint = URL + ','.join(l_IDs)
+		prices_data = await self.call_api(endpoint)
+		d_prices = {str(elem["id"]): int(0.85 * elem["sells"]["unit_price"])
+					for elem in prices_data}
+		d_prices[MC_ID] = MC_price
+		# Get raw content of containers
+		numerator = sum([d_prices[elem] * d_data["packet"][elem]
+						 for elem in  d_data["packet"].keys()])
+		packet_content = int(numerator/float(d_data["samples"]["packet"]))
 
+		numerator = sum([d_prices[elem] * d_data["bundle"][elem]
+						 for elem in  d_data["bundle"].keys()])
+		bundle_content = int(numerator/float(d_data["samples"]["bundle"]))
+		# Compute net returns
+		return_per_packet = (packet_content - packet_price_coin)
+		return_per_bunch_p = int(return_per_packet * float(UBM_UNIT) / packet_price_magic)
+		return_per_bundle_1 = (bundle_content - bundle_price_coin_1)
+		return_per_bunch_b_1 = int(return_per_bundle_1 * float(UBM_UNIT) / bundle_price_magic_1)
+		return_per_bundle_2 = (bundle_content - bundle_price_coin_2)
+		return_per_bunch_b_2 = int(return_per_bundle_2 * float(UBM_UNIT) / bundle_price_magic_2)
+		# Display said returns
+		r1 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_p))
+		r2 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_1))
+		r3 = "{1} per {0} unbound magic".format(UBM_UNIT, self.gold_to_coins(return_per_bunch_b_2))
+		data = discord.Embed(title="Unbound magic conversion returns using Magic-Warped...")
+		data.add_field(name="Packets", value=r1, inline=False)
+		data.add_field(name="Bundles", value=r2, inline=False)
+		data.add_field(name="Bundles (Ember Bay)", value=r3, inline=False)
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord - EC5")		
 
 	@gem.command(pass_context=True)
 	async def price(self, ctx, numberOfGems : int = 400):
@@ -1807,7 +2075,7 @@ class Guildwars2:
 		async with self.session.get(url) as r:
 			results = await r.json()
 		if "error" in results:
-			raise APIError("The API is dead!")
+			raise APIError("The API is dead! Endpoint: {0}".format(endpoint))
 		if "text" in results:
 			raise APIError(results["text"])
 		return results
@@ -1985,6 +2253,56 @@ class Guildwars2:
 			copper_string = " " + str(copper) + "c" 
 		return gold_string + silver_string + copper_string
 
+	def skill_embed(self, skill):
+		#Very inconsistent endpoint, playing it safe
+		description = None
+		if "description" in skill:
+			description = skill["description"]
+		data = discord.Embed(title=skill["name"], description=description)
+		if "icon" in skill:
+			data.set_thumbnail(url=skill["icon"])
+		if "professions" in skill:
+			if skill["professions"]:
+				professions = skill["professions"]
+				if len(professions) != 1:
+					data.add_field(name="Professions", value=", ".join(professions))
+				elif len(professions) == 9:
+					data.add_field(name="Professions", value="All")
+				else:
+					data.add_field(name="Profession", value=", ".join(professions))
+		if "facts" in skill:
+			for fact in skill["facts"]:
+				try:
+					if fact["type"] == "Recharge":
+						data.add_field(name="Cooldown", value=fact["value"])
+					if fact["type"] == "Distance" or fact["type"] == "Number":
+						data.add_field(name=fact["text"], value=fact["value"])
+					if fact["type"] == "ComboField":
+						data.add_field(name=fact["text"], value=fact["field_type"])
+				except:
+					pass
+		return data
+	
+	def coins_to_gold(self, input_string):
+		# Convert a gold string into a gold int
+		# You can use , or spaces as million/thousand/unit separators and g, s and c (lower-case)
+		# "1,234g 56s 78c" -> 12345678
+		# "1g 3c" -> 10003
+		# "1 234 567" -> 1234567
+		current_string = input_string.replace(",", "").replace(" ", "")
+		l_separators = [
+			{"symbol": "g", "value": 100**2},
+			{"symbol": "s", "value": 100**1},
+			{"symbol": "c", "value": 100**0}]
+		total = 0
+		for elem in l_separators:
+			if elem["symbol"] in current_string:
+				amount, current_string = current_string.split(elem["symbol"])
+				total += int(amount) * elem["value"]
+		if current_string != "":
+			total += int(current_string)
+		return total
+
 	def getColor(self, user):
 		try:
 			color = user.colour
@@ -2009,6 +2327,8 @@ class Guildwars2:
 	def save_keys(self):
 		dataIO.save_json('data/guildwars2/keys.json', self.keylist)
 	
+	def save_containers(self):
+		dataIO.save_json('data/guildwars2/containers.json', self.containers)
 
 def check_folders():
 	if not os.path.exists("data/guildwars2"):
