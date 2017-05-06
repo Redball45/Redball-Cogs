@@ -1232,7 +1232,7 @@ class Guildwars2:
 		if not output:
 			await self.bot.edit_message(message, "Sorry, nothing found")
 		else:
-		await self.bot.edit_message(message, "```" + output + "```")
+			await self.bot.edit_message(message, "```" + output + "```")
 
 	@commands.command(pass_context=True)
 	async def gw2wiki(self, ctx, *search):
