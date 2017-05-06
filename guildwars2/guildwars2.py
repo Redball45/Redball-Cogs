@@ -1154,7 +1154,7 @@ class Guildwars2:
 		scopes = ["inventories", "characters"]
 		key = self.keylist[user.id]["key"]
 		try:
-			await self._check_scopes_(user, scopes)
+			self._check_scopes_(user, scopes)
 			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank"
 			endpoint_shared = "account/inventory"
