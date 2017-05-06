@@ -48,6 +48,7 @@ class Guildwars2:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.db = self.client['gw2']
 		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/guildwars2/gemtrack.json")
@@ -56,9 +57,11 @@ class Guildwars2:
 		self.settings = dataIO.load_json("data/guildwars2/settings.json")
 		self.language = dataIO.load_json("data/guildwars2/language.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
+		self.user_cooldowns = {}
 		
 	def __unload(self):
 		self.session.close()
+		self.client.close()
 
 	@commands.group(pass_context=True)
 	async def key(self, ctx):
