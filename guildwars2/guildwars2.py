@@ -1151,6 +1151,7 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
 
+	@checks.mod_or_permissions(manage_webhooks=True)
 	@commands.command(pass_context=True)
 	async def search(self, ctx, *, item):
 		"""Find items on your account!"""
