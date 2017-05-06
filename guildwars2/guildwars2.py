@@ -2025,10 +2025,10 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
-	async def call_api(self, endpoint):
+	async def call_api(self, endpoint, headers=DEFAULT_HEADERS):
 		apiserv = 'https://api.guildwars2.com/v2/'
 		url = apiserv + endpoint
-		async with self.session.get(url) as r:
+		async with self.session.get(url, headers=headers) as r:
 			results = await r.json()
 		if "error" in results:
 			raise APIError("The API is dead! Endpoint: {0}".format(endpoint))
