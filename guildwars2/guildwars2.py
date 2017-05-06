@@ -1530,6 +1530,140 @@ class Guildwars2:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
+
+	@commands.cooldown(1, 15, BucketType.user)
+	@commands.command(pass_context=True)
+	async def search(self, ctx, *, item):
+		"""Find items on your account!"""
+		user = ctx.message.author
+		scopes = ["inventories", "characters"]
+		keydoc = await self.fetch_key(user)
+		try:
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			endpoint_bank = "account/bank"
+			endpoint_shared = "account/inventory"
+			endpoint_char = "characters?page=0"
+			endpoint_material = "account/materials"
+			bank = await self.call_api(endpoint_bank, headers)
+			shared = await self.call_api(endpoint_shared, headers)
+			material = await self.call_api(endpoint_material, headers)
+			characters = await self.call_api(endpoint_char, headers)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		item_sanitized = re.escape(item)
+		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.items.find({"name": search})
+		number = await cursor.count()
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type it's number```"
+		async for item in cursor:
+			items.append(item)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
+			try:
+				num = int(answer.content)
+				choice = items[num]
+			except:
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Searching far and wide...")
+			choice = items[0]
+		output = ""
+		await self.bot.edit_message(message, "Searching far and wide...")
+		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+		results["bank"] = sum(bankresults)
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+		results["shared"] = sum(sharedresults)
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+		results["material"] = sum(materialresults)
+		for character in characters:
+			results["characters"][character["name"]] = 0
+			bags = [bag for bag in character["bags"] if bag != None]
+			for bag in bags:
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+				results["characters"][character["name"]] += sum(inv)
+		if results["bank"]:
+			output += "BANK: Found {0}\n".format(results["bank"])
+		if results["material"]:
+			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+		if results["shared"]:
+			output += "SHARED: Found {0}\n".format(results["shared"])
+		if results["characters"]:
+			for char, value in results["characters"].items():
+				if value:
+					output += "{0}: Found {1}\n".format(char.upper(), value)
+		if not output:
+			await self.bot.edit_message(message, "Sorry, nothing found")
+		else:
+			await self.bot.edit_message(message, "```" + output + "```")
+
+	@commands.cooldown(1, 5, BucketType.user)
+	@commands.command(pass_context=True)
+	async def skillinfo(self, ctx, *, skill):
+		"""Information about a given skill"""
+		user = ctx.message.author
+		skill_sanitized = re.escape(skill)
+		search = re.compile(skill_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.skills.find({"name": search})
+		number = await cursor.count()
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type it's number```"
+		async for item in cursor:
+			items.append(item)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {}".format(c, m["name"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
+			output = ""
+			try:
+				num = int(answer.content)
+				choice = items[num]
+			except:
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Searching far and wide...")
+			choice = items[0]
+		data = self.skill_embed(choice)
+		try:
+			await self.bot.edit_message(message, new_content=" ", embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
 	
 	@commands.command(pass_context=True)
 	async def sab(self, ctx, *, charactername : str):
@@ -1702,11 +1836,11 @@ class Guildwars2:
 		best_item = sorted(l_tot, key=lambda elem:elem["sell_price"])[-1]
 		data.add_field(name="Best sell price", 
 				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["sell_price"])),
-			      inline=False)
+				  inline=False)
 		best_item =  sorted(l_tot, key=lambda elem:elem["buy_price"])[-1]
 		data.add_field(name="Best buy price", 
 				value="{0} at {1}".format(best_item["name"], self.gold_to_coins(best_item["buy_price"])),
-			      inline=False)
+				  inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
