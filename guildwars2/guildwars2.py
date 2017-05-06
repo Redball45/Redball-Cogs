@@ -1965,6 +1965,14 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC5")	
 
+	@commands.group(pass_context=True)
+	@checks.is_owner()
+	async def database(self, ctx):
+		"""Commands related to DB management"""
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+			return
+
 	@database.command(pass_context=True, name="create")
 	async def db_create(self, ctx):
 		"""Create a new database
