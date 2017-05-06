@@ -1175,7 +1175,7 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		item_sanitized = re.escape(item)
+		"""item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
 		cursor = self.db.items.find({"name": search})
 		number = await cursor.count()
@@ -1207,7 +1207,7 @@ class Guildwars2:
 				pass
 		else:
 			message = await self.bot.say("Searching far and wide...")
-			choice = items[0]
+			choice = items[0]"""
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
