@@ -21,6 +21,9 @@ except:
 	soupAvailable = False
 
 
+DEFAULT_HEADERS = {'User-Agent': "A GW2 Discord bot",
+'Accept': 'application/json'}
+
 class APIError(Exception):
 	pass
 
@@ -2188,6 +2191,11 @@ class Guildwars2:
 			return True
 		else:
 			return False
+
+	def construct_headers(self, key):
+		headers = {"Authorization": "Bearer {0}".format(key)}
+		headers.update(DEFAULT_HEADERS)
+		return headers
 
 	def gold_to_coins(self, money):
 		gold, remainder = divmod(money, 10000)
