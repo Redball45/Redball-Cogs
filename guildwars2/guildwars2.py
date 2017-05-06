@@ -13,6 +13,7 @@ import datetime
 import random
 import time
 import urllib
+import re
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
