@@ -2089,7 +2089,7 @@ class Guildwars2:
 			return
 
 	@checks.is_owner()
-	@daily_notifier.command()
+	@daily_notifier.command(name="globaltoggle")
 	async def daily_global(self, on_off: bool = None):
 		"""Toggles checking for new dailies, globally.
 		Note that in order to receive notifications you to
