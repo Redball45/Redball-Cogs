@@ -2136,7 +2136,7 @@ class Guildwars2:
 
 	async def send_daily_notifs(self):
 		try:
-			channels = self.get_daily_channel
+			channels = self.get_daily_channel()
 			try:
 				endpoint = "achievements/daily"
 				results = await self.call_api(endpoint)
