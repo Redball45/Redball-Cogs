@@ -2101,7 +2101,7 @@ class Guildwars2:
 		channel = self.get_daily_channel(server)
 		await self.bot.send_message(channel, "I will now send dailies "
 									"to {0.mention}. Make sure it's toggled "
-									"on using $daily notifier toggle on. ".format(channel, example))
+									"on using $daily notifier toggle on. ".format(channel))
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="toggle")
