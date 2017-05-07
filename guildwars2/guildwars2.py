@@ -1523,8 +1523,9 @@ class Guildwars2:
 				pass
 		else:
 			message = await self.bot.say("Finding tradepost data...")
-			choice = items[0]
-			choiceid = shiniesresults[0]["item_id"]
+			num = [0]
+			choice = items[num]
+			choiceid = shiniesresults[num]["item_id"]
 		try:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + choiceid
@@ -1537,7 +1538,8 @@ class Guildwars2:
 							   "`{1}`".format(user, e))
 			return
 		buyprice = results["buys"]["unit_price"]
-		sellprice = results ["sells"]["unit_price"]			
+		sellprice = results ["sells"]["unit_price"]	
+		itemname = shiniesresults[num]["name"]	
 		if buyprice != 0:
 			buyprice = self.gold_to_coins(buyprice)
 		if sellprice != 0:
@@ -1546,7 +1548,7 @@ class Guildwars2:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'				
-		data = discord.Embed(title=tpitemname, description='Not the item you wanted? Try !tplist (name) instead', colour=color)
+		data = discord.Embed(title=itemname, colour=color)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 		try:
