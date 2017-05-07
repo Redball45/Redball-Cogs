@@ -1209,7 +1209,7 @@ class Guildwars2:
 		else:
 			message = await self.bot.say("Searching far and wide...")
 			choice = items[0]
-			choiceid=shiniesresults[0]["item_id"]
+			choiceid = shiniesresults[0]["item_id"]
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
