@@ -1190,7 +1190,7 @@ class Guildwars2:
 		for name in shiniesresults:
 			items.append(name)
 		if number != 1:
-			for x in enumerate(items):
+			for c, m in enumerate(items):
 				msg += "\n{}: {}".format(c, m["name"])
 			msg += "```"
 			message = await self.bot.say(msg)
