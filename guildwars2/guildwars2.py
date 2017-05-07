@@ -2247,7 +2247,7 @@ class Guildwars2:
 		output = "Dailies for today are: ```"
 		for x in daily_filtered:
 			output += "\n" + x["name"]
-		output+= "\n" + dailies
+		output+= "\n".join(dailies)
 		output += "```"
 		return output
 		
