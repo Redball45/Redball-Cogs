@@ -2231,12 +2231,10 @@ class Guildwars2:
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = dailylist[x]
-#			await self.bot.say("{0}".format(section))
 			dailies.append("{0} DAILIES:".format(x.upper()))
 			for daily in section:
 				if daily["level"]["max"] == 80:
 					dailyid.append(str(daily["id"]))
-					await self.bot.say("{0}".format(dailyid))
 		dailyid = ",".join(dailyid)
 		try:
 			achendpoint = "achievements?ids={0}".format(dailyid)
@@ -2246,9 +2244,10 @@ class Guildwars2:
 							   "`{1}`".format(user, e))
 			return
 		daily_filtered = achresults
-		output = "Dailies for today are ```"
+		output = "Dailies for today are: ```"
 		for x in daily_filtered:
 			output += "\n" + x["name"]
+		output+= "\n" + dailies
 		output += "```"
 		return output
 		
