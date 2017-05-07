@@ -1215,6 +1215,7 @@ class Guildwars2:
 			choiceid = shiniesresults[0]["item_id"]
 			num = int("0")
 			await self.bot.say("Debugging, item id is {0}".format(choiceid))
+			await self.bot.say("Debugging, item id is {0}".format(bank[0]["id"]))
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
