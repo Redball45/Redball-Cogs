@@ -2243,11 +2243,10 @@ class Guildwars2:
 							   "`{1}`".format(user, e))
 			return
 		daily_filtered = achresults
-		output = "Dailies for today are: ```"
+		output = "Dailies for today are: "
 		for x in daily_filtered:
 			output += "\n" + x["name"]
 		output += "\n".join(dailies)
-		output += "```"
 		return output
 		
 #		if x == "fractals":
