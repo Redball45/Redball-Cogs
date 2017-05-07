@@ -2242,6 +2242,11 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
+		for daily in achresults:
+			if not daily["name"].startswith("Daily Tier"):
+				daily_filtered.append(daily)
+			if daily["name"].startswith("Daily Tier 4"):
+				daily_filtered_append(daily)
 		daily_filtered = achresults
 		output = "Dailies for today are: "
 		for x in daily_filtered:
