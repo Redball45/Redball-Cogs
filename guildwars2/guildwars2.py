@@ -2075,10 +2075,10 @@ class Guildwars2:
 								pass
 					else:
 						print ("A new build was found, but no channels to notify were found. Maybe error?")
-				await asyncio.sleep(60)
+				await asyncio.sleep(180)
 			except Exception as e:
 				print ("Update notifier has encountered an exception: {0}\nExecution will continue".format(e))
-				await asyncio.sleep(60)
+				await asyncio.sleep(180)
 				continue
 
 	def getlanguage(self, ctx):
@@ -2200,9 +2200,6 @@ class Guildwars2:
 		endpoint = "build"
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		currentbuild = self.build["id"]
-		owner = 77910702664200192
-		Red = await self.bot.get_user_info(owner)
-		await self.bot.send_message(Red, "Hey, I'm checking the gamebuild now {0}".format(currentbuild))
 		try:
 			results = await self.call_api(endpoint)
 		except APIError:
