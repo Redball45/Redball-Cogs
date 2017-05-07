@@ -1190,7 +1190,7 @@ class Guildwars2:
 		items = []
 		msg = "Which one of these interests you? Type it's number```"
 		async for name in shiniesresults:
-			items.append(name + item_id)
+			items.append(name)
 
 		if number != 1:
 			for c, m in enumerate(items):
