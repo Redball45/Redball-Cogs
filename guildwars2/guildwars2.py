@@ -2258,12 +2258,12 @@ class Guildwars2:
 #					if frac ["name"].startswith("Daily Tier 4"):
 #						dailies.append(frac)
 ##				dailies = ",".join(dailies)
-			else:
-				for y in section:
-					if y["level"]["max"] == 80:
-						dailies.append(y["name"])
-				dailies = ",".join(dailies)
-		return "\n".join(dailies)
+#			else:
+#				for y in section:
+#					if y["level"]["max"] == 80:
+#						dailies.append(y["name"])
+#				dailies = ",".join(dailies)
+#		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
 			offset = datetime.timedelta(hours=-8)
