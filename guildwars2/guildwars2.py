@@ -1481,32 +1481,62 @@ class Guildwars2:
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-			itemnameresult = shiniesresults[0]["name"]
-			tpbuyid = shiniesresults[0]["item_id"]
-			commerce = 'commerce/prices/'
-			endpoint = commerce + tpbuyid
-			results = await self.call_api(endpoint)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return
+#			itemnameresult = shiniesresults[0]["name"]
+#			tpbuyid = shiniesresults[0]["item_id"]
+#			commerce = 'commerce/prices/'
+#			endpoint = commerce + tpbuyid
+#			results = await self.call_api(endpoint)
+#		except APIKeyError as e:
+#			await self.bot.say(e)
+#			return
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		except APIError as e:
-			data = discord.Embed(description='I was unable to match that to an item on the TP , listing all - use !tp id (id) to select one', colour=color)
-			#For each item returned, add to the data table
-			counter = 0
-			for name in shiniesresults:
-				if counter < 10:
-					data.add_field(name=name['name'], value=name['item_id'])
-					counter += 1	
+		number = len(shiniesresults)
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type it's number```"
+		for name in shiniesresults:
+			items.append(name)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {}".format(c, m["name"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
 			try:
-				await self.bot.say(embed=data)
-				if counter > 9:
-					await self.bot.say("More than 10 entries, try to refine your search")
-			except discord.HTTPException:
-				await self.bot.say("Issue embedding data into discord - EC1")
+				num: int(answer.content)
+				choice = items[num]
+				choiceid = shiniesresults[num]["item_id"]
+				choiceid = int(choiceid)
+			except: 
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Finding tradepost data...")
+			choice = items[0]
+			choiceid = shiniesresults[0]["item_id"]
+			choiceid = int(choiceid)
+		try:
+			commerce = 'commerce/prices/'
+			endpoint = commerce + choiceid
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, This item isn't on the TP "
+							   "`{1}`".format(user, e))
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]			
@@ -1521,7 +1551,6 @@ class Guildwars2:
 		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tplist (name) instead', colour=color)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
-
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
