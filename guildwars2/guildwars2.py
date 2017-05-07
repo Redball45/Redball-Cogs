@@ -1193,7 +1193,7 @@ class Guildwars2:
 			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
 			return
 		items = []
-		msg = "Which one of these interests you? Type it's number```"
+		msg = "Which one of these interests you? Type its number```"
 		for name in shiniesresults:
 			items.append(name)
 		if number != 1:
@@ -1493,7 +1493,7 @@ class Guildwars2:
 			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
 			return
 		items = []
-		msg = "Which one of these interests you? Type it's number```"
+		msg = "Which one of these interests you? Type its number```"
 		for name in shiniesresults:
 			items.append(name)
 		if number != 1:
