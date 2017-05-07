@@ -1325,7 +1325,7 @@ class Guildwars2:
 		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
 	@checks.is_owner()
-	@daily_group.command()
+	@daily.group.command()
 	async def daily_global(self, on_off: bool = None):
 		"""Toggles checking for new dailies, globally.
 		Note that in order to receive notifications you to
