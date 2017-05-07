@@ -2216,6 +2216,8 @@ class Guildwars2:
 		return output
 
 	async def display_all_dailies(self, dailylist, tomorrow=False):
+		endpoint = "achievements/daily"
+		results = await self.call_api(endpoint)
 		dailies = ["Daily PSNA:", self.get_psna()]
 		if tomorrow:
 			dailies[0] = "PSNA at this time:"
@@ -2223,23 +2225,24 @@ class Guildwars2:
 			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
-		for x in sections:
-			section = dailylist[x]
+		for x in sections
 			dailies.append("{0} DAILIES:".format(x.upper()))
 			if x == "fractals":
-				for x in section:
-					#d = await self.db.achievements.find_one({"_id": x["id"]})#
-					fractals.append(d)
+				for x in results:
+					if x["level"]["max"] == 80:
+						fractals.append(str(x["id"]))
+				fractals = ",".join(fractals)
 				for frac in fractals:
 					if not frac["name"].startswith("Daily Tier"):
-						dailies.append(frac["name"])
-					if frac["name"].startswith("Daily Tier 4"):
-						dailies.append(frac["name"])
+						dailies.append(str(frac["name"]))
+					if frac ["name"].startswith("Daily Tier 4"):
+						dailies.append(str(frac["name"]))
+				dailies = ",".join(dailies)
 			else:
-				for x in section:
+				for x in results:
 					if x["level"]["max"] == 80:
-						#d = await self.db.achievements.find_one({"_id": x["id"]})#
-						dailies.append(d["name"])
+						dailies.append(str(x["id"]))
+				dailies = ",".join(dailies)
 		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
