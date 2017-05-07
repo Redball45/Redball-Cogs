@@ -2115,7 +2115,7 @@ class Guildwars2:
 		"""Toggles posting dailies at server reset"""
 		server = ctx.message.server
 		if on_off is not None:
-			self.settings["DAILYON"] = on_off
+			self.settings[server.id]["DAILYON"] = on_off
 		if self.settings[server.id]["DAILYON"]:
 			await self.bot.say("I will notify you on this server when dailies change")
 			if not self.settings["DAILYENABLED"]:
@@ -2505,7 +2505,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"ENABLED": False, "DAILYENABLED": False},
+		"settings.json": {"ENABLED": False, "DAILYENABLED": True},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
