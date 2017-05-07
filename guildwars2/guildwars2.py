@@ -1187,9 +1187,8 @@ class Guildwars2:
 			return
 		items = []
 		msg = "Which one of these interests you? Type it's number```"
-		async for name in shiniesresults:
+		for name in shiniesresults:
 			items.append(name)
-
 		if number != 1:
 			for c, m in enumerate(items):
 				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
