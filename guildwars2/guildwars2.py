@@ -1233,12 +1233,12 @@ class Guildwars2:
 			for bag in bags:
 				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == shiniesresults[num]["item_id"]]
 				results["characters"][character["name"]] += sum(inv)
-		if results["bank"]:
-			output += "BANK: Found {0}\n".format(results["bank"])
-		if results["material"]:
-			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
-		if results["shared"]:
-			output += "SHARED: Found {0}\n".format(results["shared"])
+		"""if results["bank"]:"""
+		output += "BANK: Found {0}\n".format(results["bank"])
+		"""if results["material"]:"""
+		output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+		"""if results["shared"]:"""
+		output += "SHARED: Found {0}\n".format(results["shared"])
 		if results["characters"]:
 			for char, value in results["characters"].items():
 				if value:
