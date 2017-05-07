@@ -2036,6 +2036,22 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
+	@daily.command(pass_context=True, name="psna")
+	async def daily_psna(self, ctx):
+		"""Show today's Pact Supply Network Agent locations"""
+		output = ("Paste this into chat for pact supply network agent "
+						   "locations: ```{0}```".format(self.get_psna()))
+		await self.bot.say(output)
+		return
+
+	def get_psna(self, modifier=0):
+			offset = datetime.timedelta(hours=-8)
+			tzone = datetime.timezone(offset)
+			day = datetime.datetime.now(tzone).weekday()
+			if day + modifier > 6:
+				modifier = -6
+		return self.gamedata["pact_supply"][day + modifier]
+
 	async def call_api(self, endpoint, headers=DEFAULT_HEADERS):
 		apiserv = 'https://api.guildwars2.com/v2/'
 		url = apiserv + endpoint
