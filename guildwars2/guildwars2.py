@@ -349,7 +349,7 @@ class Guildwars2:
 		try:
 			self._check_scopes_(user, scopes)
 			key = self.keylist[user.id]["key"]
-			endpoint = "characters/?page=0"
+			endpoint = "characters?page=0"
 			headers = self.construct_headers(key)
 			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
