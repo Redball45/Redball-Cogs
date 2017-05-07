@@ -50,6 +50,7 @@ class Guildwars2:
 		
 	def __unload(self):
 		self.session.close()
+		self.client.close()
 
 	@commands.group(pass_context=True)
 	async def key(self, ctx):
@@ -2062,17 +2063,24 @@ class Guildwars2:
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("Guildwars2"):
-			if self.settings["ENABLED"]:
+			try:
 				if await self.update_build():
 					channels = self.get_channels()
 					if channels:
 						for channel in channels:
-							await self.bot.send_message(self.bot.get_channel(channel),
-														"Guild Wars 2 has just updated! New build: "
-														"`{0}`".format(self.build["id"]))
+							try:
+								await self.bot.send_message(self.bot.get_channel(channel),
+															"Guild Wars 2 has just updated! New build: "
+															"`{0}`".format(self.build["id"]))
+							except:
+								pass
 					else:
 						print ("A new build was found, but no channels to notify were found. Maybe error?")
+				await asyncio.sleep(60)
+		except Exception as e:
+			print ("Update notifier has encountered an exception: {0}\nExecution will continue".format(e))
 			await asyncio.sleep(60)
+			continue
 
 	def getlanguage(self, ctx):
 		server = ctx.message.server
