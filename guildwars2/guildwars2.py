@@ -2240,9 +2240,9 @@ class Guildwars2:
 						dailies.append(frac)
 				dailies = ",".join(dailies)
 			else:
-				for x in section:
-					if x["level"]["max"] == 80:
-						dailies.append(str(x["id"]))
+				for y in section:
+					if y["level"]["max"] == 80:
+						dailies.append(str(y["id"]))
 				dailies = ",".join(dailies)
 		return "\n".join(dailies)
 
