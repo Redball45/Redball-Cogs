@@ -2541,8 +2541,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"DAILYENABLED": False},
-		"settings.json": {"ENABLED": False},
+		"settings.json": {"DAILYENABLED": False},{"ENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
