@@ -45,6 +45,7 @@ class Guildwars2:
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.settings = dataIO.load_json("data/guildwars2/settings.json")
+		self.dailysettings = dataIO.load_json("data/guildwars2/dailysettings.json")
 		self.language = dataIO.load_json("data/guildwars2/language.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
 		self.current_day = dataIO.load_json("data/guildwars2/day.json")
@@ -2080,11 +2081,10 @@ class Guildwars2:
 		Make sure it's toggle on using $daily notifier toggle on
 		"""
 		server = ctx.message.server
-		if server.id not in self.settings:
-			self.settings[server.id] = {"ON": False, "CHANNEL": None, "DAILYON": False, "CHANNEL": None}
-			self.settings[server.id]["DAILYCHANNEL"] = server.default_channel.id
-			self.settings[server.id]["CHANNEL"] = server.default_channel.id
-			dataIO.save_json('data/guildwars2/settings.json', self.settings)
+		if server.id not in self.dailysettings:
+			self.dailysettings[server.id] = {"DAILYON": False, "CHANNEL": None}
+			self.dailysettings[server.id]["DAILYCHANNEL"] = server.default_channel.id
+			dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
 			return
@@ -2099,13 +2099,13 @@ class Guildwars2:
 		Off by default.
 		"""
 		if on_off is not None:
-			self.settings["DAILYENABLED"] = on_off
-		if self.settings["DAILYENABLED"]:
+			self.dailysettings["DAILYENABLED"] = on_off
+		if self.dailysettings["DAILYENABLED"]:
 			await self.bot.say("Dailies are enabled. "
 							   "You still need to enable it per server.")
 		else:
 			await self.bot.say("Daily reporting is globally disabled")
-		dataIO.save_json('data/guildwars2/settings.json', self.settings)
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="channel")
@@ -2120,8 +2120,8 @@ class Guildwars2:
 			await self.bot.say("I do not have permissions to send "
 							   "messages to {0.mention}".format(channel))
 			return
-		self.settings[server.id]["DAILYCHANNEL"] = channel.id
-		dataIO.save_json('data/guildwars2/settings.json', self.settings)
+		self.dailysettings[server.id]["DAILYCHANNEL"] = channel.id
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
 		channel = await self.get_daily_channel(server)
 		await self.bot.send_message(channel, "I will now send dailies "
 									"to {0.mention}. Make sure it's toggled "
@@ -2133,14 +2133,14 @@ class Guildwars2:
 		"""Toggles posting dailies at server reset"""
 		server = ctx.message.server
 		if on_off is not None:
-			self.settings[server.id]["DAILYON"] = on_off
-		if self.settings[server.id]["DAILYON"]:
+			self.dailysettings[server.id]["DAILYON"] = on_off
+		if self.dailysettings[server.id]["DAILYON"]:
 			await self.bot.say("I will notify you on this server when dailies change")
-			if not self.settings["DAILYENABLED"]:
+			if not self.dailysettings["DAILYENABLED"]:
 				await self.bot.say("Build checking is globally disabled")
 		else:
 			await self.bot.say("I will not send notifications when dailies change")
-		dataIO.save_json('data/guildwars2/settings.json', self.settings)
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
 
 	def check_day(self):
 		self.current_day = dataIO.load_json("data/guildwars2/day.json")
@@ -2541,7 +2541,8 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"DAILYENABLED": False},{"ENABLED": False},
+		"settings.json": {"ENABLED": False},
+		"dailysettings.json": {"DAILYENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
