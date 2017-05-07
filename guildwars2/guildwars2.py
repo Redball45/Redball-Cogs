@@ -1201,6 +1201,7 @@ class Guildwars2:
 				num = int(answer.content)
 				choice = items[num]
 				choiceid = shiniesresults[num]["item_id"]
+				choiceid = int(choiceid)
 				await self.bot.say("Debugging, item id is {0}".format(choiceid))
 			except:
 				await self.bot.edit_message(message, "That's not a number in the list")
@@ -1213,7 +1214,8 @@ class Guildwars2:
 			message = await self.bot.say("Searching far and wide...")
 			choice = items[0]
 			choiceid = shiniesresults[0]["item_id"]
-			num = int("0")
+			choiceid = int(choiceid)
+			num = 0
 			await self.bot.say("Debugging, item id is {0}".format(choiceid))
 			await self.bot.say("Debugging, item id is {0}".format(bank[0]["id"]))
 		output = ""
