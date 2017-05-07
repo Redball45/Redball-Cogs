@@ -2242,7 +2242,7 @@ class Guildwars2:
 			else:
 				for y in section:
 					if y["level"]["max"] == 80:
-						dailies.append(y["id"])
+						dailies.append(y["name"])
 				dailies = ",".join(dailies)
 		return "\n".join(dailies)
 
