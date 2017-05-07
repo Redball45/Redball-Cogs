@@ -1240,10 +1240,10 @@ class Guildwars2:
 			for char, value in results["characters"].items():
 				if value:
 					output += "{0}: Found {1}\n".format(char.upper(), value)
-		if not output:
+		"""if not output:
 			await self.bot.edit_message(message, "Sorry, nothing found")
-		else:
-			await self.bot.edit_message(message, "```" + output + "```")
+		else:"""
+		await self.bot.edit_message(message, "```" + output + "```")
 
 	@commands.command(pass_context=True)
 	async def gw2wiki(self, ctx, *search):
