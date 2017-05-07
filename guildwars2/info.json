@@ -1,7 +1,7 @@
 {
     "AUTHOR" : "Redball45",
     "INSTALL_MSG" : "GW2 Cog Installed",
-    "NAME" : "gw2",
+    "NAME" : "guildwars2",
     "SHORT" : "GW2TP related commands",
     "DESCRIPTION" : "Commands for Guild Wars 2",
     "TAGS" : ["tp", "gw2"],
