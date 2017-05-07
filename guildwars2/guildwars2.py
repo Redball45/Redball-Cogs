@@ -2161,7 +2161,7 @@ class Guildwars2:
 			except Exception as e:
 				print("Daily notifier exception: {0}\nExecution will continue".format(e))
 				await asyncio.sleep(300)
-		continue
+				continue
 
 #	async def fetch_server(self, server):
 #		return await self.db.settings.find_one({"_id": server.id})
