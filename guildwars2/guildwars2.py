@@ -1289,19 +1289,24 @@ class Guildwars2:
 			await self.bot.say("Invalid type of daily")
 			return
 		dailies = []
+		daily_format = []
+		daily_filtered = []
 		for x in data:
 			if x["level"]["max"] == 80:
-				dailies.append(str(x["id"]))
-		dailies = ",".join(dailies)
-		try:
-			endpoint = "achievements?ids={0}".format(dailies)
-			results = await self.call_api(endpoint)
-		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
+				dailies.append(x["id"])
+		for daily in dailies:
+		   d = await self.db.achievements.find_one({"_id": daily})
+			daily_format.append(d)
+		if search == "fractals":
+			for daily in daily_format:
+				if not daily["name"].startswith("Daily Tier"):
+					daily_filtered.append(daily)
+				if daily["name"].startswith("Daily Tier 4"):
+					daily_filtered.append(daily)
+		else:
+			daily_filtered = daily_format
 		output = "{0} dailes for today are: ```".format(search.capitalize())
-		for x in results:
+		for x in daily_filtered:
 			output += "\n" + x["name"]
 		output += "```"
 		await self.bot.say(output)
