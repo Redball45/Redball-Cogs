@@ -1219,6 +1219,7 @@ class Guildwars2:
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
 		bankresults = [item["count"] for item in bank if item != None and item["id"] == shiniesresults[num]["item_id"]]
+		await self.bot.say("Debugging, bank count is {0}".format(bankresults))
 		results["bank"] = sum(bankresults)
 		sharedresults = [item["count"] for item in shared if item != None and item["id"] == shiniesresults[num]["item_id"]]
 		results["shared"] = sum(sharedresults)
@@ -1240,10 +1241,10 @@ class Guildwars2:
 			for char, value in results["characters"].items():
 				if value:
 					output += "{0}: Found {1}\n".format(char.upper(), value)
-		"""if not output:
+		if not output:
 			await self.bot.edit_message(message, "Sorry, nothing found")
-		else:"""
-		await self.bot.edit_message(message, "```" + output + "```")
+		else:
+			await self.bot.edit_message(message, "```" + output + "```")
 
 	@commands.command(pass_context=True)
 	async def gw2wiki(self, ctx, *search):
