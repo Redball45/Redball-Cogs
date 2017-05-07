@@ -2194,6 +2194,7 @@ class Guildwars2:
 		for x in data:
 			if x["level"]["max"] == 80:
 				dailies.append(str(x["id"]))
+				await self.bot.say("{0}".format(dailies))
 		dailies = ",".join(dailies)
 		try:
 			achendpoint = "achievements?ids={0}".format(dailies)
