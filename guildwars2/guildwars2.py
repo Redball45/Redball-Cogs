@@ -1152,15 +1152,14 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
 
-	@checks.mod_or_permissions(manage_webhooks=True)
 	@commands.command(pass_context=True)
 	async def search(self, ctx, *, item):
 		"""Find items on your account!"""
 		user = ctx.message.author
 		scopes = ["inventories", "characters"]
-		key = self.keylist[user.id]["key"]
 		try:
 			self._check_scopes_(user, scopes)
+			key = self.keylist[user.id]["key"]
 			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank?access_token={0}".format(key)
 			endpoint_shared = "account/inventory?access_token={0}".format(key)
