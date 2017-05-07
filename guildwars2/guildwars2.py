@@ -2122,7 +2122,7 @@ class Guildwars2:
 			return
 		self.dailysettings[server.id]["DAILYCHANNEL"] = channel.id
 		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
-		channel = self.dailysettings[server.id]["DAILYCHANNEL"]
+		channel = self.get_announcement_channel(server)
 		print(channel)
 		await self.bot.send_message(channel, "I will now send daily "
 									"messages to {0.mention}".format(channel))
@@ -2175,7 +2175,7 @@ class Guildwars2:
 
 	async def get_daily_channel(self, server):
 		try:
-			return servedefr.get_channel(self.dailysettings[server.id]["DAILYCHANNEL"])
+			return server.get_channel(self.dailysettings[server.id]["DAILYCHANNEL"])
 		except:
 			return None
 
