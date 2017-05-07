@@ -1325,6 +1325,24 @@ class Guildwars2:
 		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
 	@checks.is_owner()
+	@daily_group.command()
+	async def daily_global(self, on_off: bool = None):
+		"""Toggles checking for new dailies, globally.
+		Note that in order to receive notifications you to
+		set up notification channel and enable it per server using
+		[p]gamebuild toggle
+		Off by default.
+		"""
+		if on_off is not None:
+			self.settings["DAILYENABLED"] = on_off
+		if self.settings["DAILYENABLED"]:
+			await self.bot.say("Dailies are enabled. "
+							   "You still need to enable it per server.")
+		else:
+			await self.bot.say("Daily reporting is globally disabled")
+		dataIO.save_json('data/guildwars2/settings.json', self.settings)
+
+	@checks.is_owner()
 	@gamebuild.command()
 	async def globaltoggle(self, on_off: bool = None):
 		"""Toggles checking for new builds, globally.
@@ -2157,7 +2175,7 @@ class Guildwars2:
 
 	async def get_daily_channel(self, server):
 		try:
-			return server.get_channel(self.settings[server.id]["DAILYCHANNEL"])
+			return servedefr.get_channel(self.settings[server.id]["DAILYCHANNEL"])
 		except:
 			return None
 
@@ -2523,7 +2541,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"ENABLED": False, "DAILYENABLED": True},
+		"settings.json": {"ENABLED": False, "DAILYENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
