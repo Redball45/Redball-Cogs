@@ -2136,7 +2136,7 @@ class Guildwars2:
 
 	async def send_daily_notifs(self):
 		try:
-			channels = self.get_daily_channel()
+			channels = self.get_dailychannels()
 			try:
 				endpoint = "achievements/daily"
 				results = await self.call_api(endpoint)
@@ -2397,6 +2397,17 @@ class Guildwars2:
 			return None
 		name = results["name"]
 		return name
+
+	def get_dailychannels(self):
+		try:
+			channels = []
+			for server in self.settings:
+				if not server == "DAILYENABLED": #Ugly I know
+					if self.settings[server]["DAILYON"]:
+						channels.append(self.settings[server]["DAILYCHANNEL"])
+			return channels
+		except:
+			return None
 
 	def get_channels(self):
 		try:
