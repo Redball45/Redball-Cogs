@@ -1213,21 +1213,22 @@ class Guildwars2:
 			message = await self.bot.say("Searching far and wide...")
 			choice = items[0]
 			choiceid = shiniesresults[0]["item_id"]
+			num = int("0")
 			await self.bot.say("Debugging, item id is {0}".format(choiceid))
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = [item["count"] for item in bank if item != None and item["id"] == choiceid]
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == shiniesresults[num]["item_id"]]
 		results["bank"] = sum(bankresults)
-		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choiceid]
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == shiniesresults[num]["item_id"]]
 		results["shared"] = sum(sharedresults)
-		materialresults = [item["count"] for item in material if item != None and item["id"] == choiceid]
+		materialresults = [item["count"] for item in material if item != None and item["id"] == shiniesresults[num]["item_id"]]
 		results["material"] = sum(materialresults)
 		for character in characters:
 			results["characters"][character["name"]] = 0
 			bags = [bag for bag in character["bags"] if bag != None]
 			for bag in bags:
-				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choiceid]
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == shiniesresults[num]["item_id"]]
 				results["characters"][character["name"]] += sum(inv)
 		if results["bank"]:
 			output += "BANK: Found {0}\n".format(results["bank"])
