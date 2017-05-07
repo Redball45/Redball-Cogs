@@ -2196,6 +2196,7 @@ class Guildwars2:
 				dailies.append(str(x["id"]))
 				await self.bot.say("{0}".format(dailies))
 		dailies = ",".join(dailies)
+		await self.bot.say("{0}".format(dailies))
 		try:
 			achendpoint = "achievements?ids={0}".format(dailies)
 			achresults = await self.call_api(achendpoint)
@@ -2235,7 +2236,7 @@ class Guildwars2:
 			await self.bot.say("{0}".format(dailies))
 			for daily in section:
 				if daily["level"]["max"] == 80:
-					dailyid.append(daily["id"])
+					dailyid.append(str(daily["id"]))
 					await self.bot.say("{0}".format(dailyid))
 #		dailyid = ",".join(dailyid)
 		try:
