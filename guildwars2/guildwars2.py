@@ -2062,17 +2062,24 @@ class Guildwars2:
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("Guildwars2"):
-			if self.settings["ENABLED"]:
+			try:
 				if await self.update_build():
 					channels = self.get_channels()
 					if channels:
 						for channel in channels:
-							await self.bot.send_message(self.bot.get_channel(channel),
-														"@here Guild Wars 2 has just updated! New build: "
-														"`{0}`".format(self.build["id"]))
+							try:
+								await self.bot.send_message(self.bot.get_channel(channel),
+															"Guild Wars 2 has just updated! New build: "
+															"`{0}`".format(self.build["id"]))
+							except:
+								pass
 					else:
 						print ("A new build was found, but no channels to notify were found. Maybe error?")
-			await asyncio.sleep(60)
+				await asyncio.sleep(180)
+			except Exception as e:
+				print ("Update notifier has encountered an exception: {0}\nExecution will continue".format(e))
+				await asyncio.sleep(180)
+				continue
 
 	def getlanguage(self, ctx):
 		server = ctx.message.server
@@ -2191,12 +2198,14 @@ class Guildwars2:
 
 	async def update_build(self):
 		endpoint = "build"
+		self.build = dataIO.load_json("data/guildwars2/build.json")
+		currentbuild = self.build["id"]
 		try:
 			results = await self.call_api(endpoint)
 		except APIError:
 			return False
 		build = results["id"]
-		if not self.build["id"] == build:
+		if not currentbuild == build:
 			self.build["id"] = build
 			dataIO.save_json('data/guildwars2/build.json', self.build)
 			return True
@@ -2300,8 +2309,9 @@ def setup(bot):
 	check_files()
 	n = Guildwars2(bot)
 	loop = asyncio.get_event_loop()
+	buildloop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
-	loop.create_task(n._gamebuild_checker())
+	buildloop.create_task(n._gamebuild_checker())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
