@@ -2247,7 +2247,6 @@ class Guildwars2:
 				daily_filtered.append(daily)
 			if daily["name"].startswith("Daily Tier 4"):
 				daily_filtered.append(daily)
-		daily_filtered = achresults
 		output = "Dailies for today are: "
 		for x in daily_filtered:
 			output += "\n" + x["name"]
