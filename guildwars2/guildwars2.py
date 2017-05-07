@@ -1284,6 +1284,8 @@ class Guildwars2:
 		if server.id not in self.settings:
 			self.settings[server.id] = {"ON": False, "CHANNEL": None}
 			self.settings[server.id]["CHANNEL"] = server.default_channel.id
+			self.settings[server.id] = {"DAILYON": False, "CHANNEL": None}
+			self.settings[server.id]["DAILYCHANNEL"] = server.default_channel.id
 			dataIO.save_json('data/guildwars2/settings.json', self.settings)
 		if ctx.invoked_subcommand is None:
 			await send_cmd_help(ctx)
@@ -2079,6 +2081,12 @@ class Guildwars2:
 		Make sure it's toggle on using $daily notifier toggle on
 		"""
 		server = ctx.message.server
+		if server.id not in self.settings:
+			self.settings[server.id] = {"DAILYON": False, "CHANNEL": None}
+			self.settings[server.id]["DAILYCHANNEL"] = server.default_channel.id
+			self.settings[server.id] = {"ON": False, "CHANNEL": None}
+			self.settings[server.id]["CHANNEL"] = server.default_channel.id
+			dataIO.save_json('data/guildwars2/settings.json', self.settings)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
 			return
