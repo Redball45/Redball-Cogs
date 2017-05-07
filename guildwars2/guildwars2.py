@@ -2068,7 +2068,7 @@ class Guildwars2:
 					if channels:
 						for channel in channels:
 							await self.bot.send_message(self.bot.get_channel(channel),
-														"@here Guild Wars 2 has just updated! New build: "
+														"Guild Wars 2 has just updated! New build: "
 														"`{0}`".format(self.build["id"]))
 					else:
 						print ("A new build was found, but no channels to notify were found. Maybe error?")
