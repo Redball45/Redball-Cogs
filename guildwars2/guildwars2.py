@@ -47,6 +47,7 @@ class Guildwars2:
 		self.settings = dataIO.load_json("data/guildwars2/settings.json")
 		self.language = dataIO.load_json("data/guildwars2/language.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
+		self.current_day = dataIO.load_json("data/guildwars2/day.json")
 		
 	def __unload(self):
 		self.session.close()
@@ -2088,100 +2089,88 @@ class Guildwars2:
 #			await self.bot.send_cmd_help(ctx)
 #			return
 
-#	@checks.admin_or_permissions(manage_server=True)
-#	@daily_notifier.command(pass_context=True, name="channel")
-#	async def daily_notifier_channel(self, ctx, channel: discord.Channel=None):
-#		"""Sets the channel to send the dailies to
-#		If channel isn't specified, the server's default channel will be used"""
-#		server = ctx.message.server
-#		if channel is None:
-#			channel = ctx.message.server.default_channel
-#		if not server.get_member(self.bot.user.id
-#								 ).permissions_in(channel).send_messages:
-#			await self.bot.say("I do not have permissions to send "
-#							   "messages to {0.mention}".format(channel))
-#			return
-#		#await self.db.settings.update_one({"_id": server.id}, {"$set": {"daily.channel": channel.id}})#
-#		channel = await self.get_daily_channel(server)
-#		try:
-#			endpoint = "achievements/daily"
-#			results = await self.call_api(endpoint)
-#		except APIError as e:
-#			print("Exception while sending daily notifs {0}".format(e))
-#			return
-#		example = await self.display_all_dailies(results, True)
-#		await self.bot.send_message(channel, "I will now send dailies "
-#									"to {0.mention}. Make sure it's toggled "
-#									"on using $daily notifier toggle on. "
-#									"Example:\n```{1}```".format(channel, example))
+	@checks.admin_or_permissions(manage_server=True)
+	@daily_notifier.command(pass_context=True, name="channel")
+	async def daily_notifier_channel(self, ctx, channel: discord.Channel=None):
+		"""Sets the channel to send the dailies to
+		If channel isn't specified, the server's default channel will be used"""
+		server = ctx.message.server
+		if channel is None:
+			channel = ctx.message.server.default_channel
+		if not server.get_member(self.bot.user.id
+								 ).permissions_in(channel).send_messages:
+			await self.bot.say("I do not have permissions to send "
+							   "messages to {0.mention}".format(channel))
+			return
+		self.settings[server.id]["DAILYCHANNEL"] = channel.id
+		dataIO.save_json('data/guildwars2/settings.json', self.settings)
+		channel = self.get_daily_channel(server)
+		await self.bot.send_message(channel, "I will now send dailies "
+									"to {0.mention}. Make sure it's toggled "
+									"on using $daily notifier toggle on. ".format(channel, example))
 
-#	@checks.admin_or_permissions(manage_server=True)
-#	@daily_notifier.command(pass_context=True, name="toggle")
-#	async def daily_notifier_toggle(self, ctx, on_off: bool):
-#		"""Toggles posting dailies at server reset"""
-#		server = ctx.message.server
-#		if on_off is not None:
-#			#await self.db.settings.update_one({"_id": server.id}, {"$set": {"daily.on" : on_off}})#
-#		serverdoc = await self.fetch_server(server)
-#		if serverdoc["daily"]["on"]:
-#			await self.bot.say("I will notify you on this server about dailies")
-#		else:
-#			await self.bot.say("I will not send "
-#							   "notifications about new builds")
+	@checks.admin_or_permissions(manage_server=True)
+	@daily_notifier.command(pass_context=True, name="toggle")
+	async def daily_notifier_toggle(self, ctx, on_off: bool):
+		"""Toggles posting dailies at server reset"""
+		server = ctx.message.server
+		if on_off is not None:
+			self.settings["DAILYON"] = on_off
+		if self.settings[server.id]["DAILYON"]:
+			await self.bot.say("I will notify you on this server when dailies change")
+			if not self.settings "DAILYENABLED":
+				await self.bot.say("Build checking is globally disabled")
+		else:
+			await self.bot.say("I will not send notifications when dailies change")
+		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
-#	def check_day(self):
-#		current = datetime.datetime.utcnow().weekday()
-#		if self.current_day["day"] != current:
-#			self.current_day["day"] = current
-#			dataIO.save_json('data/guildwars2/day.json', self.current_day)
-#			return True
-#		else:
-#			return False
-#
-#	async def send_daily_notifs(self):
-#		try:
-#			channels = []
-#			cursor = self.db.settings.find({"daily.on" : True}, modifiers={"$snapshot": True})
-#			async for server in cursor:
-#				try:
-#					if "channel" in server["daily"]:
-#						if server["daily"]["channel"] is not None:
-#							channels.append(server["daily"]["channel"])
-#				except:
-#					pass
-#			try:
-#				endpoint = "achievements/daily"
-#				results = await self.call_api(endpoint)
-#			except APIError as e:
-#				print("Exception while sending daily notifs {0}".format(e))
-#				return
-#			message = await self.display_all_dailies(results, True)
-#			for channel in channels:
-#				try:
-#					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
-#				except:
-#					pass
-#		except Exception as e:
-#			print ("Erorr while sending daily notifs: {0}".format(e))
-#		return
-#
-#	async def get_daily_channel(self, server):
-#		try:
-#			serverdoc = await self.fetch_server(server)
-#			return server.get_channel(serverdoc["daily"]["channel"])
-#		except:
-#		return None
-#
-#	async def daily_notifs(self):
-#		while self is self.bot.get_cog("GuildWars2"):
-#			try:
-#				if self.check_day():
-#					await self.send_daily_notifs()
-#				await asyncio.sleep(60)
-#			except Exception as e:
-#				print("Daily notifier exception: {0}\nExecution will continue".format(e))
-#				await asyncio.sleep(60)
-#		continue
+	def check_day(self):
+		current = datetime.datetime.utcnow().weekday()
+		if self.current_day["day"] != current:
+			self.current_day["day"] = current
+			dataIO.save_json('data/guildwars2/day.json', self.current_day)
+			return True
+		else:
+			return False
+
+	async def send_daily_notifs(self):
+		try:
+			channels = self.get_daily_channel
+			try:
+				endpoint = "achievements/daily"
+				results = await self.call_api(endpoint)
+			except APIError as e:
+				print("Exception while sending daily notifs {0}".format(e))
+				return
+			message = await self.display_all_dailies(results, True)
+			for channel in channels:
+				try:
+					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
+				except:
+					pass
+		except Exception as e:
+			print ("Erorr while sending daily notifs: {0}".format(e))
+		return
+
+	async def get_daily_channel(self, server):
+		try:
+			return server.get_channel(self.settings[server.id]["DAILYCHANNEL"])
+		except:
+			return None
+
+	async def daily_notifs(self):
+		while self is self.bot.get_cog("GuildWars2"):
+			try:
+				if self.check_day():
+					await self.send_daily_notifs()
+				await asyncio.sleep(300)
+			except Exception as e:
+				print("Daily notifier exception: {0}\nExecution will continue".format(e))
+				await asyncio.sleep(300)
+		continue
+
+	async def fetch_server(self, server):
+		return await self.db.settings.find_one({"_id": server.id})
 
 	async def daily_handler(self, search):
 		endpoint = "achievements/daily"
@@ -2253,24 +2242,6 @@ class Guildwars2:
 		output += "\n"
 		output += "\n".join(dailies)
 		return output
-		
-#		if x == "fractals":
-#				for x in section:
-#					if x["level"]["max"] == 80:
-#						fractals.append(x["id"])
-#				fractals = ",".join(fractals)
-#				for frac in fractals:
-#					if not frac["name"].startswith("Daily Tier"):
-#						dailies.append(frac)
-#					if frac ["name"].startswith("Daily Tier 4"):
-#						dailies.append(frac)
-##				dailies = ",".join(dailies)
-#			else:
-#				for y in section:
-#					if y["level"]["max"] == 80:
-#						dailies.append(y["name"])
-#				dailies = ",".join(dailies)
-#		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
 			offset = datetime.timedelta(hours=-8)
@@ -2539,6 +2510,7 @@ def check_files():
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
 		"containers.json": {},
+		"day.json": {"day": datetime:datetime.utcnow().weekday()}
 		"keys.json": {}
 	}
 
@@ -2555,7 +2527,7 @@ def setup(bot):
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
 	loop.create_task(n._gamebuild_checker())
-#	loop.create_task(n.daily_notifs())
+	loop.create_task(n.daily_notifs())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
