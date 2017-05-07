@@ -1219,9 +1219,9 @@ class Guildwars2:
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
 		for item in bank:
-			if item["id"] == shiniesresults[num]["item_id"]:
+			if item != None and item["id"] == shiniesresults[num]["item_id"]:
 				bankresults = bankresults + item["count"]
-				results["bank"] = sum(bankresults)
+				results["bank"] = bankresults
 		sharedresults = [item["count"] for item in shared if item != None and item["id"] == shiniesresults[num]["item_id"]]
 		results["shared"] = sum(sharedresults)
 		materialresults = [item["count"] for item in material if item != None and item["id"] == shiniesresults[num]["item_id"]]
