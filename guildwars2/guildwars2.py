@@ -2077,10 +2077,10 @@ class Guildwars2:
 					else:
 						print ("A new build was found, but no channels to notify were found. Maybe error?")
 				await asyncio.sleep(60)
-		except Exception as e:
-			print ("Update notifier has encountered an exception: {0}\nExecution will continue".format(e))
-			await asyncio.sleep(60)
-			continue
+			except Exception as e:
+				print ("Update notifier has encountered an exception: {0}\nExecution will continue".format(e))
+				await asyncio.sleep(60)
+				continue
 
 	def getlanguage(self, ctx):
 		server = ctx.message.server
