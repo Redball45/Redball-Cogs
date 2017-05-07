@@ -1177,7 +1177,7 @@ class Guildwars2:
 							   "`{1}`".format(user, e))
 			return
 		try:
-			shiniesendpoint = item.replace(" ", "%20")
+			shiniesendpoint = 'idbyname/' + item.replace(" ", "%20")
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -1477,7 +1477,7 @@ class Guildwars2:
 		tpitemname = tpitemname.replace(" ", "%20")
 		color = self.getColor(user)
 		try:
-			shiniesendpoint = tpitemname
+			shiniesendpoint = 'idbyname/' + tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 			itemnameresult = shiniesresults[0]["name"]
 			tpbuyid = shiniesresults[0]["item_id"]
@@ -1516,7 +1516,7 @@ class Guildwars2:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'				
-		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tplist (name) instead', colour=color)
+		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tp list (name) instead', colour=color)
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 
@@ -1572,7 +1572,7 @@ class Guildwars2:
 		color = self.getColor(user)
 		tpitemname = tpitemname.replace(" ", "%20")
 		try:
-			shiniesendpoint = tpitemname
+			shiniesendpoint = 'idbyname/' + tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 		except APIKeyError as e:
 			await self.bot.say(e)
@@ -1911,7 +1911,43 @@ class Guildwars2:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
-
+			
+	@commands.command(pass_context=True)
+	async def trend(self, ctx, item_id: str):
+		"""Returns price trends for a specified tradeable item"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		
+		try:
+			shiniesendpoint = 'history/' + item_id
+			history = await self.call_shiniesapi(shinies_endpoint)
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+					   "`{1}`".format(user, e))
+			return
+		
+		timeNow = int(time.time())
+		buyAvg = 0
+		sellAvg = 0
+		
+		# Get average from 96 most recent entries
+		for record in history[:96]:
+			buyAvg += record["buy"]
+			sellAvg += record["sell"]
+		
+		buyAvg /= max(len(history)-1, 1)
+		sellAvg /= max(len(history)-1, 1)
+		
+		# Display data
+		data = discord.Embed(title="Trend data for id " + item_id, colour=color)
+		data.add_field(name="Buy average",value=self.gold_to_coins(buyAvg))
+		data.add_field(name="Sell average",value=self.gold_to_coins(sellAvg))
+		
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord")
+	
 	@commands.command(pass_context=True)
 	async def baglevel(self, ctx):
 		"""This computes the best level for opening champion bags"""
@@ -2262,7 +2298,7 @@ class Guildwars2:
 		return results
 
 	async def call_shiniesapi(self, shiniesendpoint):
-		shinyapiserv = 'https://www.gw2shinies.com/api/json/idbyname/'
+		shinyapiserv = 'https://www.gw2shinies.com/api/json/'
 		url = shinyapiserv + shiniesendpoint
 		async with self.session.get(url) as r:
 			shiniesresults = await r.json()
