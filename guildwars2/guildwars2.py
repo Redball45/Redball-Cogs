@@ -2235,14 +2235,14 @@ class Guildwars2:
 				fractals = ",".join(fractals)
 				for frac in fractals:
 					if not frac["name"].startswith("Daily Tier"):
-						dailies.append(frac["name"])
+						dailies.append(frac)
 					if frac ["name"].startswith("Daily Tier 4"):
-						dailies.append(frac["name"])
+						dailies.append(frac)
 				dailies = ",".join(dailies)
 			else:
 				for x in section:
 					if x["level"]["max"] == 80:
-						dailies.append(x["name"])
+						dailies.append(str(x["id"]))
 				dailies = ",".join(dailies)
 		return "\n".join(dailies)
 
