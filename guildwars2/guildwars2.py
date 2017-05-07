@@ -1161,14 +1161,15 @@ class Guildwars2:
 		try:
 			self._check_scopes_(user, scopes)
 			headers = self.construct_headers(key)
-			endpoint_bank = "account/bank"
-			endpoint_shared = "account/inventory"
+			endpoint_bank = "account/bank?access_token={0}".format(key)
+			endpoint_shared = "account/inventory?access_token={0}".format(key)
 			endpoint_char = "characters?page=0"
-			endpoint_material = "account/materials"
-			bank = await self.call_api(endpoint_bank, headers)
-			shared = await self.call_api(endpoint_shared, headers)
-			material = await self.call_api(endpoint_material, headers)
+			endpoint_material = "account/materials?access_token={0}".format(key)
+			bank = await self.call_api(endpoint_bank)
+			shared = await self.call_api(endpoint_shared)
+			material = await self.call_api(endpoint_material)
 			characters = await self.call_api(endpoint_char, headers)
+			firstitem = bank[0]["id"]
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -1176,13 +1177,13 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		"""item_sanitized = re.escape(item)
-		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
-		shiniesendpoint = search
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		shiniesendpoint = item.replace(" ", "%20")
 		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-
-		cursor = self.db.items.find({"name": search})
-		number = await cursor.count()
+		number = len(shiniesresults)
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
 			return
@@ -1191,17 +1192,19 @@ class Guildwars2:
 			return
 		items = []
 		msg = "Which one of these interests you? Type it's number```"
-		async for item in shiniesresults:
-			items.append(item)"""
+		for name in shiniesresults:
+			items.append(name)
 		if number != 1:
 			for c, m in enumerate(items):
-				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
+				msg += "\n{}: {}".format(c, m["name"])
 			msg += "```"
 			message = await self.bot.say(msg)
 			answer = await self.bot.wait_for_message(timeout=120, author=user)
 			try:
 				num = int(answer.content)
 				choice = items[num]
+				choiceid = shiniesresults[num]["item_id"]
+				choiceid = int(choiceid)
 			except:
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
@@ -1212,20 +1215,23 @@ class Guildwars2:
 		else:
 			message = await self.bot.say("Searching far and wide...")
 			choice = items[0]
+			choiceid = shiniesresults[0]["item_id"]
+			choiceid = int(choiceid)
+			num = 0
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choiceid]
 		results["bank"] = sum(bankresults)
-		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choiceid]
 		results["shared"] = sum(sharedresults)
-		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choiceid]
 		results["material"] = sum(materialresults)
 		for character in characters:
 			results["characters"][character["name"]] = 0
 			bags = [bag for bag in character["bags"] if bag != None]
 			for bag in bags:
-				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choiceid]
 				results["characters"][character["name"]] += sum(inv)
 		if results["bank"]:
 			output += "BANK: Found {0}\n".format(results["bank"])
