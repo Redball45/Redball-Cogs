@@ -2233,7 +2233,6 @@ class Guildwars2:
 			section = dailylist[x]
 #			await self.bot.say("{0}".format(section))
 			dailies.append("{0} DAILIES:".format(x.upper()))
-			await self.bot.say("{0}".format(dailies))
 			for daily in section:
 				if daily["level"]["max"] == 80:
 					dailyid.append(str(daily["id"]))
