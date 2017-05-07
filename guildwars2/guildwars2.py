@@ -2219,6 +2219,8 @@ class Guildwars2:
 		endpoint = "achievements/daily"
 		results = await self.call_api(endpoint)
 		dailies = ["Daily PSNA:", self.get_psna()]
+		daily_format = []
+		daily_filtered = []
 		if tomorrow:
 			dailies[0] = "PSNA at this time:"
 			dailies.append("PSNA in 8 hours:")
@@ -2227,18 +2229,35 @@ class Guildwars2:
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = results[x]
-			dailies.append(str("{0} DAILIES:".format(x.upper())))
-			if x == "fractals":
-				for x in section:
-					if x["level"]["max"] == 80:
-						fractals.append(x["id"])
-				fractals = ",".join(fractals)
-				for frac in fractals:
-					if not frac["name"].startswith("Daily Tier"):
-						dailies.append(frac)
-					if frac ["name"].startswith("Daily Tier 4"):
-						dailies.append(frac)
-				dailies = ",".join(dailies)
+			for x in section
+				if x["level"]["max"] == 80:
+					dailies.append(str(x["id"]))
+			dailies = ",".join(dailies)
+		try:
+			achendpoint = "achievements?ids={0}".format(dailies)
+			achresults = await self.call_api(achendpoint)
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		daily_filtered = achresults
+		output = "Dailies for today are ```"
+			for x in daily_filtered:
+				output += "\n" + x["name"]
+		output += "```"
+		return output
+		
+#		if x == "fractals":
+#				for x in section:
+#					if x["level"]["max"] == 80:
+#						fractals.append(x["id"])
+#				fractals = ",".join(fractals)
+#				for frac in fractals:
+#					if not frac["name"].startswith("Daily Tier"):
+#						dailies.append(frac)
+#					if frac ["name"].startswith("Daily Tier 4"):
+#						dailies.append(frac)
+##				dailies = ",".join(dailies)
 			else:
 				for y in section:
 					if y["level"]["max"] == 80:
