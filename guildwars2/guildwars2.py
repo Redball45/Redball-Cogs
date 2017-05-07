@@ -1218,7 +1218,7 @@ class Guildwars2:
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = [item["count"] for item in bank if item != None and item["id"] == shiniesresults[num]["item_id"]]
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == "19721"]
 		await self.bot.say("Debugging, bank count is {0}".format(bankresults))
 		results["bank"] = sum(bankresults)
 		sharedresults = [item["count"] for item in shared if item != None and item["id"] == shiniesresults[num]["item_id"]]
