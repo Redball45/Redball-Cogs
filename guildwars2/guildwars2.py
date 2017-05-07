@@ -2084,7 +2084,7 @@ class Guildwars2:
 		if server.id not in self.dailysettings:
 			self.dailysettings[server.id] = {"DAILYON": False, "CHANNEL": None}
 			self.dailysettings[server.id]["DAILYCHANNEL"] = server.default_channel.id
-			dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
+			dataIO.save_json('data/guildwars2/dailysettings.json', self.dailysettings)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
 			return
@@ -2105,7 +2105,7 @@ class Guildwars2:
 							   "You still need to enable it per server.")
 		else:
 			await self.bot.say("Daily reporting is globally disabled")
-		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.dailysettings)
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="channel")
@@ -2121,7 +2121,7 @@ class Guildwars2:
 							   "messages to {0.mention}".format(channel))
 			return
 		self.dailysettings[server.id]["DAILYCHANNEL"] = channel.id
-		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.dailysettings)
 		channel = self.get_announcement_channel(server)
 		print(channel)
 		await self.bot.send_message(channel, "I will now send daily "
@@ -2140,7 +2140,7 @@ class Guildwars2:
 				await self.bot.say("Build checking is globally disabled")
 		else:
 			await self.bot.say("I will not send notifications when dailies change")
-		dataIO.save_json('data/guildwars2/dailysettings.json', self.settings)
+		dataIO.save_json('data/guildwars2/dailysettings.json', self.dailysettings)
 
 	def check_day(self):
 		self.current_day = dataIO.load_json("data/guildwars2/day.json")
@@ -2421,10 +2421,10 @@ class Guildwars2:
 	def get_dailychannels(self):
 		try:
 			channels = []
-			for server in self.settings:
+			for server in self.dailysettings:
 				if not server == "DAILYENABLED": #Ugly I know
-					if self.settings[server]["DAILYON"]:
-						channels.append(self.settings[server]["DAILYCHANNEL"])
+					if self.dailysettings[server]["DAILYON"]:
+						channels.append(self.dailysettings[server]["DAILYCHANNEL"])
 						print(channels)
 			return channels
 		except:
