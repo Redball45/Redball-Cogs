@@ -2523,9 +2523,9 @@ def setup(bot):
 	check_files()
 	n = Guildwars2(bot)
 	loop = asyncio.get_event_loop()
-	buildloop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
-	buildloop.create_task(n._gamebuild_checker())
+	loop.create_task(n._gamebuild_checker())
+#	loop.create_task(n.daily_notifs())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
