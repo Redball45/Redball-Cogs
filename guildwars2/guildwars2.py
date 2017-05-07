@@ -2071,23 +2071,17 @@ class Guildwars2:
 		output = await self.display_all_dailies(results)
 		await self.bot.say("```" + output + "```")
 
-#	@checks.admin_or_permissions(manage_server=True)
-#	@daily.group(pass_context=True, name="notifier")
-#	async def daily_notifier(self, ctx):
-#		"""Sends a list of dailies on server reset to specificed channel.
-#		First, specify a channel using $daily notifier channel <channel>
-#		Make sure it's toggle on using $daily notifier toggle on
-#		"""
-#		server = ctx.message.server
-#		serverdoc = await self.fetch_server(server)
-#		if not serverdoc:
-#			default_channel = server.default_channel.id
-#			serverdoc = {"_id": server.id, "on": False,
-#						 "channel": default_channel, "language": "en", "daily" : {"on": False, "channel": None}}
-#			await self.db.settings.insert_one(serverdoc)
-#		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
-#			await self.bot.send_cmd_help(ctx)
-#			return
+	@checks.admin_or_permissions(manage_server=True)
+	@daily.group(pass_context=True, name="notifier")
+	async def daily_notifier(self, ctx):
+		"""Sends a list of dailies on server reset to specificed channel.
+		First, specify a channel using $daily notifier channel <channel>
+		Make sure it's toggle on using $daily notifier toggle on
+		"""
+		server = ctx.message.server
+		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
+			await self.bot.send_cmd_help(ctx)
+			return
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="channel")
@@ -2169,8 +2163,8 @@ class Guildwars2:
 				await asyncio.sleep(300)
 		continue
 
-	async def fetch_server(self, server):
-		return await self.db.settings.find_one({"_id": server.id})
+#	async def fetch_server(self, server):
+#		return await self.db.settings.find_one({"_id": server.id})
 
 	async def daily_handler(self, search):
 		endpoint = "achievements/daily"
