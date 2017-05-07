@@ -2175,7 +2175,7 @@ class Guildwars2:
 
 	async def get_daily_channel(self, server):
 		try:
-			return servedefr.get_channel(self.settings[server.id]["DAILYCHANNEL"])
+			return servedefr.get_channel(self.dailysettings[server.id]["DAILYCHANNEL"])
 		except:
 			return None
 
