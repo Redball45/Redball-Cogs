@@ -1169,6 +1169,7 @@ class Guildwars2:
 			shared = await self.call_api(endpoint_shared, headers)
 			material = await self.call_api(endpoint_material, headers)
 			characters = await self.call_api(endpoint_char, headers)
+			await self.bot.say("Debugging - Initial API Call OK")
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
