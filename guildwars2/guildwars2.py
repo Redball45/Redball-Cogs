@@ -1221,6 +1221,7 @@ class Guildwars2:
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
+		bankresults = 0
 		for x in bank:
 			if x != None and x["id"] == choiceid:
 				bankresults = bankresults + x["count"]
