@@ -2153,7 +2153,7 @@ class Guildwars2:
 			return None
 
 	async def daily_notifs(self):
-		while self is self.bot.get_cog("GuildWars2"):
+		while self is self.bot.get_cog("Guildwars2"):
 			try:
 				if self.check_day():
 					await self.send_daily_notifs()
@@ -2504,7 +2504,7 @@ def check_files():
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
 		"containers.json": {},
-		"day.json": {"day": datetime:datetime.utcnow().weekday()}
+		"day.json": {"day": datetime.datetime.utcnow().weekday()}
 		"keys.json": {}
 	}
 
