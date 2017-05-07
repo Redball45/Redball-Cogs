@@ -2142,7 +2142,7 @@ class Guildwars2:
 				dailies.append(str(x["id"]))
 		dailies = ",".join(dailies)
 		try:
-			achendpoint = "achievements?ids=0".format(dailies)
+			achendpoint = "achievements?ids={0}".format(dailies)
 			achresults = await self.call_api(achendpoint)
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
