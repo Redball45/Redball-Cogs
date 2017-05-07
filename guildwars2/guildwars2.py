@@ -2225,7 +2225,7 @@ class Guildwars2:
 			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
-		for x in sections
+		for x in sections:
 			dailies.append("{0} DAILIES:".format(x.upper()))
 			if x == "fractals":
 				for x in results:
