@@ -2242,8 +2242,8 @@ class Guildwars2:
 			return
 		daily_filtered = achresults
 		output = "Dailies for today are ```"
-			for x in daily_filtered:
-				output += "\n" + x["name"]
+		for x in daily_filtered:
+			output += "\n" + x["name"]
 		output += "```"
 		return output
 		
