@@ -2187,13 +2187,16 @@ class Guildwars2:
 		endpoint = "achievements/daily"
 		results = await self.call_api(endpoint)
 		data = results[search]
+		await self.bot.say("{0}".format(data))
 		dailies = []
 		daily_format = []
 		daily_filtered = []
 		for x in data:
 			if x["level"]["max"] == 80:
 				dailies.append(str(x["id"]))
+				await self.bot.say("{0}".format(dailies))
 		dailies = ",".join(dailies)
+		await self.bot.say("{0}".format(dailies))
 		try:
 			achendpoint = "achievements?ids={0}".format(dailies)
 			achresults = await self.call_api(achendpoint)
@@ -2216,7 +2219,10 @@ class Guildwars2:
 		return output
 
 	async def display_all_dailies(self, dailylist, tomorrow=False):
-		dailies = ["Daily PSNA:", self.get_psna()]
+		dailies = ["Pact Supply Agent WPs:", self.get_psna()]
+		dailyid =[]
+		daily_format = []
+		daily_filtered = []
 		if tomorrow:
 			dailies[0] = "PSNA at this time:"
 			dailies.append("PSNA in 8 hours:")
@@ -2225,22 +2231,46 @@ class Guildwars2:
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = dailylist[x]
-			dailies.append("{0} DAILIES:".format(x.upper()))
-			if x == "fractals":
-				for x in section:
-					#d = await self.db.achievements.find_one({"_id": x["id"]})#
-					fractals.append(d)
-				for frac in fractals:
-					if not frac["name"].startswith("Daily Tier"):
-						dailies.append(frac["name"])
-					if frac["name"].startswith("Daily Tier 4"):
-						dailies.append(frac["name"])
-			else:
-				for x in section:
-					if x["level"]["max"] == 80:
-						#d = await self.db.achievements.find_one({"_id": x["id"]})#
-						dailies.append(d["name"])
-		return "\n".join(dailies)
+			for daily in section:
+				if daily["level"]["max"] == 80:
+					dailyid.append(str(daily["id"]))
+		dailyid = ",".join(dailyid)
+		try:
+			achendpoint = "achievements?ids={0}".format(dailyid)
+			achresults = await self.call_api(achendpoint)
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		for daily in achresults:
+			if not daily["name"].startswith("Daily Tier"):
+				daily_filtered.append(daily)
+			if daily["name"].startswith("Daily Tier 4"):
+				daily_filtered.append(daily)
+		output = "Dailies for today are: "
+		for x in daily_filtered:
+			output += "\n" + x["name"]
+		output += "\n"
+		output += "\n".join(dailies)
+		return output
+		
+#		if x == "fractals":
+#				for x in section:
+#					if x["level"]["max"] == 80:
+#						fractals.append(x["id"])
+#				fractals = ",".join(fractals)
+#				for frac in fractals:
+#					if not frac["name"].startswith("Daily Tier"):
+#						dailies.append(frac)
+#					if frac ["name"].startswith("Daily Tier 4"):
+#						dailies.append(frac)
+##				dailies = ",".join(dailies)
+#			else:
+#				for y in section:
+#					if y["level"]["max"] == 80:
+#						dailies.append(y["name"])
+#				dailies = ",".join(dailies)
+#		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
 			offset = datetime.timedelta(hours=-8)
