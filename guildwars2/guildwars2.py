@@ -2121,9 +2121,7 @@ class Guildwars2:
 			return
 		self.dailysettings[server.id]["DAILYCHANNEL"] = channel.id
 		dataIO.save_json('data/guildwars2/dailysettings.json', self.dailysettings)
-		channel = self.get_daily_channel(server)
-		await self.bot.send_message(channel, "I will now send daily "
-									"messages to {0.mention}".format(channel))
+		await self.bot.say("I will now send dailies to the selected channel at reset")
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="toggle")
