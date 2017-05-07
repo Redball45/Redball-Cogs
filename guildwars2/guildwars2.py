@@ -349,8 +349,9 @@ class Guildwars2:
 		try:
 			self._check_scopes_(user, scopes)
 			key = self.keylist[user.id]["key"]
-			endpoint = "characters/?access_token={0}".format(key)
-			results = await self.call_api(endpoint)
+			endpoint = "characters?page=0"
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -360,7 +361,7 @@ class Guildwars2:
 			return
 		output = "{0.mention}, your characters: ```"
 		for x in results:
-			output += "\n" + x
+			output += "\n" + x["name"] + " (" + x["profession"] + ")"
 		output += "```"
 		await self.bot.say(output.format(user))
 
