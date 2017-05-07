@@ -2144,11 +2144,12 @@ class Guildwars2:
 				print("Exception while sending daily notifs {0}".format(e))
 				return
 			message = await self.display_all_dailies(results, True)
-			for channel in channels:
-				try:
-					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
-				except:
-					pass
+			if channels:
+				for channel in channels:
+					try:
+						await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
+					except:
+						pass
 		except Exception as e:
 			print ("Erorr while sending daily notifs: {0}".format(e))
 		return
