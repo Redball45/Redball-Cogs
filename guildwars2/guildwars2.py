@@ -2187,6 +2187,7 @@ class Guildwars2:
 		endpoint = "achievements/daily"
 		results = await self.call_api(endpoint)
 		data = results[search]
+		await self.bot.say("{0}".format(data))
 		dailies = []
 		daily_format = []
 		daily_filtered = []
