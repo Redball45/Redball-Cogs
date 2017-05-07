@@ -1919,29 +1919,29 @@ class Guildwars2:
 		color = self.getColor(user)
 		
 		try:
-			shiniesendpoint = 'history/' + item_id
+			shinies_endpoint = 'history/' + item_id
 			history = await self.call_shiniesapi(shinies_endpoint)
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 					   "`{1}`".format(user, e))
 			return
 		
-		timeNow = int(time.time())
-		buyAvg = 0
-		sellAvg = 0
+		time_now = int(time.time())
+		buy_avg = 0
+		sell_avg = 0
 		
 		# Get average from 96 most recent entries
 		for record in history[:96]:
-			buyAvg += record["buy"]
-			sellAvg += record["sell"]
+			buy_avg += record["buy"]
+			sell_avg += record["sell"]
 		
-		buyAvg /= max(len(history)-1, 1)
-		sellAvg /= max(len(history)-1, 1)
+		buy_avg /= max(len(history)-1, 1)
+		sell_avg /= max(len(history)-1, 1)
 		
 		# Display data
 		data = discord.Embed(title="Trend data for id " + item_id, colour=color)
-		data.add_field(name="Buy average",value=self.gold_to_coins(buyAvg))
-		data.add_field(name="Sell average",value=self.gold_to_coins(sellAvg))
+		data.add_field(name="Buy average",value=self.gold_to_coins(buy_avg))
+		data.add_field(name="Sell average",value=self.gold_to_coins(sell_avg))
 		
 		try:
 			await self.bot.say(embed=data)
