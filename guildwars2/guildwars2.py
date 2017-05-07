@@ -2504,7 +2504,7 @@ def check_files():
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
 		"containers.json": {},
-		"day.json": {"day": datetime.datetime.utcnow().weekday()}
+		"day.json": {"day": datetime.datetime.utcnow().weekday()},
 		"keys.json": {}
 	}
 
