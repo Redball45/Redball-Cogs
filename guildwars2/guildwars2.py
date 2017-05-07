@@ -2177,12 +2177,12 @@ class Guildwars2:
 
 	async def daily_notifs(self):
 		while self is self.bot.get_cog("Guildwars2"):
-			Red_ID = 77910702664200192
-			Red = await self.bot.get_user_info(Red_ID)
+#			Red_ID = 77910702664200192
+#			Red = await self.bot.get_user_info(Red_ID)
 			try:
 				if self.check_day():
 					await self.send_daily_notifs()
-					await self.bot.send_message(Red, "Daily notif loop completed")
+#					await self.bot.send_message(Red, "Daily notif loop completed")
 				await asyncio.sleep(300)
 			except Exception as e:
 				print("Daily notifier exception: {0}\nExecution will continue".format(e))
