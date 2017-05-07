@@ -1325,24 +1325,6 @@ class Guildwars2:
 		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
 	@checks.is_owner()
-	@daily.group.command()
-	async def daily_global(self, on_off: bool = None):
-		"""Toggles checking for new dailies, globally.
-		Note that in order to receive notifications you to
-		set up notification channel and enable it per server using
-		[p]gamebuild toggle
-		Off by default.
-		"""
-		if on_off is not None:
-			self.settings["DAILYENABLED"] = on_off
-		if self.settings["DAILYENABLED"]:
-			await self.bot.say("Dailies are enabled. "
-							   "You still need to enable it per server.")
-		else:
-			await self.bot.say("Daily reporting is globally disabled")
-		dataIO.save_json('data/guildwars2/settings.json', self.settings)
-
-	@checks.is_owner()
 	@gamebuild.command()
 	async def globaltoggle(self, on_off: bool = None):
 		"""Toggles checking for new builds, globally.
@@ -2106,6 +2088,24 @@ class Guildwars2:
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
 			return
+
+	@checks.is_owner()
+	@daily.group(pass_context=True, name="global")
+	async def daily_global(self, on_off: bool = None):
+		"""Toggles checking for new dailies, globally.
+		Note that in order to receive notifications you to
+		set up notification channel and enable it per server using
+		[p]gamebuild toggle
+		Off by default.
+		"""
+		if on_off is not None:
+			self.settings["DAILYENABLED"] = on_off
+		if self.settings["DAILYENABLED"]:
+			await self.bot.say("Dailies are enabled. "
+							   "You still need to enable it per server.")
+		else:
+			await self.bot.say("Daily reporting is globally disabled")
+		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
 	@checks.admin_or_permissions(manage_server=True)
 	@daily_notifier.command(pass_context=True, name="channel")
