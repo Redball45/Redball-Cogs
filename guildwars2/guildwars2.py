@@ -1481,14 +1481,6 @@ class Guildwars2:
 		try:
 			shiniesendpoint = tpitemname
 			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-#			itemnameresult = shiniesresults[0]["name"]
-#			tpbuyid = shiniesresults[0]["item_id"]
-#			commerce = 'commerce/prices/'
-#			endpoint = commerce + tpbuyid
-#			results = await self.call_api(endpoint)
-#		except APIKeyError as e:
-#			await self.bot.say(e)
-#			return
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
@@ -1612,7 +1604,7 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		data = discord.Embed(description='Matching IDs, use !tpid (id) to see prices for a specific item', colour=color)
+		data = discord.Embed(description='Matching IDs, use !tp id (id) to see prices for a specific item', colour=color)
 		#For each item returned, add to the data table
 		counter = 0
 		for name in shiniesresults:
