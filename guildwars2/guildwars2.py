@@ -1514,7 +1514,6 @@ class Guildwars2:
 				num = int(answer.content)
 				choice = items[num]
 				choiceid = shiniesresults[num]["item_id"]
-				choiceid = int(choiceid)
 			except: 
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
@@ -1526,7 +1525,6 @@ class Guildwars2:
 			message = await self.bot.say("Finding tradepost data...")
 			choice = items[0]
 			choiceid = shiniesresults[0]["item_id"]
-			choiceid = int(choiceid)
 		try:
 			commerce = 'commerce/prices/'
 			endpoint = commerce + choiceid
