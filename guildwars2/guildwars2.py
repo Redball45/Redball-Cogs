@@ -1170,7 +1170,6 @@ class Guildwars2:
 			material = await self.call_api(endpoint_material)
 			characters = await self.call_api(endpoint_char, headers)
 			firstitem = bank[0]["id"]
-			await self.bot.say("Debugging - Initial API Call OK id {0}".format(firstitem))
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -1202,7 +1201,6 @@ class Guildwars2:
 				choice = items[num]
 				choiceid = shiniesresults[num]["item_id"]
 				choiceid = int(choiceid)
-				await self.bot.say("Debugging, item id is {0}".format(choiceid))
 			except:
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
@@ -1216,8 +1214,6 @@ class Guildwars2:
 			choiceid = shiniesresults[0]["item_id"]
 			choiceid = int(choiceid)
 			num = 0
-			await self.bot.say("Debugging, item id is {0}".format(choiceid))
-			await self.bot.say("Debugging, item id is {0}".format(bank[0]["id"]))
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
