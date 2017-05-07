@@ -1511,7 +1511,7 @@ class Guildwars2:
 			message = await self.bot.say(msg)
 			answer = await self.bot.wait_for_message(timeout=120, author=user)
 			try:
-				num: int(answer.content)
+				num = int(answer.content)
 				choice = items[num]
 				choiceid = shiniesresults[num]["item_id"]
 				choiceid = int(choiceid)
