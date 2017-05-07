@@ -2198,6 +2198,7 @@ class Guildwars2:
 
 	async def update_build(self):
 		endpoint = "build"
+		self.build = dataIO.load_json("data/guildwars2/build.json")
 		currentbuild = self.build["id"]
 		owner = 77910702664200192
 		Red = await self.bot.get_user_info(owner)
