@@ -1221,27 +1221,24 @@ class Guildwars2:
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = 0
-		for x in bank:
-			if x != None and x["id"] == choiceid:
-				bankresults = bankresults + x["count"]
-				results["bank"] = bankresults
-		sharedresults = [item["count"] for item in shared if item != None and item["id"] == shiniesresults[num]["item_id"]]
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choiceid]
+		results["bank"] = sum(bankresults)
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choiceid]
 		results["shared"] = sum(sharedresults)
-		materialresults = [item["count"] for item in material if item != None and item["id"] == shiniesresults[num]["item_id"]]
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choiceid]
 		results["material"] = sum(materialresults)
 		for character in characters:
 			results["characters"][character["name"]] = 0
 			bags = [bag for bag in character["bags"] if bag != None]
 			for bag in bags:
-				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == shiniesresults[num]["item_id"]]
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choiceid]
 				results["characters"][character["name"]] += sum(inv)
-		"""if results["bank"]:"""
-		output += "BANK: Found {0}\n".format(results["bank"])
-		"""if results["material"]:"""
-		output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
-		"""if results["shared"]:"""
-		output += "SHARED: Found {0}\n".format(results["shared"])
+		if results["bank"]:
+			output += "BANK: Found {0}\n".format(results["bank"])
+		if results["material"]:
+			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+		if results["shared"]:
+			output += "SHARED: Found {0}\n".format(results["shared"])
 		if results["characters"]:
 			for char, value in results["characters"].items():
 				if value:
