@@ -1169,7 +1169,6 @@ class Guildwars2:
 			shared = await self.call_api(endpoint_shared)
 			material = await self.call_api(endpoint_material)
 			characters = await self.call_api(endpoint_char, headers)
-			firstitem = bank[0]["id"]
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -1177,12 +1176,13 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
+		try:
+			shiniesendpoint = item.replace(" ", "%20")
+			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		shiniesendpoint = item.replace(" ", "%20")
-		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 		number = len(shiniesresults)
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
