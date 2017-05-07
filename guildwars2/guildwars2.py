@@ -2112,7 +2112,7 @@ class Guildwars2:
 			self.settings["DAILYON"] = on_off
 		if self.settings[server.id]["DAILYON"]:
 			await self.bot.say("I will notify you on this server when dailies change")
-			if not self.settings "DAILYENABLED":
+			if not self.settings["DAILYENABLED"]:
 				await self.bot.say("Build checking is globally disabled")
 		else:
 			await self.bot.say("I will not send notifications when dailies change")
@@ -2499,7 +2499,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"ENABLED": False},
+		"settings.json": {"ENABLED": False, "DAILYENABLED": False},
 		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
 		"keys.json": {},
