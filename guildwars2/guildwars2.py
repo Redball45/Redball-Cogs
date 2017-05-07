@@ -2219,7 +2219,7 @@ class Guildwars2:
 		return output
 
 	async def display_all_dailies(self, dailylist, tomorrow=False):
-		dailies = ["Daily PSNA:", self.get_psna()]
+		dailies = "\n".join(["Daily PSNA:", self.get_psna()])
 		dailyid =[]
 		daily_format = []
 		daily_filtered = []
