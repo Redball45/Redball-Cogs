@@ -1151,6 +1151,7 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
 
+	@checks.mod_or_permissions(manage_webhooks=True)
 	@commands.command(pass_context=True)
 	async def search(self, ctx, *, item):
 		"""Find items on your account!"""
@@ -1177,8 +1178,9 @@ class Guildwars2:
 			return
 		item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
-		cursor = self.db.items.find({"name": search})
-		number = await cursor.count()
+		shiniesendpoint = search
+		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
+		number = Object.keys(shiniesresult).length
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
 			return
@@ -1187,8 +1189,9 @@ class Guildwars2:
 			return
 		items = []
 		msg = "Which one of these interests you? Type it's number```"
-		async for item in cursor:
-			items.append(item)
+		async for name in shiniesresults:
+			items.append(name + item_id)
+
 		if number != 1:
 			for c, m in enumerate(items):
 				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
