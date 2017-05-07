@@ -1282,9 +1282,8 @@ class Guildwars2:
 		"""Commands related to setting up a new game build notifier"""
 		server = ctx.message.server
 		if server.id not in self.settings:
-			self.settings[server.id] = {"ON": False, "CHANNEL": None}
+			self.settings[server.id] = {"ON": False, "CHANNEL": None, "DAILYON": False, "CHANNEL": None}
 			self.settings[server.id]["CHANNEL"] = server.default_channel.id
-			self.settings[server.id] = {"DAILYON": False, "CHANNEL": None}
 			self.settings[server.id]["DAILYCHANNEL"] = server.default_channel.id
 			dataIO.save_json('data/guildwars2/settings.json', self.settings)
 		if ctx.invoked_subcommand is None:
@@ -2082,9 +2081,8 @@ class Guildwars2:
 		"""
 		server = ctx.message.server
 		if server.id not in self.settings:
-			self.settings[server.id] = {"DAILYON": False, "CHANNEL": None}
+			self.settings[server.id] = {"ON": False, "CHANNEL": None, "DAILYON": False, "CHANNEL": None}
 			self.settings[server.id]["DAILYCHANNEL"] = server.default_channel.id
-			self.settings[server.id] = {"ON": False, "CHANNEL": None}
 			self.settings[server.id]["CHANNEL"] = server.default_channel.id
 			dataIO.save_json('data/guildwars2/settings.json', self.settings)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
