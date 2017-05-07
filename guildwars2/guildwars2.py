@@ -1275,43 +1275,6 @@ class Guildwars2:
 		except:
 			await self.bot.say("{0.mention}, no results found".format(user))
 
-	@commands.command(pass_context=True)
-	async def daily(self, ctx, pve_pvp_wvw_fractals):
-		"""Returns current GW2 dailies for pve, pvp, wvw or fractals"""
-		valid_dailies = ["pvp", "wvw", "pve", "fractals"]
-		user = ctx.message.author
-		search = pve_pvp_wvw_fractals.lower()
-		try:
-			endpoint = "achievements/daily"
-			results = await self.call_api(endpoint)
-		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
-		search = pve_pvp_wvw_fractals.lower()
-		if search in valid_dailies:
-			data = results[search]
-		else:
-			await self.bot.say("Invalid type of daily")
-			return
-		dailies = []
-		for x in data:
-			if x["level"]["max"] == 80:
-				dailies.append(str(x["id"]))
-		dailies = ",".join(dailies)
-		try:
-			endpoint = "achievements?ids={0}".format(dailies)
-			results = await self.call_api(endpoint)
-		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
-		output = "{0} dailes for today are: ```".format(search.capitalize())
-		for x in results:
-			output += "\n" + x["name"]
-		output += "```"
-		await self.bot.say(output)
-
 	@commands.group(pass_context=True, no_pm=True)
 	@checks.admin_or_permissions(manage_server=True)
 	async def gamebuild(self, ctx):
@@ -2036,6 +1999,56 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 
+	@commands.group(pass_context=True)
+	async def daily(self, ctx):
+		"""Commands showing daily things"""
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+
+	@daily.command(pass_context=True, name="pve")
+	async def daily_pve(self, ctx):
+		"""Show today's PvE dailies"""
+		try:
+			output = await self.daily_handler("pve")
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		await self.bot.say(output)
+
+	@daily.command(pass_context=True, name="wvw")
+	async def daily_wvw(self, ctx):
+		"""Show today's WvW dailies"""
+		try:
+			output = await self.daily_handler("wvw")
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		await self.bot.say(output)
+
+	@daily.command(pass_context=True, name="pvp")
+	async def daily_pvp(self, ctx):
+		"""Show today's PvP dailies"""
+		try:
+			output = await self.daily_handler("pvp")
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		await self.bot.say(output)
+
+	@daily.command(pass_context=True, name="fractals")
+	async def daily_fractals(self, ctx):
+		"""Show today's fractal dailie"""
+		try:
+			output = await self.daily_handler("fractals")
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		await self.bot.say(output)
+
 	@daily.command(pass_context=True, name="psna")
 	async def daily_psna(self, ctx):
 		"""Show today's Pact Supply Network Agent locations"""
@@ -2043,6 +2056,138 @@ class Guildwars2:
 						   "locations: ```{0}```".format(self.get_psna()))
 		await self.bot.say(output)
 		return
+
+	@daily.command(pass_context=True, name="all")
+	async def daily_all(self, ctx):
+		"""Show today's all dailies"""
+		try:
+			endpoint = "achievements/daily"
+			results = await self.call_api(endpoint)
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		output = await self.display_all_dailies(results)
+		await self.bot.say("```" + output + "```")
+
+#	@checks.admin_or_permissions(manage_server=True)
+#	@daily.group(pass_context=True, name="notifier")
+#	async def daily_notifier(self, ctx):
+#		"""Sends a list of dailies on server reset to specificed channel.
+#		First, specify a channel using $daily notifier channel <channel>
+#		Make sure it's toggle on using $daily notifier toggle on
+#		"""
+#		server = ctx.message.server
+#		serverdoc = await self.fetch_server(server)
+#		if not serverdoc:
+#			default_channel = server.default_channel.id
+#			serverdoc = {"_id": server.id, "on": False,
+#						 "channel": default_channel, "language": "en", "daily" : {"on": False, "channel": None}}
+#			await self.db.settings.insert_one(serverdoc)
+#		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
+#			await self.bot.send_cmd_help(ctx)
+#			return
+
+
+#	@daily_notifier.command(pass_context=True, name="channel")
+#	async def daily_notifier_channel(self, ctx, channel: discord.Channel=None):
+#		"""Sets the channel to send the dailies to
+#		If channel isn't specified, the server's default channel will be used"""
+#		server = ctx.message.server
+#		if channel is None:
+#			channel = ctx.message.server.default_channel
+#		if not server.get_member(self.bot.user.id
+#								 ).permissions_in(channel).send_messages:
+#			await self.bot.say("I do not have permissions to send "
+#							   "messages to {0.mention}".format(channel))
+#			return
+#		#await self.db.settings.update_one({"_id": server.id}, {"$set": {"daily.channel": channel.id}})#
+#		channel = await self.get_daily_channel(server)
+#		try:
+#			endpoint = "achievements/daily"
+#			results = await self.call_api(endpoint)
+#		except APIError as e:
+#			print("Exception while sending daily notifs {0}".format(e))
+#			return
+#		example = await self.display_all_dailies(results, True)
+#		await self.bot.send_message(channel, "I will now send dailies "
+#									"to {0.mention}. Make sure it's toggled "
+#									"on using $daily notifier toggle on. "
+#									"Example:\n```{1}```".format(channel, example))
+
+#	@daily_notifier.command(pass_context=True, name="toggle")
+#	async def daily_notifier_toggle(self, ctx, on_off: bool):
+#		"""Toggles posting dailies at server reset"""
+#		server = ctx.message.server
+#		if on_off is not None:
+#			#await self.db.settings.update_one({"_id": server.id}, {"$set": {"daily.on" : on_off}})#
+#		serverdoc = await self.fetch_server(server)
+#		if serverdoc["daily"]["on"]:
+#			await self.bot.say("I will notify you on this server about dailies")
+#		else:
+#			await self.bot.say("I will not send "
+#							   "notifications about new builds")
+
+
+
+	async def daily_handler(self, search):
+		endpoint = "achievements/daily"
+		results = await self.call_api(endpoint)
+		data = results[search]
+		dailies = []
+		daily_format = []
+		daily_filtered = []
+		for x in data:
+			if x["level"]["max"] == 80:
+				dailies.append(x["id"])
+		dailies = ",".join(dailies)
+		try:
+			achendpoint = "achievements?ids=0".format(dailies)
+			achresults = await self.call_api(achendpoint)
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		if search == "fractals":
+			for daily in achresults:
+				if not daily["name"].startswith("Daily Tier"):
+					daily_filtered.append(daily)
+				if daily["name"].startswith("Daily Tier 4"):
+					daily_filtered.append(daily)
+		else:
+			daily_filtered = achresults
+		output = "{0} dailes for today are: ```".format(search.capitalize())
+		for x in daily_filtered:
+			output += "\n" + x["name"]
+		output += "```"
+		return output
+
+	async def display_all_dailies(self, dailylist, tomorrow=False):
+		dailies = ["Daily PSNA:", self.get_psna()]
+		if tomorrow:
+			dailies[0] = "PSNA at this time:"
+			dailies.append("PSNA in 8 hours:")
+			dailies.append(self.get_psna(1))
+		fractals = []
+		sections = ["pve", "pvp", "wvw", "fractals"]
+		for x in sections:
+			section = dailylist[x]
+			dailies.append("{0} DAILIES:".format(x.upper()))
+			if x == "fractals":
+				for x in section:
+					#d = await self.db.achievements.find_one({"_id": x["id"]})#
+					fractals.append(d)
+				for frac in fractals:
+					if not frac["name"].startswith("Daily Tier"):
+						dailies.append(frac["name"])
+					if frac["name"].startswith("Daily Tier 4"):
+						dailies.append(frac["name"])
+			else:
+				for x in section:
+					if x["level"]["max"] == 80:
+						#d = await self.db.achievements.find_one({"_id": x["id"]})#
+						dailies.append(d["name"])
+		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
 			offset = datetime.timedelta(hours=-8)
