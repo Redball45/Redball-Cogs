@@ -2231,7 +2231,8 @@ class Guildwars2:
 			section = results[x]
 			for x in section:
 				if x["level"]["max"] == 80:
-					dailies.append(x["id"])
+					d = x["id"]
+					dailies.append(d)
 			dailies = ",".join(dailies)
 		try:
 			achendpoint = "achievements?ids={0}".format(dailies)
