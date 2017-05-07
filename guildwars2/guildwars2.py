@@ -2218,6 +2218,7 @@ class Guildwars2:
 
 	async def display_all_dailies(self, dailylist, tomorrow=False):
 		dailies = ["Daily PSNA:", self.get_psna()]
+		dailyid =[]
 		daily_format = []
 		daily_filtered = []
 		if tomorrow:
@@ -2233,11 +2234,11 @@ class Guildwars2:
 			await self.bot.say("{0}".format(dailies))
 			for daily in section:
 				if daily["level"]["max"] == 80:
-					dailies.append(daily["id"])
-					await self.bot.say("{0}".format(dailies))
-			dailies = ",".join(dailies)
+					dailyid.append(daily["id"])
+					await self.bot.say("{0}".format(dailyid))
+		dailyid = ",".join(dailyid)
 		try:
-			achendpoint = "achievements?ids={0}".format(dailies)
+			achendpoint = "achievements?ids={0}".format(dailyid)
 			achresults = await self.call_api(achendpoint)
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
