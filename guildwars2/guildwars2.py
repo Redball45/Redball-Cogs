@@ -2062,6 +2062,9 @@ class Guildwars2:
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("Guildwars2"):
+			owner = 77910702664200192
+			Red = await self.bot.get_user_info(owner)
+			await self.bot.send_message(Red, "Hey, I'm checking the gamebuild now")
 			try:
 				if await self.update_build():
 					channels = self.get_channels()
