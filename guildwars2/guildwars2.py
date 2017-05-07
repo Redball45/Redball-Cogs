@@ -2227,7 +2227,7 @@ class Guildwars2:
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = results[x]
-#			dailies.append(str("{0} DAILIES:".format(x.upper())))
+			dailies.append(str("{0} DAILIES:".format(x.upper())))
 			if x == "fractals":
 				for x in section:
 					if x["level"]["max"] == 80:
@@ -2242,7 +2242,7 @@ class Guildwars2:
 			else:
 				for y in section:
 					if y["level"]["max"] == 80:
-						dailies.append(str(y["id"]))
+						dailies.append(y["id"])
 				dailies = ",".join(dailies)
 		return "\n".join(dailies)
 
