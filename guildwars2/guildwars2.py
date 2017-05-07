@@ -2216,8 +2216,6 @@ class Guildwars2:
 		return output
 
 	async def display_all_dailies(self, dailylist, tomorrow=False):
-		endpoint = "achievements/daily"
-		results = await self.call_api(endpoint)
 		dailies = []
 #		dailies = ["Daily PSNA:", self.get_psna()]
 		daily_format = []
@@ -2229,7 +2227,7 @@ class Guildwars2:
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
-			section = results[x]
+			section = dailylist[x]
 			for daily in section:
 				if daily["level"]["max"] == 80:
 					dailies.append(str(daily["id"]))
