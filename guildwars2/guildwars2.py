@@ -2125,6 +2125,7 @@ class Guildwars2:
 		dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
 	def check_day(self):
+		self.current_day = dataIO.load_json("data/guildwars2/day.json")
 		current = datetime.datetime.utcnow().weekday()
 		if self.current_day["day"] != current:
 			self.current_day["day"] = current
