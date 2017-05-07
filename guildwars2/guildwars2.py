@@ -1162,7 +1162,7 @@ class Guildwars2:
 			self._check_scopes_(user, scopes)
 			endpoint_bank = "account/bank?access_token={0}".format(key)
 			endpoint_shared = "account/inventory?access_token={0}".format(key)
-			endpoint_char = "characters?access_token={0}".format(key)
+			endpoint_char = "characters?page=0?access_token={0}".format(key)
 			endpoint_material = "account/materials?access_token={0}".format(key)
 			bank = await self.call_api(endpoint_bank)
 			shared = await self.call_api(endpoint_shared)
