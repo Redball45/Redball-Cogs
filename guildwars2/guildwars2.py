@@ -2218,21 +2218,21 @@ class Guildwars2:
 	async def display_all_dailies(self, dailylist, tomorrow=False):
 		endpoint = "achievements/daily"
 		results = await self.call_api(endpoint)
-		dailies = ["Daily PSNA:", self.get_psna()]
+		dailies = []
+#		dailies = ["Daily PSNA:", self.get_psna()]
 		daily_format = []
 		daily_filtered = []
-		if tomorrow:
-			dailies[0] = "PSNA at this time:"
-			dailies.append("PSNA in 8 hours:")
-			dailies.append(self.get_psna(1))
+#		if tomorrow:
+#			dailies[0] = "PSNA at this time:"
+#			dailies.append("PSNA in 8 hours:")
+#			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = results[x]
 			for x in section:
 				if x["level"]["max"] == 80:
-					d = (str(x["id"])
-					dailies.append(d)
+					dailies.append(str[x["id"]])
 			dailies = ",".join(dailies)
 		try:
 			achendpoint = "achievements?ids={0}".format(dailies)
