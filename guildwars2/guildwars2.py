@@ -1178,7 +1178,7 @@ class Guildwars2:
 			return
 		shiniesendpoint = item.replace(" ", "%20")
 		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-		number = Object.keys(shiniesresult).length
+		number = len(shiniesresults)
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
 			return
@@ -1212,17 +1212,17 @@ class Guildwars2:
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["item_id"]]
 		results["bank"] = sum(bankresults)
-		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["item_id"]]
 		results["shared"] = sum(sharedresults)
-		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["item_id"]]
 		results["material"] = sum(materialresults)
 		for character in characters:
 			results["characters"][character["name"]] = 0
 			bags = [bag for bag in character["bags"] if bag != None]
 			for bag in bags:
-				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["item_id"]]
 				results["characters"][character["name"]] += sum(inv)
 		if results["bank"]:
 			output += "BANK: Found {0}\n".format(results["bank"])
