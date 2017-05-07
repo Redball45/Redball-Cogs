@@ -2050,7 +2050,7 @@ class Guildwars2:
 			day = datetime.datetime.now(tzone).weekday()
 			if day + modifier > 6:
 				modifier = -6
-		return self.gamedata["pact_supply"][day + modifier]
+			return self.gamedata["pact_supply"][day + modifier]
 
 	async def call_api(self, endpoint, headers=DEFAULT_HEADERS):
 		apiserv = 'https://api.guildwars2.com/v2/'
