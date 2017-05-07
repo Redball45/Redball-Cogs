@@ -2408,6 +2408,7 @@ class Guildwars2:
 				if not server == "DAILYENABLED": #Ugly I know
 					if self.settings[server]["DAILYON"]:
 						channels.append(self.settings[server]["DAILYCHANNEL"])
+						print(channels)
 			return channels
 		except:
 			return None
