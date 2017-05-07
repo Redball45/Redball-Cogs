@@ -1160,15 +1160,14 @@ class Guildwars2:
 		key = self.keylist[user.id]["key"]
 		try:
 			self._check_scopes_(user, scopes)
-			headers = self.construct_headers(key)
-			endpoint_bank = "account/bank"
-			endpoint_shared = "account/inventory"
-			endpoint_char = "characters?page=0"
-			endpoint_material = "account/materials"
-			bank = await self.call_api(endpoint_bank, headers)
-			shared = await self.call_api(endpoint_shared, headers)
-			material = await self.call_api(endpoint_material, headers)
-			characters = await self.call_api(endpoint_char, headers)
+			endpoint_bank = "account/bank?access_token={0}".format(key)
+			endpoint_shared = "account/inventory?access_token={0}".format(key)
+			endpoint_char = "characters?access_token={0}".format(key)
+			endpoint_material = "account/materials?accesstoken={0}".format(key)
+			bank = await self.call_api(endpoint_bank)
+			shared = await self.call_api(endpoint_shared)
+			material = await self.call_api(endpoint_material)
+			characters = await self.call_api(endpoint_char)
 			firstitem = bank[0]["id"]
 			await self.bot.say("Debugging - Initial API Call OK id {0}".format(firstitem))
 		except APIKeyError as e:
