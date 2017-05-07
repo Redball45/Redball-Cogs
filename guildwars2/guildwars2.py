@@ -2231,7 +2231,6 @@ class Guildwars2:
 		sections = ["pve", "pvp", "wvw", "fractals"]
 		for x in sections:
 			section = dailylist[x]
-			dailies.append("{0} DAILIES:".format(x.upper()))
 			for daily in section:
 				if daily["level"]["max"] == 80:
 					dailyid.append(str(daily["id"]))
@@ -2247,7 +2246,7 @@ class Guildwars2:
 		output = "Dailies for today are: ```"
 		for x in daily_filtered:
 			output += "\n" + x["name"]
-		output+= "\n".join(dailies)
+		output += "\n".join(dailies)
 		output += "```"
 		return output
 		
