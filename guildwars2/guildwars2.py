@@ -1177,6 +1177,10 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
+		except ShinyAPIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
 		shiniesendpoint = item.replace(" ", "%20")
 		shiniesresults = await self.call_shiniesapi(shiniesendpoint)
 		number = len(shiniesresults)
