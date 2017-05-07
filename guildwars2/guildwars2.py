@@ -1160,6 +1160,7 @@ class Guildwars2:
 		key = self.keylist[user.id]["key"]
 		try:
 			self._check_scopes_(user, scopes)
+			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank?access_token={0}".format(key)
 			endpoint_shared = "account/inventory?access_token={0}".format(key)
 			endpoint_char = "characters?page=0"
