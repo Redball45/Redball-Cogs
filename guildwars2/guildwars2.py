@@ -50,7 +50,6 @@ class Guildwars2:
 		
 	def __unload(self):
 		self.session.close()
-		self.client.close()
 
 	@commands.group(pass_context=True)
 	async def key(self, ctx):
@@ -2308,8 +2307,9 @@ def setup(bot):
 	check_files()
 	n = Guildwars2(bot)
 	loop = asyncio.get_event_loop()
+	buildloop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
-	loop.create_task(n._gamebuild_checker())
+	buildloop.create_task(n._gamebuild_checker())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
