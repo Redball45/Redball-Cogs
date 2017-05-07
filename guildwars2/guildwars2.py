@@ -2145,6 +2145,7 @@ class Guildwars2:
 				return
 			message = await self.display_all_dailies(results, True)
 			print(message)
+			print(channels)
 			if channels:
 				for channel in channels:
 					try:
