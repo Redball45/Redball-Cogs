@@ -2062,9 +2062,6 @@ class Guildwars2:
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("Guildwars2"):
-			owner = 77910702664200192
-			Red = await self.bot.get_user_info(owner)
-			await self.bot.send_message(Red, "Hey, I'm checking the gamebuild now")
 			try:
 				if await self.update_build():
 					channels = self.get_channels()
@@ -2201,12 +2198,16 @@ class Guildwars2:
 
 	async def update_build(self):
 		endpoint = "build"
+		currentbuild = self.build["id"]
+		owner = 77910702664200192
+		Red = await self.bot.get_user_info(owner)
+		await self.bot.send_message(Red, "Hey, I'm checking the gamebuild now {0}".format(currentbuild))
 		try:
 			results = await self.call_api(endpoint)
 		except APIError:
 			return False
 		build = results["id"]
-		if not self.build["id"] == build:
+		if not currentbuild == build:
 			self.build["id"] = build
 			dataIO.save_json('data/guildwars2/build.json', self.build)
 			return True
