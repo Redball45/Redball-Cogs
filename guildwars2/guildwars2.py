@@ -43,14 +43,10 @@ class Guildwars2:
 		self.bot = bot
 		self.client = AsyncIOMotorClient()
 		self.db = self.client['gw2']
-		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/guildwars2/gemtrack.json")
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
-		self.settings = dataIO.load_json("data/guildwars2/settings.json")
-		self.dailysettings = dataIO.load_json("data/guildwars2/dailysettings.json")
-		self.language = dataIO.load_json("data/guildwars2/language.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
 		self.current_day = dataIO.load_json("data/guildwars2/day.json")
 		
@@ -1372,25 +1368,6 @@ class Guildwars2:
 			await self.bot.say("I will not send "
 								"notifications about new builds")
 
-	@checks.is_owner()
-	@gamebuild.command()
-	async def globaltoggle(self, on_off: bool = None):
-		"""Toggles checking for new builds, globally.
-		Note that in order to receive notifications you to
-		set up notification channel and enable it per server using
-		[p]gamebuild toggle
-		Off by default.
-		"""
-		if on_off is not None:
-			self.settings["ENABLED"] = on_off
-		if self.settings["ENABLED"]:
-			await self.update_build()
-			await self.bot.say("Build checking is enabled. "
-							   "You still need to enable it per server.")
-		else:
-			await self.bot.say("Build checking is globally disabled")
-		dataIO.save_json('data/guildwars2/settings.json', self.settings)
-
 	@commands.group(pass_context=True)
 	async def tp(self, ctx):
 		"""Commands related to tradingpost
@@ -2369,7 +2346,7 @@ class Guildwars2:
 			ids = ",".join(str(x) for x in items[counter:(counter + 200)])
 			if not ids:
 				done = True
-				print("Done with items, moving to achievements")
+				await self.bot.say("Done with items, moving to achievements")
 				break
 			itemgroup = await self.call_api("items?ids={0}".format(ids))
 			counter += 200
@@ -2386,11 +2363,11 @@ class Guildwars2:
 		total = len(items)
 		while not done:
 			percentage = (counter / total) * 100
-			print("Progress: {0:.1f}%".format(percentage))
+			await self.bot.say("Progress: {0:.1f}%".format(percentage))
 			ids = ",".join(str(x) for x in items[counter:(counter + 200)])
 			if not ids:
 				done = True
-				print("Done with achievements, moving to itemstats")
+				await self.bot.say("Done with achievements, moving to itemstats")
 				break
 			itemgroup = await self.call_api("achievements?ids={0}".format(ids))
 			counter += 200
@@ -2407,7 +2384,7 @@ class Guildwars2:
 		for item in itemgroup:
 			item["_id"] = item["id"]
 		await self.db.itemstats.insert_many(itemgroup)
-		print("Itemstats complete. Moving to titles")
+		await self.bot.say("Itemstats complete. Moving to titles")
 		counter = 0
 		done = False
 		await self.db.titles.create_index("name")
@@ -2415,7 +2392,7 @@ class Guildwars2:
 		for item in itemgroup:
 			item["_id"] = item["id"]
 		await self.db.titles.insert_many(itemgroup)
-		print("Titles done!")
+		await self.bot.say("Titles done!")
 		try:
 			items = await self.call_api("recipes")
 		except Exception as e:
@@ -2426,11 +2403,11 @@ class Guildwars2:
 		total = len(items)
 		while not done:
 			percentage = (counter / total) * 100
-			print("Progress: {0:.1f}%".format(percentage))
+			await self.bot.say("Progress: {0:.1f}%".format(percentage))
 			ids = ",".join(str(x) for x in items[counter:(counter + 200)])
 			if not ids:
 				done = True
-				print("Done with recioes")
+				await self.bot.say("Done with recioes")
 				break
 			itemgroup = await self.call_api("recipes?ids={0}".format(ids))
 			counter += 200
@@ -2447,11 +2424,11 @@ class Guildwars2:
 		total = len(items)
 		while not done:
 			percentage = (counter / total) * 100
-			print("Progress: {0:.1f}%".format(percentage))
+			await self.bot.say("Progress: {0:.1f}%".format(percentage))
 			ids = ",".join(str(x) for x in items[counter:(counter + 200)])
 			if not ids:
 				done = True
-				print("Done with skins")
+				await self.bot.say("Done with skins")
 				break
 			itemgroup = await self.call_api("skins?ids={0}".format(ids))
 			counter += 200
@@ -2592,7 +2569,7 @@ class Guildwars2:
 					else:
 						print(
 							"A new build was found, but no channels to notify were found. Maybe error?")
-					await self.rebuild_database(    )
+					#await self.rebuild_database(    )
 				await asyncio.sleep(300)
 			except Exception as e:
 				print(
