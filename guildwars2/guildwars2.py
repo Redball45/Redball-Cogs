@@ -1950,8 +1950,6 @@ class Guildwars2:
 			return
 		
 		time_now = int(time.time())
-		buy_avg = 0
-		sell_avg = 0
 		
 		# Select 96 entries, each (usually) spaced 15 minutes apart.
 		last_week = history[:96]
@@ -1961,18 +1959,35 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, there was no historical data found.".format(user))
 			return
 		
+		buy_avg = 0
+		sell_avg = 0
+		buy_min = last_week[0]["buy"]
+		sell_min = last_week[0]["sell"]
+		buy_max = 0
+		sell_max = 0
+		
 		# Get average from 96 most recent entries
 		for record in last_week:
-			buy_avg += int(record["buy"])
-			sell_avg += int(record["sell"])
+			buy = int(record["buy"])
+			sell = int(record["sell"])
+			buy_avg += buy
+			sell_avg += sell
+			buy_min = min(buy_min, buy)
+			sell_min = min(sell_min, sell)
+			buy_max = max(buy_max, buy)
+			sell_max = max(sell_max, sell)
 		
 		buy_avg /= len(last_week)
 		sell_avg /= len(last_week)
 		
 		# Display data
-		data = discord.Embed(title="Trend data for id " + item_id, colour=color)
-		data.add_field(name="Buy average",value=self.gold_to_coins(buy_avg))
-		data.add_field(name="Sell average",value=self.gold_to_coins(sell_avg))
+		data = discord.Embed(title="Daily average of id " + item_id, colour=color)
+		data.add_field(name="Average Buy",value=self.gold_to_coins(buy_avg))
+		data.add_field(name="Minimum Buy",value=self.gold_to_coins(buy_min))
+		data.add_field(name="Maximum Buy",value=self.gold_to_coins(buy_max))
+		data.add_field(name="Average Sell",value=self.gold_to_coins(sell_avg))
+		data.add_field(name="Minimum Sell",value=self.gold_to_coins(sell_min))
+		data.add_field(name="Maximum Sell",value=self.gold_to_coins(sell_max))
 		
 		try:
 			await self.bot.say(embed=data)
@@ -2223,7 +2238,6 @@ class Guildwars2:
 				print("Exception while sending daily notifs {0}".format(e))
 				return
 			message = await self.display_all_dailies(results, True)
-			print(message)
 			if channels:
 				for channel in channels:
 					try:
@@ -2486,7 +2500,6 @@ class Guildwars2:
 				if not server == "DAILYENABLED": #Ugly I know
 					if self.dailysettings[server]["DAILYON"]:
 						channels.append(self.dailysettings[server]["DAILYCHANNEL"])
-						print(channels)
 			return channels
 		except:
 			return None
