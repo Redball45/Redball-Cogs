@@ -499,6 +499,7 @@ class Guildwars2:
 					count = item["value"]
 			data.add_field(name="Count", value=count, inline=False)
 		except:
+			data.add_field(name="Add your API key (!key) if you want me to tell you how many you have!")
 			pass
 		data.set_thumbnail(url=icon)
 		data.add_field(name="Description", value=desc, inline=False)
