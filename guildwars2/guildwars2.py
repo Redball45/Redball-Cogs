@@ -2562,7 +2562,7 @@ class Guildwars2:
 						for channel in channels:
 							try:
 								await self.bot.send_message(self.bot.get_channel(channel),
-															"@here Guild Wars 2 has just updated! New build: "
+															"Guild Wars 2 has just updated! New build: "
 															"`{0}`".format(self.build["id"]))
 							except:
 								pass
