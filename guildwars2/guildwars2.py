@@ -30,6 +30,9 @@ DEFAULT_HEADERS = {'User-Agent': "A GW2 Discord bot",
 class APIError(Exception):
 	pass
 
+class APIConnectionError(APIError):
+	pass
+
 class ShinyAPIError(Exception):
 	pass
 
