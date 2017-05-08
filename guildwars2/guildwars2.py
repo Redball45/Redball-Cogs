@@ -1499,20 +1499,14 @@ class Guildwars2:
 			await asyncio.sleep(300)
 
 	@tp.command(pass_context=True)
-	async def data(self, ctx, *, tpitemname: str):
+	async def data(self, ctx, *, item: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
-		tpitemname = tpitemname.replace(" ", "%20")
-		color = self.getColor(user)
-		try:
-			shiniesendpoint = 'idbyname/' + tpitemname
-			shiniesresults = await self.call_shiniesapi(shiniesendpoint)
-		except ShinyAPIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-							   "`{1}`".format(user, e))
-			return
-		number = len(shiniesresults)
+		item_sanitzed = re.escape(item)
+		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.items.find({"name": search})
+		number = await cursor.count
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
 			return
@@ -1521,18 +1515,17 @@ class Guildwars2:
 			return
 		items = []
 		msg = "Which one of these interests you? Type its number```"
-		for name in shiniesresults:
-			items.append(name)
+		async for item in cursor:
+			items.append(item)
 		if number != 1:
 			for c, m in enumerate(items):
-				msg += "\n{}: {}".format(c, m["name"])
+				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
 			msg += "```"
 			message = await self.bot.say(msg)
 			answer = await self.bot.wait_for_message(timeout=120, author=user)
 			try:
 				num = int(answer.content)
 				choice = items[num]
-				choiceid = shiniesresults[num]["item_id"]
 			except: 
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
@@ -1542,12 +1535,10 @@ class Guildwars2:
 				pass
 		else:
 			message = await self.bot.say("Finding tradepost data...")
-			num = 0
-			choice = items[num]
-			choiceid = shiniesresults[num]["item_id"]
+			choice = items[0]
 		try:
 			commerce = 'commerce/prices/'
-			endpoint = commerce + choiceid
+			endpoint = commerce + choice["_id"]
 			results = await self.call_api(endpoint)
 		except APIKeyError as e:
 			await self.bot.say(e)
@@ -1558,7 +1549,7 @@ class Guildwars2:
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]	
-		itemname = shiniesresults[num]["name"]	
+		itemname = choice["name"]
 		if buyprice != 0:
 			buyprice = self.gold_to_coins(buyprice)
 		if sellprice != 0:
