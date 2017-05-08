@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from .utils import checks
+from discord.ext.commands.cooldowns import BucketType
 from cogs.utils.dataIO import dataIO, fileIO
 from __main__ import send_cmd_help
 
@@ -14,6 +15,7 @@ import random
 import time
 import urllib
 import re
+from motor.motor_asyncio import AsyncIOMotorClient
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -39,6 +41,8 @@ class Guildwars2:
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.client = AsyncIOMotorClient
+		self.db = self.client['gw2']
 		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
 		self.gemtrack = dataIO.load_json("data/guildwars2/gemtrack.json")
@@ -52,6 +56,7 @@ class Guildwars2:
 		
 	def __unload(self):
 		self.session.close()
+		self.client.close()
 
 	@commands.group(pass_context=True)
 	async def key(self, ctx):
@@ -2267,6 +2272,164 @@ class Guildwars2:
 				print("Daily notifier exception: {0}\nExecution will continue".format(e))
 				await asyncio.sleep(300)
 				continue
+
+    @commands.group(pass_context=True)
+    @checks.is_owner()
+    async def database(self, ctx):
+        """Commands related to DB management"""
+        if ctx.invoked_subcommand is None:
+            await self.bot.send_cmd_help(ctx)
+		return
+    @database.command(pass_context=True, name="create")
+    async def db_create(self, ctx):
+        """Create a new database
+        """
+		await self.rebuild_database()
+
+    @database.command(pass_context=True, name="statistics")
+    async def db_stats(self, ctx):
+        """Some statistics
+        """
+        cursor = self.db.keys.find()
+        result = await cursor.count()
+        await self.bot.say("{} registered users".format(result))
+        cursor_servers = self.db.settings.find()
+        result_servers = await cursor_servers.count()
+		await self.bot.say("{} servers for update notifs".format(result_servers))
+
+    async def rebuild_database(self):
+        # Needs a lot of cleanup, but works anyway.
+        start = time.time()
+        await self.db.items.drop()
+        await self.db.itemstats.drop()
+        await self.db.achievements.drop()
+        await self.db.titles.drop()
+        await self.db.recipes.drop()
+        await self.db.skins.drop()
+        await self.db.currencies.drop()
+        await self.db.skills.drop()
+        self.bot.building_database = True
+        try:
+            items = await self.call_api("items")
+        except Exception as e:
+            print(e)
+        await self.db.items.create_index("name")
+        counter = 0
+        done = False
+        total = len(items)
+        while not done:
+            percentage = (counter / total) * 100
+            print("Progress: {0:.1f}%".format(percentage))
+            ids = ",".join(str(x) for x in items[counter:(counter + 200)])
+            if not ids:
+                done = True
+                print("Done with items, moving to achievements")
+                break
+            itemgroup = await self.call_api("items?ids={0}".format(ids))
+            counter += 200
+            for item in itemgroup:
+                item["_id"] = item["id"]
+            await self.db.items.insert_many(itemgroup)
+        try:
+            items = await self.call_api("achievements")
+        except Exception as e:
+            print(e)
+        await self.db.achievements.create_index("name")
+        counter = 0
+        done = False
+        total = len(items)
+        while not done:
+            percentage = (counter / total) * 100
+            print("Progress: {0:.1f}%".format(percentage))
+            ids = ",".join(str(x) for x in items[counter:(counter + 200)])
+            if not ids:
+                done = True
+                print("Done with achievements, moving to itemstats")
+                break
+            itemgroup = await self.call_api("achievements?ids={0}".format(ids))
+            counter += 200
+            for item in itemgroup:
+                item["_id"] = item["id"]
+            await self.db.achievements.insert_many(itemgroup)
+        try:
+            items = await self.call_api("itemstats")
+        except Exception as e:
+            print(e)
+        counter = 0
+        done = False
+        itemgroup = await self.call_api("itemstats?ids=all")
+        for item in itemgroup:
+            item["_id"] = item["id"]
+        await self.db.itemstats.insert_many(itemgroup)
+        print("Itemstats complete. Moving to titles")
+        counter = 0
+        done = False
+        await self.db.titles.create_index("name")
+        itemgroup = await self.call_api("titles?ids=all")
+        for item in itemgroup:
+            item["_id"] = item["id"]
+        await self.db.titles.insert_many(itemgroup)
+        print("Titles done!")
+        try:
+            items = await self.call_api("recipes")
+        except Exception as e:
+            print(e)
+        await self.db.recipes.create_index("output_item_id")
+        counter = 0
+        done = False
+        total = len(items)
+        while not done:
+            percentage = (counter / total) * 100
+            print("Progress: {0:.1f}%".format(percentage))
+            ids = ",".join(str(x) for x in items[counter:(counter + 200)])
+            if not ids:
+                done = True
+                print("Done with recioes")
+                break
+            itemgroup = await self.call_api("recipes?ids={0}".format(ids))
+            counter += 200
+            for item in itemgroup:
+                item["_id"] = item["id"]
+            await self.db.recipes.insert_many(itemgroup)
+        try:
+            items = await self.call_api("skins")
+        except Exception as e:
+            print(e)
+        await self.db.skins.create_index("name")
+        counter = 0
+        done = False
+        total = len(items)
+        while not done:
+            percentage = (counter / total) * 100
+            print("Progress: {0:.1f}%".format(percentage))
+            ids = ",".join(str(x) for x in items[counter:(counter + 200)])
+            if not ids:
+                done = True
+                print("Done with skins")
+                break
+            itemgroup = await self.call_api("skins?ids={0}".format(ids))
+            counter += 200
+            for item in itemgroup:
+                item["_id"] = item["id"]
+            await self.db.skins.insert_many(itemgroup)
+        counter = 0
+        done = False
+        await self.db.currencies.create_index("name")
+        itemgroup = await self.call_api("currencies?ids=all")
+        for item in itemgroup:
+            item["_id"] = item["id"]
+        await self.db.currencies.insert_many(itemgroup)
+        end = time.time()
+        counter = 0
+        done = False
+        await self.db.skills.create_index("name")
+        itemgroup = await self.call_api("skills?ids=all")
+        for item in itemgroup:
+            item["_id"] = item["id"]
+        await self.db.skills.insert_many(itemgroup)
+        end = time.time()
+        self.bot.building_database = False
+		await self.bot.say("Database done! Time elapsed: {0} seconds".format(end - start))
 
 #	async def fetch_server(self, server):
 #		return await self.db.settings.find_one({"_id": server.id})
