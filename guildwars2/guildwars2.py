@@ -1540,11 +1540,7 @@ class Guildwars2:
 			buyprice = 'No buy orders'
 		if sellprice == 0:
 			sellprice = 'No sell orders'				
-<<<<<<< HEAD
 		data = discord.Embed(title=itemname, colour=color)
-=======
-		data = discord.Embed(title=itemnameresult, description='Not the item you wanted? Try !tp list (name) instead', colour=color)
->>>>>>> c74aa97ed2b348b65bf139012a9e04559ffc375b
 		data.add_field(name="Buy price", value=buyprice)
 		data.add_field(name="Sell price", value=sellprice)
 		try:
