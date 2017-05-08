@@ -1506,7 +1506,7 @@ class Guildwars2:
 		item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
 		cursor = self.db.items.find({"name": search})
-		number = await cursor.count
+		number = await cursor.count()
 		if not number:
 			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
 			return
