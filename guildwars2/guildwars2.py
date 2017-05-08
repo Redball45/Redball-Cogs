@@ -1930,13 +1930,21 @@ class Guildwars2:
 		buy_avg = 0
 		sell_avg = 0
 		
+		# Select 96 entries, each (usually) spaced 15 minutes apart.
+		last_week = history[:96]
+		
+		# No data returned?
+		if not last_week:
+			await.self.boy.say("{0.mention}, there was no historical data found.".format(user))
+			return
+		
 		# Get average from 96 most recent entries
-		for record in history[:96]:
+		for record in last_week:
 			buy_avg += int(record["buy"])
 			sell_avg += int(record["sell"])
 		
-		buy_avg /= max(len(history), 1)
-		sell_avg /= max(len(history), 1)
+		buy_avg /= len(last_week)
+		sell_avg /= len(last_week)
 		
 		# Display data
 		data = discord.Embed(title="Trend data for id " + item_id, colour=color)
