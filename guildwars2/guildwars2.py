@@ -2697,6 +2697,17 @@ class Guildwars2:
 		headers.update(DEFAULT_HEADERS)
 		return headers
 
+
+	def handle_duplicates(self, upgrades):
+		formatted_list = []
+		for x in upgrades:
+			if upgrades.count(x) != 1:
+				formatted_list.append(x + " x" + str(upgrades.count(x)))
+				upgrades[:] = [i for i in upgrades if i != x]
+			else:
+				formatted_list.append(x)
+		return formatted_list
+
 	def gold_to_coins(self, money):
 		gold, remainder = divmod(money, 10000)
 		silver, copper = divmod(remainder, 100)
