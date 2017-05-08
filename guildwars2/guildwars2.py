@@ -1503,6 +1503,7 @@ class Guildwars2:
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
+		color = self.getColor(user)
 		item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
 		cursor = self.db.items.find({"name": search})
