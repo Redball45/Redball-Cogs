@@ -203,7 +203,7 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		accountname = self.keylist[user.id]["account_name"]
+		accountname = keydoc["account_name"]
 		created = results["created"].split("T", 1)[0]
 		hascommander = "Yes" if results["commander"] else "No"
 		color = self.getColor(user)
@@ -216,7 +216,7 @@ class Guildwars2:
 		if "wvw_rank" in results:
 			wvwrank = results["wvw_rank"]
 			data.add_field(name="WvW rank", value=wvwrank)
-		if "pvp" in self.keylist[user.id]["permissions"]:
+		if "pvp" in keydoc["permissions"]:
 			endpoint = "pvp/stats?access_token={0}".format(key)
 			try:
 				pvp = await self.call_api(endpoint)
@@ -242,7 +242,7 @@ class Guildwars2:
 		keydoc = await self.fetch_key(user)
 		msg = await self.bot.say("Getting legendary insights, this might take a while...")
 		try:
-			self._check_scopes_(user, scopes)
+			await self._check_scopes_(user, scopes)
 			key = keydoc["key"]
 			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank"
@@ -1398,21 +1398,24 @@ class Guildwars2:
 		if ctx.invoked_subcommand is None:
 			await send_cmd_help(ctx)
 
-	@tp.command(pass_context=True)
-	async def current(self, ctx, buys_sells):
+	@commands.cooldown(1, 10, BucketType.user)
+	@tp.command(pass_context=True, name="current")
+	async def tp_current(self, ctx, buys_sells):
 		"""Show current selling/buying transactions
 		invoke with sells or buys"""
 		user = ctx.message.author
 		color = self.getColor(user)
 		state = buys_sells.lower()
 		scopes = ["tradingpost"]
+		endpoint = "commerce/transactions/current/{0}".format(state)
+		keydoc = await self.fetch_key(user)
 		if state == "buys" or state == "sells":
 			try:
-				self._check_scopes_(user, scopes)
-				key = self.keylist[user.id]["key"]
-				accountname = self.keylist[user.id]["account_name"]
-				endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key, state)
-				results = await self.call_api(endpoint)
+				await self._check_scopes_(user, scopes)
+				key = keydoc["key"]
+				headers = self.construct_headers(key)
+				accountname = keydoc["account_name"]
+				results = await self.call_api(endpoint, headers)
 			except APIKeyError as e:
 				await self.bot.say(e)
 				return
@@ -1423,18 +1426,19 @@ class Guildwars2:
 		else:
 			await self.bot.say("{0.mention}, Please us either 'sells' or 'buys' as parameter".format(user))
 			return
-
 		data = discord.Embed(description='Current ' + state, colour=color)
 		data.set_author(name='Transaction overview of {0}'.format(accountname))
 		data.set_thumbnail(
 			url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
 		data.set_footer(text="Black Lion Trading Company")
-
-		results = results[:20] # Only display 20 most recent transactions
+		results = results[:20]  # Only display 20 most recent transactions
 		item_id = ""
 		dup_item = {}
+		itemlist = []
 		# Collect listed items
 		for result in results:
+			itemdoc = await self.fetch_item(result["item_id"])
+			itemlist.append(itemdoc)
 			item_id += str(result["item_id"]) + ","
 			if result["item_id"] not in dup_item:
 				dup_item[result["item_id"]] = len(dup_item)
@@ -1443,7 +1447,6 @@ class Guildwars2:
 		endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
 		# Call API once for all items
 		try:
-			itemlist = await self.call_api(endpoint_items)
 			listings = await self.call_api(endpoint_listing)
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -1458,12 +1461,11 @@ class Guildwars2:
 			offers = listings[index][state]
 			max_price = offers[0]["unit_price"]
 			data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
-				+ " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
+						   + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
-
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/guildwars2/gemtrack.json", self.gemtrack)
@@ -1674,11 +1676,13 @@ class Guildwars2:
 		scopes = ["characters", "progression"]
 		color = self.getColor(user)
 		charactername = charactername.replace(" ", "%20")
+		endpoint = "characters/" + charactername + "/sab"
+		keydoc = await self.fetch_key(user)
 		try:
-			self._check_scopes_(user, scopes)
-			key = self.keylist[user.id]["key"]
-			endpoint = "characters/" +  charactername + "/sab/?access_token={0}".format(key)
-			results = await self.call_api(endpoint)
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -1704,11 +1708,13 @@ class Guildwars2:
 		user = ctx.message.author
 		scopes = ["progression"]
 		color = self.getColor(user)
+		endpoint = "account/home/cats"
+		keydoc = await self.fetch_key(user)
 		try:
-			self._check_scopes_(user, scopes)
-			key = self.keylist[user.id]["key"]
-			endpoint = "account/home/cats/?access_token={0}".format(key)
-			results = await self.call_api(endpoint)
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -2817,12 +2823,9 @@ def check_files():
 		"gamedata.json": {},
 		"settings.json": {"ENABLED": False},
 		"dailysettings.json": {"DAILYENABLED": False},
-		"language.json": {},
 		"build.json": {"id": None},  # Yay legacy support
-		"keys.json": {},
 		"containers.json": {},
-		"day.json": {"day": datetime.datetime.utcnow().weekday()},
-		"keys.json": {}
+		"day.json": {"day": datetime.datetime.utcnow().weekday()}
 	}
 
 	for filename, value in files.items():
