@@ -1538,7 +1538,8 @@ class Guildwars2:
 			choice = items[0]
 		try:
 			commerce = 'commerce/prices/'
-			endpoint = commerce + choice["_id"]
+			choiceid = str(choice["_id"])
+			endpoint = commerce + choiceid
 			results = await self.call_api(endpoint)
 		except APIKeyError as e:
 			await self.bot.say(e)
