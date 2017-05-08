@@ -456,6 +456,7 @@ class Guildwars2:
 		async for x in cursor:
 			results.append(x)
 		currlist = [currency["name"] for currency in results]
+		output = "Available currencies are: ```"
 		output += ", ".join(currlist) + "```"
 		await self.bot.say(output)
 
