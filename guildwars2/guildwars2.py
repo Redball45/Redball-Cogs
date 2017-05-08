@@ -1515,7 +1515,7 @@ class Guildwars2:
 				pass
 		else:
 			message = await self.bot.say("Finding tradepost data...")
-			num = [0]
+			num = 0
 			choice = items[num]
 			choiceid = shiniesresults[num]["item_id"]
 		try:
