@@ -2223,7 +2223,6 @@ class Guildwars2:
 				print("Exception while sending daily notifs {0}".format(e))
 				return
 			message = await self.display_all_dailies(results, True)
-			print(message)
 			if channels:
 				for channel in channels:
 					try:
@@ -2486,7 +2485,6 @@ class Guildwars2:
 				if not server == "DAILYENABLED": #Ugly I know
 					if self.dailysettings[server]["DAILYON"]:
 						channels.append(self.dailysettings[server]["DAILYCHANNEL"])
-						print(channels)
 			return channels
 		except:
 			return None
