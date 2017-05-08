@@ -1550,8 +1550,8 @@ class Guildwars2:
 			await self.bot.say(e)
 			return
 		except APINotFound as e:
-			await self.bot.say("{0.mention}, This item isn't on the TP "
-							   "`{1}`".format(user, e))
+			await self.bot.say("{0.mention}, This item isn't on the TP."
+							   "{1}".format(user, e))
 			return
 		buyprice = results["buys"]["unit_price"]
 		sellprice = results ["sells"]["unit_price"]	
