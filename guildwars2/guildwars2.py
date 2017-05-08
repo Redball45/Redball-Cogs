@@ -244,6 +244,7 @@ class Guildwars2:
 		try:
 			self._check_scopes_(user, scopes)
 			key = keydoc["key"]
+			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank"
 			endpoint_shared = "account/inventory"
 			endpoint_char = "characters?page=0"
