@@ -1043,6 +1043,84 @@ class Guildwars2:
 				output += "```"
 				await self.bot.say(output.format(user))
 
+	@commands.command(pass_context=True)
+	async def sab(self, ctx, *, charactername : str):
+		"""This displays unlocked SAB items for the character specified
+		Requires an API key with characters and progression"""
+		user = ctx.message.author
+		scopes = ["characters", "progression"]
+		color = self.getColor(user)
+		charactername = charactername.replace(" ", "%20")
+		endpoint = "characters/" + charactername + "/sab"
+		keydoc = await self.fetch_key(user)
+		try:
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+
+		data = discord.Embed(title='SAB Character Info', colour =color)
+		for elem in results["unlocks"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
+		for elem in results["songs"]:
+			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Need permission to embed links")
+
+	@commands.command(pass_context=True)
+	async def cats(self, ctx):
+		"""This displays unlocked home instance cats for your account
+		Requires an API key with characters and progression"""
+		user = ctx.message.author
+		scopes = ["progression"]
+		color = self.getColor(user)
+		endpoint = "account/home/cats"
+		keydoc = await self.fetch_key(user)
+		try:
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+		else:
+			listofcats = []
+			for cat in results:
+				id = cat["id"]
+				hint = cat["hint"]
+				listofcats.append(hint)			
+			catslist = list(
+				set(list(self.gamedata["cats"])) ^ set(listofcats))
+			if not catslist:
+				await self.bot.say("Congratulations {0.mention}, "
+									"you've collected all the cats. Here's a gold star: "
+									":star:".format(user))
+			else:
+				formattedlist = []
+				output = "{0.mention}, you haven't collected the following cats yet: ```"
+				catslist.sort(
+					key=lambda val: self.gamedata["cats"][val]["order"])
+				for cat in catslist:
+					formattedlist.append(self.gamedata["cats"][cat]["name"])
+				for x in formattedlist:
+					output += "\n" + x
+				output += "```"
+				await self.bot.say(output.format(user))
+
 	@commands.group(pass_context=True)
 	async def wvw(self, ctx):
 		"""Commands related to wvw"""
@@ -1452,62 +1530,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
 
-	def save_gemtrack(self):
-		dataIO.save_json("data/guildwars2/gemtrack.json", self.gemtrack)
-	
-	async def getGemPrice(self, numberOfGems : int = 400):
-		try:
-			endpoint = "commerce/exchange/coins?quantity=10000000"
-			gemsresult = await self.call_api(endpoint)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return 0
-		
-		gemCost = gemsresult['coins_per_gem']*numberOfGems
-		return gemCost
-  
-	@commands.group(pass_context=True)
-	async def gem(self, ctx):
-		"""Gem - Gold transfer related commands"""
-		if ctx.invoked_subcommand is None:
-			await send_cmd_help(ctx)
-	  
-	@gem.command(pass_context=True)
-	async def track(self, ctx, gold : int):
-		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
-		user = ctx.message.author
-		color = self.getColor(user)
-		price = gold * 10000
-		
-		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
-		self.save_gemtrack()
-		
-		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
-
-	# tracks gemprices and notifies people
-	async def _gemprice_tracker(self):
-		while self is self.bot.get_cog("Guildwars2"):
-			gemCost = await self.getGemPrice()			
-			doCleanup = False
-			
-			if gemCost != 0:
-				for user_id, data in self.gemtrack.items():
-					if gemCost < data["price"]:
-						user = await self.bot.get_user_info(user_id)
-						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
-						self.gemtrack[user_id]["price"] = 0
-						doCleanup = True;
-			
-				if doCleanup:
-					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
-					for x in keys:
-						del self.gemtrack[x]
-					self.save_gemtrack()
-			
-			await asyncio.sleep(300)
-
-	@tp.command(pass_context=True)
-	async def data(self, ctx, *, item: str):
+	@tp.command(pass_context=True, name="price")
+	async def tp_price(self, ctx, *, item: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
@@ -1577,8 +1601,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC2")
 
-	@tp.command(pass_context=True)
-	async def id(self, ctx, *, tpdataid: str):
+	@tp.command(pass_context=True, name="id")
+	async def tp_id(self, ctx, *, tpdataid: str):
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
@@ -1617,8 +1641,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Iss")
 
-	@tp.command(pass_context=True)
-	async def list(self, ctx, *, tpitemname: str):
+	@tp.command(pass_context=True, name="list")
+	async def tp_list(self, ctx, *, tpitemname: str):
 		"""This lists the ids and names of all matching items to the entered name"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -1646,84 +1670,6 @@ class Guildwars2:
 				await self.bot.say("More than 10 entries, try to refine your search")
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
-	
-	@commands.command(pass_context=True)
-	async def sab(self, ctx, *, charactername : str):
-		"""This displays unlocked SAB items for the character specified
-		Requires an API key with characters and progression"""
-		user = ctx.message.author
-		scopes = ["characters", "progression"]
-		color = self.getColor(user)
-		charactername = charactername.replace(" ", "%20")
-		endpoint = "characters/" + charactername + "/sab"
-		keydoc = await self.fetch_key(user)
-		try:
-			await self._check_scopes_(user, scopes)
-			key = keydoc["key"]
-			headers = self.construct_headers(key)
-			results = await self.call_api(endpoint, headers)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return
-		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-								"`{1}`".format(user, e))
-			return
-
-		data = discord.Embed(title='SAB Character Info', colour =color)
-		for elem in results["unlocks"]:
-			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
-		for elem in results["songs"]:
-			data.add_field(name=elem["name"].replace('_', ' ').title(), value="Unlocked")
-		try:
-			await self.bot.say(embed=data)
-		except discord.HTTPException:
-			await self.bot.say("Need permission to embed links")
-
-	@commands.command(pass_context=True)
-	async def cats(self, ctx):
-		"""This displays unlocked home instance cats for your account
-		Requires an API key with characters and progression"""
-		user = ctx.message.author
-		scopes = ["progression"]
-		color = self.getColor(user)
-		endpoint = "account/home/cats"
-		keydoc = await self.fetch_key(user)
-		try:
-			await self._check_scopes_(user, scopes)
-			key = keydoc["key"]
-			headers = self.construct_headers(key)
-			results = await self.call_api(endpoint, headers)
-		except APIKeyError as e:
-			await self.bot.say(e)
-			return
-		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-								"`{1}`".format(user, e))
-			return
-		else:
-			listofcats = []
-			for cat in results:
-				id = cat["id"]
-				hint = cat["hint"]
-				listofcats.append(hint)			
-			catslist = list(
-				set(list(self.gamedata["cats"])) ^ set(listofcats))
-			if not catslist:
-				await self.bot.say("Congratulations {0.mention}, "
-									"you've collected all the cats. Here's a gold star: "
-									":star:".format(user))
-			else:
-				formattedlist = []
-				output = "{0.mention}, you haven't collected the following cats yet: ```"
-				catslist.sort(
-					key=lambda val: self.gamedata["cats"][val]["order"])
-				for cat in catslist:
-					formattedlist.append(self.gamedata["cats"][cat]["name"])
-				for x in formattedlist:
-					output += "\n" + x
-				output += "```"
-				await self.bot.say(output.format(user))
 
 	@commands.group(pass_context=True)
 	async def container(self, ctx):
@@ -1947,8 +1893,26 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC5")		
 
-	@gem.command(pass_context=True)
-	async def price(self, ctx, numberOfGems : int = 400):
+	@commands.group(pass_context=True)
+	async def gem(self, ctx):
+		"""Gem - Gold transfer related commands"""
+		if ctx.invoked_subcommand is None:
+			await send_cmd_help(ctx)
+	  
+	@gem.command(pass_context=True, name="track")
+	async def gem_track(self, ctx, gold : int):
+		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
+		user = ctx.message.author
+		color = self.getColor(user)
+		price = gold * 10000
+		
+		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
+		self.save_gemtrack()
+		
+		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
+
+	@gem.command(pass_context=True, name="price")
+	async def gem_price(self, ctx, numberOfGems : int = 400):
 		"""This lists current gold/gem prices"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -1968,8 +1932,8 @@ class Guildwars2:
 		except discord.HTTPException:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
-	@commands.command(pass_context=True)
-	async def trend(self, ctx, item_id: str):
+	@commands.command(pass_context=True, gem="trend")
+	async def gem_trend(self, ctx, item_id: str):
 		"""Returns price trends for a specified tradeable item"""
 		user = ctx.message.author
 		color = self.getColor(user)
@@ -2260,6 +2224,42 @@ class Guildwars2:
 			return True
 		else:
 			return False
+
+	# tracks gemprices and notifies people
+	async def _gemprice_tracker(self):
+		while self is self.bot.get_cog("Guildwars2"):
+			gemCost = await self.getGemPrice()			
+			doCleanup = False
+			
+			if gemCost != 0:
+				for user_id, data in self.gemtrack.items():
+					if gemCost < data["price"]:
+						user = await self.bot.get_user_info(user_id)
+						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
+						self.gemtrack[user_id]["price"] = 0
+						doCleanup = True;
+			
+				if doCleanup:
+					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
+					for x in keys:
+						del self.gemtrack[x]
+					self.save_gemtrack()
+			
+			await asyncio.sleep(300)
+
+	def save_gemtrack(self):
+		dataIO.save_json("data/guildwars2/gemtrack.json", self.gemtrack)
+	
+	async def getGemPrice(self, numberOfGems : int = 400):
+		try:
+			endpoint = "commerce/exchange/coins?quantity=10000000"
+			gemsresult = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return 0
+		
+		gemCost = gemsresult['coins_per_gem']*numberOfGems
+		return gemCost
 
 	async def send_daily_notifs(self):
 		try:
