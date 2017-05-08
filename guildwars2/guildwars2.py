@@ -1546,7 +1546,7 @@ class Guildwars2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
-		except APIError as e:
+		except APINotFound as e:
 			await self.bot.say("{0.mention}, This item isn't on the TP "
 							   "`{1}`".format(user, e))
 			return
