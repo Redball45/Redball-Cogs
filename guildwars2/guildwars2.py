@@ -33,7 +33,10 @@ class APIError(Exception):
 class ShinyAPIError(Exception):
 	pass
 
-class APIKeyError(Exception):
+class APIKeyError(APIError):
+	pass
+
+class APINotFound(APIError)
 	pass
 
 class Guildwars2:
