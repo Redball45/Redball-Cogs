@@ -1531,6 +1531,7 @@ class Guildwars2:
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
 			try:
+				await self.bot.delete_message(message)
 				await self.bot.delete_message(answer)
 			except:
 				pass
