@@ -1923,7 +1923,7 @@ class Guildwars2:
 			history = await self.call_shiniesapi(shinies_endpoint)
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
-					   "`{1}`".format(user, e))
+							   "`{1}`".format(user, e))
 			return
 		
 		time_now = int(time.time())
@@ -1932,11 +1932,11 @@ class Guildwars2:
 		
 		# Get average from 96 most recent entries
 		for record in history[:96]:
-			buy_avg += record["buy"]
-			sell_avg += record["sell"]
+			buy_avg += int(record["buy"])
+			sell_avg += int(record["sell"])
 		
-		buy_avg /= max(len(history)-1, 1)
-		sell_avg /= max(len(history)-1, 1)
+		buy_avg /= max(len(history), 1)
+		sell_avg /= max(len(history), 1)
 		
 		# Display data
 		data = discord.Embed(title="Trend data for id " + item_id, colour=color)
