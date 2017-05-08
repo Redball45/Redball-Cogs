@@ -1961,8 +1961,8 @@ class Guildwars2:
 		
 		buy_avg = 0
 		sell_avg = 0
-		buy_min = last_week[0]["buy"]
-		sell_min = last_week[0]["sell"]
+		buy_min = float("inf")
+		sell_min = float("inf")
 		buy_max = 0
 		sell_max = 0
 		
