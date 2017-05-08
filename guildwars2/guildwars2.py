@@ -366,8 +366,9 @@ class Guildwars2:
 		output += "```"
 		await self.bot.say(output.format(user))
 
-	@character.command(pass_context=True)
-	async def gear(self, ctx, *, character: str):
+	@commands.cooldown(1, 10, BucketType.user)
+	@character.command(pass_context=True, name="gear")
+	async def character_gear(self, ctx, *, character: str):
 		"""Displays the gear of given character
 		You must be the owner of given character.
 		Requires a key with characters scope
@@ -386,28 +387,39 @@ class Guildwars2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
-		except APIError as e:
-			await self.bot.say("{0.mention}, invalid character name".format(user))
+		except APINotFound:
+			await self.bot.say("Invalid character name".format(user))
 			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
 		eq = results["equipment"]
 		gear = {}
 		pieces = ["Helm", "Shoulders", "Coat", "Gloves", "Leggings", "Boots", "Ring1", "Ring2", "Amulet",
 				  "Accessory1", "Accessory2", "Backpack", "WeaponA1", "WeaponA2", "WeaponB1", "WeaponB2"]
 		for piece in pieces:
-			gear[piece] = {"id": None, "upgrades": None, "infusions": None,
-						   "statname": None}
+			gear[piece] = {"id": None, "upgrades": [], "infusions": [],
+						   "stat": None, "name": None}
 		for item in eq:
 			for piece in pieces:
 				if item["slot"] == piece:
 					gear[piece]["id"] = item["id"]
+					c = await self.fetch_item(item["id"])
+					gear[piece]["name"] = c["name"]
 					if "upgrades" in item:
-						gear[piece]["upgrades"] = item["upgrades"]
+						for u in item["upgrades"]:
+							upgrade = await self.db.items.find_one({"_id": u})
+							gear[piece]["upgrades"].append(upgrade["name"])
 					if "infusions" in item:
-						gear[piece]["infusions"] = item["infusions"]
+						for u in item["infusions"]:
+							infusion = await self.db.items.find_one({"_id": u})
+							gear[piece]["infusions"].append(infusion["name"])
 					if "stats" in item:
-						gear[piece]["statname"] = item["stats"]["id"]
+						gear[piece]["stat"] = await self.fetch_statname(item["stats"]["id"])
 					else:
-						gear[piece]["statname"] = await self._getstats_(gear[piece]["id"])
+						thing = await self.db.items.find_one({"_id": item["id"]})
+						statid = thing["details"]["infix_upgrade"]["id"]
+						gear[piece]["stat"] = await self.fetch_statname(statid)
 		profession = results["profession"]
 		level = results["level"]
 		color = self.gamedata["professions"][profession.lower()]["color"]
@@ -416,30 +428,21 @@ class Guildwars2:
 		data = discord.Embed(description="Gear", colour=color)
 		for piece in pieces:
 			if gear[piece]["id"] is not None:
-				statname = await self._getstatname_(gear[piece]["statname"], ctx)
-				itemname = await self._get_item_name_(gear[piece]["id"], ctx)
-				if gear[piece]["upgrades"]:
-					upgrade = await self._get_item_name_(gear[piece]["upgrades"], ctx)
-				if gear[piece]["infusions"]:
-					infusion = await self._get_item_name_(gear[piece]["infusions"], ctx)
-				if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-					msg = "{0} {1} with {2}".format(
-						statname, itemname, upgrade)
-				elif gear[piece]["upgrades"] and gear[piece]["infusions"]:
-					msg = "{0} {1} with {2} and {3}".format(
-						statname, itemname, upgrade, infusion)
-				elif gear[piece]["infusions"] and not gear[piece]["upgrades"]:
-					msg = "{0} {1} with {2}".format(
-						statname, itemname, infusion)
-				elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-					msg = "{0} {1}".format(statname, itemname)
-				data.add_field(name=piece, value=msg, inline=False)
+				statname = gear[piece]["stat"]
+				itemname = gear[piece]["name"]
+				upgrade = self.handle_duplicates(gear[piece]["upgrades"])
+				infusion = self.handle_duplicates(gear[piece]["infusions"])
+				msg = "\n".join(upgrade + infusion)
+				if not msg:
+					msg = "---"
+				data.add_field(name="{0} {1} [{2}]".format(
+					statname, itemname, piece), value=msg, inline=False)
 		data.set_author(name=character)
 		data.set_footer(text="A level {0} {1} ".format(
 			level, profession.lower()), icon_url=icon)
 		try:
 			await self.bot.say(embed=data)
-		except discord.HTTPException:
+		except discord.HTTPException as e:
 			await self.bot.say("Need permission to embed links")
 
 	@commands.group(pass_context=True)
@@ -2637,45 +2640,13 @@ class Guildwars2:
 
 		return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-	async def _get_item_name_(self, items, ctx):
-		language = self.getlanguage(ctx)
-		name = []
-		if isinstance(items, int):
-			endpoint = "items/{0}?lang={1}".format(items, language)
-			try:
-				results = await self.call_api(endpoint)
-			except APIError:
-				return None
-			name.append(results["name"])
-		else:
-			for x in items:
-				endpoint = "items/{0}?lang={1}".format(x, language)
-				try:
-					results = await self.call_api(endpoint)
-				except APIError:
-					return None
-				name.append(results["name"])
-		name = ", ".join(name)
-		return name
 
-	async def _getstats_(self, item):
-		endpoint = "items/{0}".format(item)
-		try:
-			results = await self.call_api(endpoint)
-		except APIError:
-			return None
-		name = results["details"]["infix_upgrade"]["id"]
-		return name
+	async def fetch_statname(self, item):
+		statset = await self.db.itemstats.find_one({"_id": item})
+		return statset["name"]
 
-	async def _getstatname_(self, item, ctx):
-		language = self.getlanguage(ctx)
-		endpoint = "itemstats/{0}?lang={1}".format(item, language)
-		try:
-			results = await self.call_api(endpoint)
-		except APIError:
-			return None
-		name = results["name"]
-		return name
+	async def fetch_item(self, item):
+		return await self.db.items.find_one({"_id": item})
 
 	async def get_daily_channel(self, server):
 		try:
