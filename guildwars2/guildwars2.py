@@ -1935,7 +1935,7 @@ class Guildwars2:
 		
 		# No data returned?
 		if not last_week:
-			await.self.boy.say("{0.mention}, there was no historical data found.".format(user))
+			await self.bot.say("{0.mention}, there was no historical data found.".format(user))
 			return
 		
 		# Get average from 96 most recent entries
