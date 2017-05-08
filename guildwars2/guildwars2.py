@@ -2746,7 +2746,7 @@ class Guildwars2:
 			color = discord.Embed.Empty
 		return color
 
-	def _check_scopes_(self, user, scopes):
+	async def _check_scopes_(self, user, scopes):
 		keydoc = await self.fetch_key(user)
 		if not keydoc:
 			raise APIKeyError(
