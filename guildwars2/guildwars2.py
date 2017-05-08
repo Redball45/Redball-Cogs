@@ -41,7 +41,7 @@ class Guildwars2:
 
 	def __init__(self, bot):
 		self.bot = bot
-		self.client = AsyncIOMotorClient
+		self.client = AsyncIOMotorClient()
 		self.db = self.client['gw2']
 		self.keylist = dataIO.load_json("data/guildwars2/keys.json")
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
