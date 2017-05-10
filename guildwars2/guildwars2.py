@@ -2290,7 +2290,15 @@ class Guildwars2:
 
 	async def send_daily_notifs(self):
 		try:
-			channels = self.get_dailychannels()
+			channels = []
+			cursor = self.db.settings.find({"daily.on" : True}, modifiers={"$snapshot": True})
+			async for server in cursor:
+				try:
+					if "channel" in server["daily"]:
+						if server["daily"]["channel"] is not None:
+							channels.append(server["daily"]["channel"])
+				except:
+					pass
 			try:
 				endpoint = "achievements/daily"
 				results = await self.call_api(endpoint)
@@ -2298,15 +2306,14 @@ class Guildwars2:
 				print("Exception while sending daily notifs {0}".format(e))
 				return
 			message = await self.display_all_dailies(results, True)
-			if channels:
-				for channel in channels:
-					try:
-						await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
-					except:
-						pass
+			for channel in channels:
+				try:
+					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
+				except:
+					pass
 		except Exception as e:
 			print ("Erorr while sending daily notifs: {0}".format(e))
-		return
+			return
 
 	async def get_daily_channel(self, server):
 		try:
