@@ -2504,7 +2504,7 @@ class Guildwars2:
 		daily_format = []
 		daily_filtered = []
 		for x in data:
-			if x["level"]["max"] == 80:
+			if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
 				dailies.append(x["id"])
 		for daily in dailies:
 			d = await self.db.achievements.find_one({"_id": daily})
@@ -2545,7 +2545,7 @@ class Guildwars2:
 						dailies.append(frac["name"])
 			else:
 				for x in section:
-					if x["level"]["max"] == 80:
+					if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
 						d = await self.db.achievements.find_one({"_id": x["id"]})
 						dailies.append(d["name"])
 		return "\n".join(dailies)
