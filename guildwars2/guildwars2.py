@@ -2291,7 +2291,7 @@ class Guildwars2:
 			return None
 
 	async def daily_notifs(self):
-		while self is self.bot.get_cog("GuildWars2"):
+		while self is self.bot.get_cog("Guildwars2"):
 			try:
 				if self.check_day():
 					await self.send_daily_notifs()
@@ -2559,7 +2559,7 @@ class Guildwars2:
 		return shiniesresults
 
 	async def _gamebuild_checker(self):
-		while self is self.bot.get_cog("GuildWars2"):
+		while self is self.bot.get_cog("Guildwars2"):
 			try:
 				if await self.update_build():
 					channels = await self.get_channels()
