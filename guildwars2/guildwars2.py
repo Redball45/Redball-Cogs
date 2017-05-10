@@ -2526,8 +2526,8 @@ class Guildwars2:
 	async def display_all_dailies(self, dailylist, tomorrow=False):
 		dailies = ["Daily PSNA:", self.get_psna()]
 		if tomorrow:
-			dailies[0] = "PSNA at this time:"
-			dailies.append("PSNA in 8 hours:")
+			dailies[0] = "Pact Supply Agent WPs at this time:"
+			dailies.append("Pact Supply Agent WPs in 8 hours:")
 			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
