@@ -2504,7 +2504,7 @@ class Guildwars2:
 		daily_format = []
 		daily_filtered = []
 		for x in data:
-			if x["level"]["max"] == 80:
+			if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
 				dailies.append(x["id"])
 		for daily in dailies:
 			d = await self.db.achievements.find_one({"_id": daily})
