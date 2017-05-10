@@ -33,6 +33,9 @@ class APIError(Exception):
 class APIConnectionError(APIError):
 	pass
 
+class APIForbidden(APIError):
+	pass
+
 class ShinyAPIError(Exception):
 	pass
 
@@ -281,7 +284,7 @@ class Guildwars2:
 			await send_cmd_help(ctx)
 
 	@character.command(name="info", pass_context=True)
-	async def _info(self, ctx, *, character: str):
+	async def character_info(self, ctx, *, character: str):
 		"""Info about the given character
 		You must be the owner of given character.
 		Requires a key with characters scope
@@ -299,6 +302,9 @@ class Guildwars2:
 			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
+			return
+		except APINotFound:
+			await self.bot.say("Invalid character name")
 			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -418,8 +424,11 @@ class Guildwars2:
 						gear[piece]["stat"] = await self.fetch_statname(item["stats"]["id"])
 					else:
 						thing = await self.db.items.find_one({"_id": item["id"]})
-						statid = thing["details"]["infix_upgrade"]["id"]
-						gear[piece]["stat"] = await self.fetch_statname(statid)
+						try:
+							statid = thing["details"]["infix_upgrade"]["id"]
+							gear[piece]["stat"] = await self.fetch_statname(statid)
+						except:
+							gear[piece]["stat"] = ""
 		profession = results["profession"]
 		level = results["level"]
 		color = self.gamedata["professions"][profession.lower()]["color"]
@@ -669,14 +678,14 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="info")
-	async def guild_info(self, ctx, *, guild: str):
+	async def guild_info(self, ctx, *, guild_name: str):
 		"""Information about general guild stats
 		Enter guilds name
 		Requires a key with guilds scope
 		"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -689,6 +698,9 @@ class Guildwars2:
 			guild_id = str(guild_id).strip("']")
 			endpoint = "guild/{0}".format(guild_id)
 			results = await self.call_api(endpoint, headers)
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -725,12 +737,12 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="members")
-	async def guild_members(self, ctx, *, guild: str):
+	async def guild_members(self, ctx, *, guild_name: str):
 		"""Get list of all members and their ranks
 		Requires key with guilds scope and also Guild Leader permissions ingame"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -748,6 +760,11 @@ class Guildwars2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
+		except APIForbidden:
+			await self.bot.say("You need to be a guild leader to use this command")
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
@@ -784,12 +801,12 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="treasury")
-	async def guild_treasury(self, ctx, *, guild: str):
+	async def guild_treasury(self, ctx, *, guild_name: str):
 		"""Get list of current and needed items for upgrades
 		   Requires key with guilds scope and also Guild Leader permissions ingame"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -805,6 +822,11 @@ class Guildwars2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
+		except APIForbidden:
+			await self.bot.say("You need to be a guild leader to use this command")
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
@@ -2161,7 +2183,7 @@ class Guildwars2:
 
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.cooldown(1, 5, BucketType.user)
-	@daily.group(pass_context=True, name="notifier")
+	@daily.group(pass_context=True, name="notifier", no_pm=True)
 	async def daily_notifier(self, ctx):
 		"""Sends a list of dailies on server reset to specificed channel.
 		First, specify a channel using $daily notifier channel <channel>
@@ -2533,9 +2555,9 @@ class Guildwars2:
 		async with self.session.get(url, headers=headers) as r:
 			if r.status != 200 and r.status != 206:
 				if r.status == 404:
-					raise APINotFound()
+					raise APINotFound("Not found")
 				if r.status == 403:
-					raise APIConnectionError("Access denied")
+					raise APIForbidden("Access denied")
 				if r.status == 429:
 					print (time.strftime('%a %H:%M:%S'), "Api call limit reached")
 					raise APIConnectionError(
