@@ -765,6 +765,7 @@ class Guildwars2:
 			return
 		except APIForbidden:
 			await self.bot.say("You need to be a guild leader to use this command")
+			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
@@ -827,6 +828,7 @@ class Guildwars2:
 			return
 		except APIForbidden:
 			await self.bot.say("You need to be a guild leader to use this command")
+			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
