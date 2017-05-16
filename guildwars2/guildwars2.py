@@ -171,23 +171,6 @@ class Guildwars2:
 			await self.bot.say("Need permission to embed links")
 
 	@commands.command(pass_context=True)
-	async def langset(self, ctx, lang):
-		"""Set the language parameter and store it into settings file"""
-		server = ctx.message.server
-
-		if server is None:
-			await self.bot.say("That command is not available in DMs.")
-
-		else:
-			languages = ["en", "de", "es", "fr", "ko", "zh"]
-			if lang in languages:
-				await self.bot.say("Language for this server set to {0}.".format(lang))
-				self.language[server.id] = {"language": lang}
-				dataIO.save_json('data/guildwars2/language.json', self.language)
-			else:
-				await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
-
-	@commands.command(pass_context=True)
 	async def account(self, ctx):
 		"""Information about your account
 		Requires a key with account scope
@@ -2613,22 +2596,6 @@ class Guildwars2:
 				await asyncio.sleep(300)
 				continue
 
-	def getlanguage(self, ctx):
-		server = ctx.message.server
-
-		with open('data/guildwars2/language.json') as langfile:
-			data = json.load(langfile)
-		# Direct messages to bot defaults to english
-		if server is None:
-			language = "en"
-		else:
-			# Default value if no language set
-			if server.id in data:
-				language = data[server.id]["language"]
-			else:
-				language = "en"
-		return language
-
 	async def getworldid(self, world):
 		if world is None:
 			return None
@@ -2651,13 +2618,11 @@ class Guildwars2:
 		return results
 
 	async def _get_title_(self, tid, ctx):
-		language = self.getlanguage(ctx)
-		endpoint = "titles/{0}?lang={1}".format(tid,language)
 		try:
-			results = await self.call_api(endpoint)
-		except APIError:
-			return None
-		title = results["name"]
+			results = await self.db.titles.find_one({"_id" : tid})
+			title = results["name"]
+		except:
+			return ""
 		return title
 
 	def get_age(self, age):
@@ -2798,8 +2763,6 @@ class Guildwars2:
 				raise APIKeyError(
 					"{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 
-	def save_keys(self):
-		dataIO.save_json('data/guildwars2/keys.json', self.keylist)
 	
 	def save_containers(self):
 		dataIO.save_json('data/guildwars2/containers.json', self.containers)
