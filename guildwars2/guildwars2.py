@@ -2776,9 +2776,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"ENABLED": False},
-		"dailysettings.json": {"DAILYENABLED": False},
-		"build.json": {"id": None},  # Yay legacy support
+		"build.json": {"id": None},
 		"containers.json": {},
 		"day.json": {"day": datetime.datetime.utcnow().weekday()}
 	}
