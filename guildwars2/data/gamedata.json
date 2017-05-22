@@ -158,5 +158,5 @@
 			{ "name": "Crash Site",  "duration": 40, "color": "0xFCFADC" },
 			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" }]}
 	  ]
-   },
+   }
 }
