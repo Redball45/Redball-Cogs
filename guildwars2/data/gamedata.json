@@ -131,26 +131,24 @@
 			{ "name": "",  "duration": 10, "color": "0x84C147" },
 			{ "name": "Night Bosses",  "duration": 20, "color": "0x6DAC2F" },
 			{ "name": "Daytime", "duration": 75,  "color": "0xC4E2A5" },
-			{ "name": "Night",  "duration": 15, "color": "0x84C147" }]}
+			{ "name": "Night",  "duration": 15, "color": "0x84C147" }]},
 		{"name": "Auric Basin",
 		 "phases": [
 			{ "name": "Pillars",  "duration": 45, "color": "0xFFE37F" },
 			{ "name": "Challenges",  "duration": 15, "color": "0xFFD53D" },
 			{ "name": "Octovine",  "duration": 20, "color": "0xEAB700" },
 			{ "name": "Reset",  "duration": 10, "color": "0xFFF1C1" },
-			{ "name": "Pillars",  "duration": 30, "color": "0xFFE37F" }]}
+			{ "name": "Pillars",  "duration": 30, "color": "0xFFE37F" }]},
 		{"name": "Tangled Depths",
 		 "phases": [
 			{ "name": "",  "duration": 25, "color": "0xFFD7D7" },
 			{ "name": "Prep",  "duration": 5, "color": "0xffbdbd" },
 			{ "name": "Chak Gerent",  "duration": 20, "color": "0xf99" },
-			{ "name": "Help the Outposts",  "duration": 70, "color": "0xFFD7D7" }]}
-
+			{ "name": "Help the Outposts",  "duration": 70, "color": "0xFFD7D7" }]},
 		{"name": "Dragon's Stand",
 		 "phases": [
 			{ "name": "",  "duration": 90, "color": "0xDFDDF7" },
 			{ "name": "Start",  "duration": 30, "color": "0xc8c5e5"}]},
-
 		{"name": "Dry Top",
 		   "phases": [
 			{ "name": "Crash Site", "duration": 40,  "color": "0xFCFADC" },
@@ -158,5 +156,5 @@
 			{ "name": "Crash Site",  "duration": 40, "color": "0xFCFADC" },
 			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" }]}
 	  ]
-   },
+   }
 }
