@@ -104,5 +104,57 @@
 		"[&BNMAAAA=][&BNUGAAA=][&BMwCAAA=][&BJQHAAA=][&BJsCAAA=][&BHsBAAA=]",
 		"[&BBABAAA=][&BJIBAAA=][&BLkCAAA=][&BH8HAAA=][&BBEDAAA=][&BEICAAA=]",
 		"[&BCECAAA=][&BC0AAAA=][&BDoBAAA=][&BIkHAAA=][&BO4CAAA=][&BIUCAAA=]"
-	]
+	],
+	"event_timers" : {
+	  "bosses" : {
+		"normal" : [
+		  {"name" : "Admiral Taidha Covington", "start_time" : [0, 0], "interval" : 3, "waypoint" : "[&BKgBAAA=]"},
+		  {"name" : "Svanir Shaman Chief", "start_time" : [0, 15], "interval" : 2, "waypoint" : "[&BMIDAAA=]"},
+		  {"name" : "Megadestroyer", "start_time" : [0, 30], "interval" : 3, "waypoint" : "[&BM0CAAA=]"},
+		  {"name" : "Fire Elemental", "start_time" : [0, 45], "interval" : 2, "waypoint" : "[&BEcAAAA=]"},
+		  {"name" : "The Shatterer", "start_time" : [1, 0], "interval" : 3, "waypoint" : "[&BE4DAAA=]"},
+		  {"name" : "Great Jungle Wurm", "start_time" : [1, 15], "interval" : 2, "waypoint" : "[&BEEFAAA=]"},
+		  {"name" : "Modniir Ulgoth", "start_time" : [1, 30], "interval" : 3, "waypoint" : "[&BLAAAAA=]"},
+		  {"name" : "Shadow Behemoth", "start_time" : [1, 45], "interval" : 2, "waypoint" : "[&BPcAAAA=]"},
+		  {"name" : "Golem Mark II", "start_time" : [2, 0], "interval" : 3, "waypoint" : "[&BNQCAAA=]"},
+		  {"name" : "Claw of Jormag", "start_time" : [2, 30], "interval" : 3, "waypoint" : "[&BHoCAAA=]"}
+		],
+		"hardcore" : [
+		  {"name" : "Evolved Jungle Wurm", "times" : [[1, 0], [4, 0], [8, 0], [12, 30], [17, 0], [20, 0]], "waypoint" : "[&BKoBAAA=]"},
+		  {"name" : "Tequatl the Sunless", "times" : [[0, 0], [3, 0], [7, 0], [11, 30], [16, 0], [19, 0]], "waypoint" : "[&BNABAAA=]"},
+		  {"name" : "Karka Queen",         "times" : [[2, 0], [6, 0], [10, 30], [15, 0], [18, 0], [23, 0]], "waypoint" : "[&BNUGAAA=]"}
+		]
+	  },
+	  "maps" : [
+		{"name": "Verdant Brink",
+		 "phases": [
+			{ "name": "",  "duration": 10, "color": "0x84C147" },
+			{ "name": "Night Bosses",  "duration": 20, "color": "0x6DAC2F" },
+			{ "name": "Daytime", "duration": 75,  "color": "0xC4E2A5" },
+			{ "name": "Night",  "duration": 15, "color": "0x84C147" }]},
+		{"name": "Auric Basin",
+		 "phases": [
+			{ "name": "Pillars",  "duration": 45, "color": "0xFFE37F" },
+			{ "name": "Challenges",  "duration": 15, "color": "0xFFD53D" },
+			{ "name": "Octovine",  "duration": 20, "color": "0xEAB700" },
+			{ "name": "Reset",  "duration": 10, "color": "0xFFF1C1" },
+			{ "name": "Pillars",  "duration": 30, "color": "0xFFE37F" }]},
+		{"name": "Tangled Depths",
+		 "phases": [
+			{ "name": "",  "duration": 25, "color": "0xFFD7D7" },
+			{ "name": "Prep",  "duration": 5, "color": "0xffbdbd" },
+			{ "name": "Chak Gerent",  "duration": 20, "color": "0xf99" },
+			{ "name": "Help the Outposts",  "duration": 70, "color": "0xFFD7D7" }]},
+		{"name": "Dragon's Stand",
+		 "phases": [
+			{ "name": "",  "duration": 90, "color": "0xDFDDF7" },
+			{ "name": "Start",  "duration": 30, "color": "0xc8c5e5"}]},
+		{"name": "Dry Top",
+		   "phases": [
+			{ "name": "Crash Site", "duration": 40,  "color": "0xFCFADC" },
+			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" },
+			{ "name": "Crash Site",  "duration": 40, "color": "0xFCFADC" },
+			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" }]}
+	  ]
+   }
 }
