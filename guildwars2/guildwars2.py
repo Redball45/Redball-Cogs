@@ -33,6 +33,9 @@ class APIError(Exception):
 class APIConnectionError(APIError):
 	pass
 
+class APIForbidden(APIError):
+	pass
+
 class ShinyAPIError(Exception):
 	pass
 
@@ -168,23 +171,6 @@ class Guildwars2:
 			await self.bot.say("Need permission to embed links")
 
 	@commands.command(pass_context=True)
-	async def langset(self, ctx, lang):
-		"""Set the language parameter and store it into settings file"""
-		server = ctx.message.server
-
-		if server is None:
-			await self.bot.say("That command is not available in DMs.")
-
-		else:
-			languages = ["en", "de", "es", "fr", "ko", "zh"]
-			if lang in languages:
-				await self.bot.say("Language for this server set to {0}.".format(lang))
-				self.language[server.id] = {"language": lang}
-				dataIO.save_json('data/guildwars2/language.json', self.language)
-			else:
-				await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
-
-	@commands.command(pass_context=True)
 	async def account(self, ctx):
 		"""Information about your account
 		Requires a key with account scope
@@ -281,7 +267,7 @@ class Guildwars2:
 			await send_cmd_help(ctx)
 
 	@character.command(name="info", pass_context=True)
-	async def _info(self, ctx, *, character: str):
+	async def character_info(self, ctx, *, character: str):
 		"""Info about the given character
 		You must be the owner of given character.
 		Requires a key with characters scope
@@ -299,6 +285,9 @@ class Guildwars2:
 			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
+			return
+		except APINotFound:
+			await self.bot.say("Invalid character name")
 			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -418,8 +407,11 @@ class Guildwars2:
 						gear[piece]["stat"] = await self.fetch_statname(item["stats"]["id"])
 					else:
 						thing = await self.db.items.find_one({"_id": item["id"]})
-						statid = thing["details"]["infix_upgrade"]["id"]
-						gear[piece]["stat"] = await self.fetch_statname(statid)
+						try:
+							statid = thing["details"]["infix_upgrade"]["id"]
+							gear[piece]["stat"] = await self.fetch_statname(statid)
+						except:
+							gear[piece]["stat"] = ""
 		profession = results["profession"]
 		level = results["level"]
 		color = self.gamedata["professions"][profession.lower()]["color"]
@@ -669,14 +661,14 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="info")
-	async def guild_info(self, ctx, *, guild: str):
+	async def guild_info(self, ctx, *, guild_name: str):
 		"""Information about general guild stats
 		Enter guilds name
 		Requires a key with guilds scope
 		"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -689,6 +681,9 @@ class Guildwars2:
 			guild_id = str(guild_id).strip("']")
 			endpoint = "guild/{0}".format(guild_id)
 			results = await self.call_api(endpoint, headers)
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return
@@ -725,12 +720,12 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="members")
-	async def guild_members(self, ctx, *, guild: str):
+	async def guild_members(self, ctx, *, guild_name: str):
 		"""Get list of all members and their ranks
 		Requires key with guilds scope and also Guild Leader permissions ingame"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -747,6 +742,12 @@ class Guildwars2:
 			results = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
+			return
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
+		except APIForbidden:
+			await self.bot.say("You need to be a guild leader to use this command")
 			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -784,12 +785,12 @@ class Guildwars2:
 
 	@commands.cooldown(1, 20, BucketType.user)
 	@guild.command(pass_context=True, name="treasury")
-	async def guild_treasury(self, ctx, *, guild: str):
+	async def guild_treasury(self, ctx, *, guild_name: str):
 		"""Get list of current and needed items for upgrades
 		   Requires key with guilds scope and also Guild Leader permissions ingame"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		guild = guild.replace(' ', '%20')
+		guild = guild_name.replace(' ', '%20')
 		scopes = ["guilds"]
 		endpoint_id = "guild/search?name={0}".format(guild)
 		keydoc = await self.fetch_key(user)
@@ -804,6 +805,12 @@ class Guildwars2:
 			treasury = await self.call_api(endpoint, headers)
 		except APIKeyError as e:
 			await self.bot.say(e)
+			return
+		except APINotFound:
+			await self.bot.say("Invalid guild name")
+			return
+		except APIForbidden:
+			await self.bot.say("You need to be a guild leader to use this command")
 			return
 		except APIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -2161,7 +2168,7 @@ class Guildwars2:
 
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.cooldown(1, 5, BucketType.user)
-	@daily.group(pass_context=True, name="notifier")
+	@daily.group(pass_context=True, name="notifier", no_pm=True)
 	async def daily_notifier(self, ctx):
 		"""Sends a list of dailies on server reset to specificed channel.
 		First, specify a channel using $daily notifier channel <channel>
@@ -2266,7 +2273,15 @@ class Guildwars2:
 
 	async def send_daily_notifs(self):
 		try:
-			channels = self.get_dailychannels()
+			channels = []
+			cursor = self.db.settings.find({"daily.on" : True}, modifiers={"$snapshot": True})
+			async for server in cursor:
+				try:
+					if "channel" in server["daily"]:
+						if server["daily"]["channel"] is not None:
+							channels.append(server["daily"]["channel"])
+				except:
+					pass
 			try:
 				endpoint = "achievements/daily"
 				results = await self.call_api(endpoint)
@@ -2274,15 +2289,14 @@ class Guildwars2:
 				print("Exception while sending daily notifs {0}".format(e))
 				return
 			message = await self.display_all_dailies(results, True)
-			if channels:
-				for channel in channels:
-					try:
-						await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
-					except:
-						pass
+			for channel in channels:
+				try:
+					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
+				except:
+					pass
 		except Exception as e:
 			print ("Erorr while sending daily notifs: {0}".format(e))
-		return
+			return
 
 	async def get_daily_channel(self, server):
 		try:
@@ -2473,7 +2487,7 @@ class Guildwars2:
 		daily_format = []
 		daily_filtered = []
 		for x in data:
-			if x["level"]["max"] == 80:
+			if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
 				dailies.append(x["id"])
 		for daily in dailies:
 			d = await self.db.achievements.find_one({"_id": daily})
@@ -2495,8 +2509,8 @@ class Guildwars2:
 	async def display_all_dailies(self, dailylist, tomorrow=False):
 		dailies = ["Daily PSNA:", self.get_psna()]
 		if tomorrow:
-			dailies[0] = "PSNA at this time:"
-			dailies.append("PSNA in 8 hours:")
+			dailies[0] = "Pact Supply Agent WPs at this time:"
+			dailies.append("Pact Supply Agent WPs in 8 hours:")
 			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
@@ -2514,7 +2528,7 @@ class Guildwars2:
 						dailies.append(frac["name"])
 			else:
 				for x in section:
-					if x["level"]["max"] == 80:
+					if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
 						d = await self.db.achievements.find_one({"_id": x["id"]})
 						dailies.append(d["name"])
 		return "\n".join(dailies)
@@ -2533,9 +2547,9 @@ class Guildwars2:
 		async with self.session.get(url, headers=headers) as r:
 			if r.status != 200 and r.status != 206:
 				if r.status == 404:
-					raise APINotFound()
+					raise APINotFound("Not found")
 				if r.status == 403:
-					raise APIConnectionError("Access denied")
+					raise APIForbidden("Access denied")
 				if r.status == 429:
 					print (time.strftime('%a %H:%M:%S'), "Api call limit reached")
 					raise APIConnectionError(
@@ -2582,22 +2596,6 @@ class Guildwars2:
 				await asyncio.sleep(300)
 				continue
 
-	def getlanguage(self, ctx):
-		server = ctx.message.server
-
-		with open('data/guildwars2/language.json') as langfile:
-			data = json.load(langfile)
-		# Direct messages to bot defaults to english
-		if server is None:
-			language = "en"
-		else:
-			# Default value if no language set
-			if server.id in data:
-				language = data[server.id]["language"]
-			else:
-				language = "en"
-		return language
-
 	async def getworldid(self, world):
 		if world is None:
 			return None
@@ -2620,13 +2618,11 @@ class Guildwars2:
 		return results
 
 	async def _get_title_(self, tid, ctx):
-		language = self.getlanguage(ctx)
-		endpoint = "titles/{0}?lang={1}".format(tid,language)
 		try:
-			results = await self.call_api(endpoint)
-		except APIError:
-			return None
-		title = results["name"]
+			results = await self.db.titles.find_one({"_id" : tid})
+			title = results["name"]
+		except:
+			return ""
 		return title
 
 	def get_age(self, age):
@@ -2767,8 +2763,6 @@ class Guildwars2:
 				raise APIKeyError(
 					"{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 
-	def save_keys(self):
-		dataIO.save_json('data/guildwars2/keys.json', self.keylist)
 	
 	def save_containers(self):
 		dataIO.save_json('data/guildwars2/containers.json', self.containers)
@@ -2782,9 +2776,7 @@ def check_files():
 	files = {
 		"gemtrack.json": {},
 		"gamedata.json": {},
-		"settings.json": {"ENABLED": False},
-		"dailysettings.json": {"DAILYENABLED": False},
-		"build.json": {"id": None},  # Yay legacy support
+		"build.json": {"id": None},
 		"containers.json": {},
 		"day.json": {"day": datetime.datetime.utcnow().weekday()}
 	}
