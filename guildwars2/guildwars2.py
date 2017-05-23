@@ -1936,7 +1936,7 @@ class Guildwars2:
 		sell_avg /= len(last_week)
 		
 		# Display data
-		data = discord.Embed(title="Daily average of id " + item_id, colour=color)
+		data = discord.Embed(title="Daily average of id " + choiceid, colour=color)
 		data.add_field(name="Average Buy",value=self.gold_to_coins(buy_avg))
 		data.add_field(name="Minimum Buy",value=self.gold_to_coins(buy_min))
 		data.add_field(name="Maximum Buy",value=self.gold_to_coins(buy_max))
