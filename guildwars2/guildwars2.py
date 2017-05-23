@@ -1954,13 +1954,48 @@ class Guildwars2:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
 	@tp.command(pass_context=True, name="trend")
-	async def tp_trend(self, ctx, item_id: str):
+	async def tp_trend(self, ctx, item: str):
 		"""Returns price trends for a specified tradeable item"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		
+		item_sanitized = re.escape(item)
+		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
+		cursor = self.db.items.find({"name": search})
+		number = await cursor.count()
+		if not number:
+			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			return
+		if number > 20:
+			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
+			return
+		items = []
+		msg = "Which one of these interests you? Type its number```"
+		async for item in cursor:
+			items.append(item)
+		if number != 1:
+			for c, m in enumerate(items):
+				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
+			msg += "```"
+			message = await self.bot.say(msg)
+			answer = await self.bot.wait_for_message(timeout=120, author=user)
+			try:
+				num = int(answer.content)
+				choice = items[num]
+			except: 
+				await self.bot.edit_message(message, "That's not a number in the list")
+				return
+			try:
+				await self.bot.delete_message(message)
+				await self.bot.delete_message(answer)
+			except:
+				pass
+		else:
+			message = await self.bot.say("Finding tradepost data...")
+			choice = items[0]
 		try:
-			shinies_endpoint = 'history/' + item_id
+			commerce = 'commerce/prices/'
+			choiceid = str(choice["_id"])		
+			shinies_endpoint = 'history/' + choiceid
 			history = await self.call_shiniesapi(shinies_endpoint)
 		except ShinyAPIError as e:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
