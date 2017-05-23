@@ -1257,7 +1257,7 @@ class Guildwars2:
 			return
 		choice = await self.itemname_to_id(item, user)
 		output = ""
-		await self.bot.edit_message(message, "Searching far and wide...")
+		message = await self.bot.say("Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
 		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
 		results["bank"] = sum(bankresults)
