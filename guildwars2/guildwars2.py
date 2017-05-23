@@ -1771,7 +1771,7 @@ class Guildwars2:
 			return
 	
 	@commands.command(pass_context=True)
-	async def UBM(self, ctx, MC_price_str : str = "0"):
+	async def ubm(self, ctx, MC_price_str : str = "0"):
 		"""This displays which way of converting unbound magic to gold is the most profitable.
 		It takes as an optional argument the value the user gives to mystic coins (in copper), defaults to 0"""
 		user = ctx.message.author
