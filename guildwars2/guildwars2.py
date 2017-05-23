@@ -1255,7 +1255,7 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		choice = await self.bot.itemname_to_id(item, user)
+		choice = await self.itemname_to_id(item, user)
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
