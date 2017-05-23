@@ -1954,7 +1954,7 @@ class Guildwars2:
 			await self.bot.say("Issue embedding data into discord - EC3")
 			
 	@tp.command(pass_context=True, name="trend")
-	async def tp_trend(self, ctx, item: str):
+	async def tp_trend(self, ctx, *, item: str):
 		"""Returns price trends for a specified tradeable item"""
 		user = ctx.message.author
 		color = self.getColor(user)
