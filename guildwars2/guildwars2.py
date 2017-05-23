@@ -1557,9 +1557,10 @@ class Guildwars2:
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		choiceid = await self.itemname_to_id(item)
+		choice = await self.itemname_to_id(item)
 		try:
 			commerce = 'commerce/prices/'
+			choiceid = str(choice["_id"])
 			endpoint = commerce + choiceid
 			results = await self.call_api(endpoint)
 		except APIKeyError as e:
@@ -1924,9 +1925,10 @@ class Guildwars2:
 		"""Returns price trends for a specified tradeable item"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		choiceid = await self.itemname_to_id(item)
+		choice = await self.itemname_to_id(item)
 		try:
 			commerce = 'commerce/prices/'
+			choiceid = str(choice["_id"])
 			shinies_endpoint = 'history/' + choiceid
 			history = await self.call_shiniesapi(shinies_endpoint)
 		except ShinyAPIError as e:
@@ -2647,7 +2649,6 @@ class Guildwars2:
 			try:
 				num = int(answer.content)
 				choice = items[num]
-				choiceid = str(choice["_id"])
 			except: 
 				await self.bot.edit_message(message, "That's not a number in the list")
 				return
@@ -2659,8 +2660,7 @@ class Guildwars2:
 		else:
 			message = await self.bot.say("Finding tradepost data...")
 			choice = items[0]
-			choiceid = str(choice["_id"])
-		return choiceid
+		return choice
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("Guildwars2"):
