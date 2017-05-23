@@ -1255,39 +1255,7 @@ class Guildwars2:
 			await self.bot.say("{0.mention}, API has responded with the following error: "
 							   "`{1}`".format(user, e))
 			return
-		item_sanitized = re.escape(item)
-		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
-		cursor = self.db.items.find({"name": search})
-		number = await cursor.count()
-		if not number:
-			await self.bot.say("Your search gave me no item results, sorry. Check for typos.")
-			return
-		if number > 20:
-			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
-			return
-		items = []
-		msg = "Which one of these interests you? Type it's number```"
-		async for item in cursor:
-			items.append(item)
-		if number != 1:
-			for c, m in enumerate(items):
-				msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
-			msg += "```"
-			message = await self.bot.say(msg)
-			answer = await self.bot.wait_for_message(timeout=120, author=user)
-			try:
-				num = int(answer.content)
-				choice = items[num]
-			except:
-				await self.bot.edit_message(message, "That's not a number in the list")
-				return
-			try:
-				await self.bot.delete_message(answer)
-			except:
-				pass
-		else:
-			message = await self.bot.say("Searching far and wide...")
-			choice = items[0]
+		choice = await self.bot.itemname_to_id(item, user)
 		output = ""
 		await self.bot.edit_message(message, "Searching far and wide...")
 		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
