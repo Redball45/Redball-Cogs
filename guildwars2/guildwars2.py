@@ -1557,7 +1557,7 @@ class Guildwars2:
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		choice = await self.itemname_to_id(item)
+		choice = await self.itemname_to_id(item, user)
 		try:
 			commerce = 'commerce/prices/'
 			choiceid = str(choice["_id"])
@@ -1925,7 +1925,7 @@ class Guildwars2:
 		"""Returns price trends for a specified tradeable item"""
 		user = ctx.message.author
 		color = self.getColor(user)
-		choice = await self.itemname_to_id(item)
+		choice = await self.itemname_to_id(item, user)
 		try:
 			commerce = 'commerce/prices/'
 			choiceid = str(choice["_id"])
@@ -2625,7 +2625,7 @@ class Guildwars2:
 			raise ShinyAPIError(shiniesresults["text"])
 		return shiniesresults
 
-	async def itemname_to_id(self, item):
+	async def itemname_to_id(self, item, user):
 		item_sanitized = re.escape(item)
 		search = re.compile(item_sanitized + ".*", re.IGNORECASE)
 		cursor = self.db.items.find({"name": search})
