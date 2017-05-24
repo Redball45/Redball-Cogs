@@ -2635,12 +2635,17 @@ class Guildwars2:
 			try:
 				if await self.update_build():
 					channels = await self.get_channels()
+					try:
+						link = await self.get_patchnotes()
+						patchnotes = "\nPatchnotes: " + link
+					except:
+						patchnotes = ""
 					if channels:
 						for channel in channels:
 							try:
 								await self.bot.send_message(self.bot.get_channel(channel),
 															"Guild Wars 2 has just updated! New build: "
-															"`{0}`".format(self.build["id"]))
+															"`{0}`{1}".format(self.build["id"], patchnotes))
 							except:
 								pass
 					else:
@@ -2653,6 +2658,14 @@ class Guildwars2:
 					"Update ontifier has encountered an exception: {0}\nExecution will continue".format(e))
 				await asyncio.sleep(300)
 				continue
+
+	async def get_patchnotes(self):
+		url = "https://forum-en.guildwars2.com/forum/info/updates"
+		async with self.session.get(url) as r:
+			results = await r.text()
+		soup = BeautifulSoup(results, 'html.parser')
+		post = soup.find(class_="arenanet topic")
+		return "https://forum-en.guildwars2.com" + post.find("a")["href"]		
 
 	async def getworldid(self, world):
 		if world is None:
