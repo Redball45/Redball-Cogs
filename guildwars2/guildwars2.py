@@ -400,7 +400,7 @@ class Guildwars2:
 				value="Representing {0} Legendary Insights".format(li_insignia),
 				inline=False)
 		# Identify the bot
-		embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+		# embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
 		# Edit the embed into the initial message.
 		await self.bot.edit_message(msg, "{0.mention}, here are your Legendary Insights".format(user), embed=embed)
