@@ -156,5 +156,50 @@
 			{ "name": "Crash Site",  "duration": 40, "color": "0xFCFADC" },
 			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" }]}
 	  ]
+    },
+    "insights": {
+      "legendary_insight":  77302,
+      "gift_of_prowess":    78989,
+      "envoy_insignia":     80516,
+      "refined_envoy_armor": {
+        "refined_envoy_helmet":       80387,
+        "refined_envoy_pauldrons":    80236,
+        "refined_envoy_breastplate":  80648,
+        "refined_envoy_gauntlets":    80673,
+        "refined_envoy_tassets":      80427,
+        "refined_envoy_greaves":      80127,
+        "refined_envoy_mask":         80634,
+        "refined_envoy_shoulderpads": 80366,
+        "refined_envoy_jerkin":       80607,
+        "refined_envoy_vambraces":    80658,
+        "refined_envoy_leggings":     80675,
+        "refined_envoy_boots":        80177,
+        "refined_envoy_cowl":         80441,
+        "refined_envoy_mantle":       80264,
+        "refined_envoy_vestments":    80120,
+        "refined_envoy_gloves":       80460,
+        "refined_envoy_pants":        80275,
+        "refined_envoy_shoes":        80583
+      },
+      "perfected_envoy_armor": {
+        "perfected_envoy_helmet":       80384,
+        "perfected_envoy_pauldrons":    80435,
+        "perfected_envoy_breastplate":  80254,
+        "perfected_envoy_gauntlets":    80205,
+        "perfected_envoy_tassets":      80277,
+        "perfected_envoy_greaves":      80557,
+        "perfected_envoy_mask":         80296,
+        "perfected_envoy_shoulderpads": 80145,
+        "perfected_envoy_jerkin":       80578,
+        "perfected_envoy_vambraces":    80161,
+        "perfected_envoy_leggings":     80252,
+        "perfected_envoy_boots":        80281,
+        "perfected_envoy_cowl":         80248,
+        "perfected_envoy_mantle":       80131,
+        "perfected_envoy_vestments":    80190,
+        "perfected_envoy_gloves":       80111,
+        "perfected_envoy_pants":        80356,
+        "perfected_envoy_shoes":        80399
+      }
    }
 }
