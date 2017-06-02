@@ -15,6 +15,8 @@ import random
 import time
 import urllib
 import re
+from itertools import chain
+from operator import itemgetter
 from motor.motor_asyncio import AsyncIOMotorClient
 
 try: # check if BeautifulSoup4 is installed
