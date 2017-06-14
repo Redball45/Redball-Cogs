@@ -147,7 +147,7 @@ class EventMaker():
 			"event_start_time": start_time,
 			"description": desc,
 			"has_started": False,
-			"participants": [author.id]
+			"participants": {author.id : ""}
 		}
 		self.settings[server.id]["next_id"] += 1
 		self.events[server.id].append(new_event)
@@ -183,6 +183,7 @@ class EventMaker():
 					if len(event["participants"]) < 1:
 						if ctx.message.author.id not in event["participants"]:
 							event["participants"].append(ctx.message.author.id)
+							event["participants"][ctx.message.author.id] = ""
 							await self.bot.say("Joined the event!")
 							dataIO.save_json(
 								os.path.join("data", "eventmaker", "events.json"),
@@ -197,7 +198,7 @@ class EventMaker():
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
 								event["participants"].append(ctx.message.author.id)
-								event["participants"][ctx.message.author.id] = { "Reserve": "Yes"}
+								event["participants"][ctx.message.author.id] = "Reserve"
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
 									self.events)
@@ -267,10 +268,9 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					for user in event["participants"]:
-						user
 						user_obj = discord.utils.get(
 							self.bot.get_all_members(), id=user)
-						await self.bot.say("{}#{}".format(
+						await self.bot.say("{}#{} - {}".format(
 							user_obj.name, user_obj.discriminator))
 				else:
 					await self.bot.say("That event has already started!")
