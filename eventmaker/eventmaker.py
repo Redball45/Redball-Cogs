@@ -147,7 +147,8 @@ class EventMaker():
 			"event_start_time": start_time,
 			"description": desc,
 			"has_started": False,
-			"participants": {author.id : ""}
+			"participants": [author.id : ""],
+			"reservers": [author.id : ""]
 		}
 		self.settings[server.id]["next_id"] += 1
 		self.events[server.id].append(new_event)
@@ -182,7 +183,7 @@ class EventMaker():
 					print(len(event["participants"]))
 					if len(event["participants"]) < 1:
 						if ctx.message.author.id not in event["participants"]:
-							event["participants"][ctx.message.author.id] = ""
+							event["participants"].append(ctx.message.author.id)
 							await self.bot.say("Joined the event!")
 							dataIO.save_json(
 								os.path.join("data", "eventmaker", "events.json"),
@@ -196,7 +197,7 @@ class EventMaker():
 						response = response.lower()
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
-								event["participants"][ctx.message.author.id] = "Reserve"
+								event["reserves"].append(ctx.message.author.id)
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
 									self.events)
@@ -267,12 +268,16 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					for user in event["participants"]:
-						await self.bot.say(user)
-						#userid = user
-						#user_obj = discord.utils.get(
-						#	self.bot.get_all_members(), id=user)
-						#await self.bot.say("{}#{} - {}".format(
-						#	user_obj.name, user_obj.discriminator))
+						user_obj = discord.utils.get(
+							self.bot.get_all_members(), id=user)
+						await self.bot.say("{}#{}".format(
+							user_obj.name, user_obj.discriminator))
+					await self.bot.say("Reserves")
+					for user in event["reserves"]:
+						user_obj = discord.utils.get(
+							self.bot.get_all_members(), id=user)
+						await self.bot.say("{}#{}".format(
+							user_obj.name, user_obj.discriminator))                      
 				else:
 					await self.bot.say("That event has already started!")
 				break
