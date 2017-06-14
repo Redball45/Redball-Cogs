@@ -192,7 +192,7 @@ class EventMaker():
 						msg = await self.bot.wait_for_message(author=author, timeout=30)
 						response = msg.content
 						response = response.lower()
-						if response = "yes":
+						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
 							reservename = "Reserve" + ctx.message.author.id
 							event["participants"].append(reservename)
