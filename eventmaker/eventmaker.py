@@ -1,9 +1,9 @@
 from discord.ext import commands
 from .utils import checks
 from .utils.dataIO import dataIO
-from datetime import datetime as dt
+from datetime import datetime
 from datetime import date
-import dateutil.parser as dateparser
+import dateutil
 import time
 import asyncio
 import aiohttp
@@ -105,7 +105,7 @@ class EventMaker():
                 await self.bot.say("You don't have permission to create events!")
                 return
 
-        creation_time = dt.utcnow()
+        creation_time = datetime.utcnow()
         await self.bot.say("Enter a name for the event: ")
         msg = await self.bot.wait_for_message(author=author, timeout=30)
         if msg is None:
@@ -121,7 +121,7 @@ class EventMaker():
             return
         datetimestring = msg.content
         dt = dateparser.parse(datetimestring)
-        start_time =  int(time.mktime(dt.timetuple()))
+        start_time =  int(time.mktime(datetime.timetuple()))
         if start_time is None:
             await self.bot.say("Something went wrong with parsing the time you entered!")
             return
@@ -161,11 +161,11 @@ class EventMaker():
                           self.bot.get_all_members(),
                           id=new_event["creator"]))
         emb.set_footer(
-            text="Created at (UTC) " + dt.utcfromtimestamp(
+            text="Created at (UTC) " + datetime.utcfromtimestamp(
                 new_event["create_time"]).strftime("%Y-%m-%d %H:%M:%S"))
         emb.add_field(name="Event ID", value=str(new_event["id"]))
         emb.add_field(
-            name="Start time (UTC)", value=dt.utcfromtimestamp(
+            name="Start time (UTC)", value=datetime.utcfromtimestamp(
                 new_event["event_start_time"]))
         await self.bot.say(embed=emb)
 
@@ -230,7 +230,7 @@ class EventMaker():
                     name="Participant count", value=str(
                         len(event["participants"])))
                 emb.add_field(
-                    name="Start time (UTC)", value=dt.utcfromtimestamp(
+                    name="Start time (UTC)", value=datetime.utcfromtimestamp(
                         event["event_start_time"]))
                 events.append(emb)
         if len(events) == 0:
@@ -356,7 +356,7 @@ class EventMaker():
         """Event loop"""
         CHECK_DELAY = 60
         while self == self.bot.get_cog("EventMaker"):
-            cur_time = dt.utcnow()
+            cur_time = datetime.utcnow()
             cur_time = calendar.timegm(cur_time.utctimetuple())
             save = False
             for server in list(self.events.keys()):
@@ -373,7 +373,7 @@ class EventMaker():
                                           id=event["creator"]))
                         emb.set_footer(
                             text="Created at (UTC) " +
-                            dt.utcfromtimestamp(
+                            datetime.utcfromtimestamp(
                                 event["create_time"]).strftime(
                                     "%Y-%m-%d %H:%M:%S"))
                         emb.add_field(name="Event ID", value=str(event["id"]))
