@@ -175,6 +175,7 @@ class EventMaker():
 	async def joinevent(self, ctx, event_id: int):
 		"""Join the specified event"""
 		server = ctx.message.server
+		author = ctx.message.author
 		for event in self.events[server.id]:
 			if event["id"] == event_id:
 				if not event["has_started"]:
