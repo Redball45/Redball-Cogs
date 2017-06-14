@@ -196,7 +196,7 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					#print(len(event["participants"]))
-					if len(event["participants"]) < event["max_participants"]:
+					if len(event["participants"]) < int(event["max_participants"]):
 						if ctx.message.author.id not in event["participants"]:
 							event["participants"].append(ctx.message.author.id)
 							await self.bot.say("Joined the event!")
