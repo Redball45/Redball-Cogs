@@ -3,6 +3,7 @@ from .utils import checks
 from .utils.dataIO import dataIO
 from datetime import datetime as dt
 from datetime import date
+import dateutil.parser as dateparser
 import time
 import asyncio
 import aiohttp
@@ -119,7 +120,8 @@ class EventMaker():
             await self.bot.say("No start time provided!")
             return
         datetimestring = msg.content
-        start_time =  time.mktime(time.strptime(datetimestring, '%a, %d %b %Y %H:%M:%S GMT'))
+        dt = dateparser.parse(datetimestring)
+        start_time =  int(time.mktime(dt.timetuple()))
         if start_time is None:
             await self.bot.say("Something went wrong with parsing the time you entered!")
             return
