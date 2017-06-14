@@ -197,8 +197,7 @@ class EventMaker():
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
 								event["participants"].append(ctx.message.author.id)
-								event["participants"][ctx.message.author.id].append("Reserve")
-								await self.bot.say("Joined the event!")
+								event["participants"][ctx.message.author.id] = { "Reserve": "Yes"}
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
 									self.events)
