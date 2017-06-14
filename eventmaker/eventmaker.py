@@ -178,6 +178,7 @@ class EventMaker():
 		for event in self.events[server.id]:
 			if event["id"] == event_id:
 				if not event["has_started"]:
+					print(len(event["participants"]))
 					if len(event["participants"]) <= 1:
 						if ctx.message.author.id not in event["participants"]:
 							event["participants"].append(ctx.message.author.id)
