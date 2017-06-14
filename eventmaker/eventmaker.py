@@ -267,10 +267,12 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					for user in event["participants"]:
-						user_obj = discord.utils.get(
-							self.bot.get_all_members(), id=user)
-						await self.bot.say("{}#{} - {}".format(
-							user_obj.name, user_obj.discriminator))
+						await self.bot.say(user)
+						#userid = user
+						#user_obj = discord.utils.get(
+						#	self.bot.get_all_members(), id=user)
+						#await self.bot.say("{}#{} - {}".format(
+						#	user_obj.name, user_obj.discriminator))
 				else:
 					await self.bot.say("That event has already started!")
 				break
