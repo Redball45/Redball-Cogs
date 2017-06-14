@@ -169,8 +169,9 @@ class EventMaker():
 				new_event["event_start_time"]))
 		channel = discord.utils.get(self.bot.get_all_channels(),
 								id=self.settings[server.id]["channel"])
+		eventid = new_event["id"]
 		try:
-			await self.bot.send_message("A new event has been created, type !joinevent {0} to join."(new_event["id"]))
+			await self.bot.send_message("A new event has been created, type !joinevent {0} to join.".format(eventid))
 			await self.bot.send_message(channel, embed=emb)
 		except discord.Forbidden:
 			pass  # No permissions to send messages
