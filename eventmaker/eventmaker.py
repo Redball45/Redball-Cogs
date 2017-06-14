@@ -2,6 +2,7 @@ from discord.ext import commands
 from .utils import checks
 from .utils.dataIO import dataIO
 from datetime import datetime as dt
+from datetime import date
 import asyncio
 import aiohttp
 import discord
@@ -111,12 +112,13 @@ class EventMaker():
         name = msg.content
         msg = None
         await self.bot.say(
-            "Enter the amount of time from now the event will take place (ex. 1w, 3d 12h, 1y 2w): ")
+            "Enter the time the event will start in this format, e.g Fri, 08 Jun 2017 19:00:00 GMT")
         msg = await self.bot.wait_for_message(author=author, timeout=30)
         if msg is None:
             await self.bot.say("No start time provided!")
             return
-        start_time = self.parse_time(creation_time, msg)
+        datetimestring = msg
+        start_time =  time.mktime(time.strptime(datetimestring, '%a, %d %b %Y %H:%M:%S GMT'))
         if start_time is None:
             await self.bot.say("Something went wrong with parsing the time you entered!")
             return
@@ -151,7 +153,7 @@ class EventMaker():
         emb = discord.Embed(title=new_event["event_name"],
                             description=new_event["description"],
                             url="https://time.is/UTC")
-        emb.add_field(name="Created by",
+        emb.add_field(name="Raid Leader",
                       value=discord.utils.get(
                           self.bot.get_all_members(),
                           id=new_event["creator"]))
@@ -216,13 +218,10 @@ class EventMaker():
                 emb = discord.Embed(title=event["event_name"],
                                     description=event["description"],
                                     url="https://time.is/UTC")
-                emb.add_field(name="Created by",
+                emb.add_field(name="Raid Leader",
                               value=discord.utils.get(
                                   self.bot.get_all_members(),
                                   id=event["creator"]))
-                emb.set_footer(
-                    text="Created at (UTC) " + dt.utcfromtimestamp(
-                        event["create_time"]).strftime("%Y-%m-%d %H:%M:%S"))
                 emb.add_field(name="Event ID", value=str(event["id"]))
                 emb.add_field(
                     name="Participant count", value=str(
