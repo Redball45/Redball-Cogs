@@ -148,7 +148,7 @@ class EventMaker():
 			"description": desc,
 			"has_started": False,
 			"participants": [author.id],
-			"reservers": [author.id]
+			"reserves": [author.id]
 		}
 		self.settings[server.id]["next_id"] += 1
 		self.events[server.id].append(new_event)
