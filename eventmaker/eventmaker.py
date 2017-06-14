@@ -261,7 +261,7 @@ class EventMaker():
 				emb = discord.Embed(title=event["event_name"],
 									description=event["description"],
 									url="https://time.is/UTC")
-				emb.add_field(name="Raid Leader",
+				emb.add_field(name="Organiser",
 							  value=discord.utils.get(
 								  self.bot.get_all_members(),
 								  id=event["creator"]))
