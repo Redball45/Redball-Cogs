@@ -163,14 +163,17 @@ class EventMaker():
 					  value=discord.utils.get(
 						  self.bot.get_all_members(),
 						  id=new_event["creator"]))
-		emb.set_footer(
-			text="Created at (UTC) " + datetime.utcfromtimestamp(
-				new_event["create_time"]).strftime("%Y-%m-%d %H:%M:%S"))
 		emb.add_field(name="Event ID", value=str(new_event["id"]))
 		emb.add_field(
 			name="Start time (UTC)", value=datetime.utcfromtimestamp(
 				new_event["event_start_time"]))
-		await self.bot.say(embed=emb)
+		channel = discord.utils.get(self.bot.get_all_channels(),
+								id=self.settings[server]["channel"])
+		try:
+			await self.bot.send_message("A new event has been created, type !joinevent {0} to join."(new_event["id"]))
+			await self.bot.send_message(channel, embed=emb)
+		except discord.Forbidden:
+			pass  # No permissions to send messages
 
 	@commands.command(pass_context=True)
 	async def joinevent(self, ctx, event_id: int):
@@ -180,8 +183,8 @@ class EventMaker():
 		for event in self.events[server.id]:
 			if event["id"] == event_id:
 				if not event["has_started"]:
-					print(len(event["participants"]))
-					if len(event["participants"]) < 1:
+					#print(len(event["participants"]))
+					if len(event["participants"]) < 10:
 						if ctx.message.author.id not in event["participants"]:
 							event["participants"].append(ctx.message.author.id)
 							await self.bot.say("Joined the event!")
@@ -402,11 +405,6 @@ class EventMaker():
 									  value=discord.utils.get(
 										  self.bot.get_all_members(),
 										  id=event["creator"]))
-						emb.set_footer(
-							text="Created at (UTC) " +
-							datetime.utcfromtimestamp(
-								event["create_time"]).strftime(
-									"%Y-%m-%d %H:%M:%S"))
 						emb.add_field(name="Event ID", value=str(event["id"]))
 						emb.add_field(
 							name="Participant count", value=str(
