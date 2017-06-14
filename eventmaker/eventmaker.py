@@ -196,8 +196,8 @@ class EventMaker():
 						response = response.lower()
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
-								reservename = "Reserve" + ctx.message.author.id
-								event["participants"].append(reservename)
+								event["participants"].append(ctx.message.author.id)
+								event["participants"][ctx.message.author.id].append("Reserve")
 								await self.bot.say("Joined the event!")
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
@@ -268,6 +268,7 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					for user in event["participants"]:
+						user
 						user_obj = discord.utils.get(
 							self.bot.get_all_members(), id=user)
 						await self.bot.say("{}#{}".format(
