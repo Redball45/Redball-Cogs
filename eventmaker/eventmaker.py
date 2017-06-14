@@ -148,7 +148,7 @@ class EventMaker():
 			"description": desc,
 			"has_started": False,
 			"participants": [author.id],
-			"reserves": [author.id]
+			"reserves": []
 		}
 		self.settings[server.id]["next_id"] += 1
 		self.events[server.id].append(new_event)
@@ -225,8 +225,11 @@ class EventMaker():
 						event["participants"].remove(author.id)
 						await self.bot.say("Removed you from that event!")
 					else:
-						await self.bot.say(
-							"You aren't signed up for that event!")
+						if author.id in event["reserves"]:
+							event["reserves"].remove(author.id)
+							await self.bot.say("Removed you from that event!")
+						else:
+							await self.bot.say("You aren't signed up for that event!")
 				else:
 					await self.bot.say("That event already started!")
 				break
