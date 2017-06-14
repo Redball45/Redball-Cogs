@@ -194,12 +194,12 @@ class EventMaker():
 						response = response.lower()
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
-							reservename = "Reserve" + ctx.message.author.id
-							event["participants"].append(reservename)
-							await self.bot.say("Joined the event!")
-							dataIO.save_json(
-								os.path.join("data", "eventmaker", "events.json"),
-								self.events)
+								reservename = "Reserve" + ctx.message.author.id
+								event["participants"].append(reservename)
+								await self.bot.say("Joined the event!")
+								dataIO.save_json(
+									os.path.join("data", "eventmaker", "events.json"),
+									self.events)
 							else:
 								await self.bot.say("You have already joined that event!")
 						else:
