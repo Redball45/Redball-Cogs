@@ -147,9 +147,9 @@ class EventMaker():
 			"event_start_time": start_time,
 			"description": desc,
 			"has_started": False,
-			"participants": [author.id : ""],
-			"reservers": [author.id : ""]
-		}
+			"participants": [author.id],
+			"reservers": [author.id]
+			
 		self.settings[server.id]["next_id"] += 1
 		self.events[server.id].append(new_event)
 		dataIO.save_json(os.path.join(
