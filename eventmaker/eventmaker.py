@@ -133,7 +133,7 @@ class EventMaker():
 		if msg is None:
 			await self.bot.say("No number provided!")
 			return
-		elif msg.content == 0
+		elif msg.content == 0:
 			max_parc = 99999999
 		else:
 			max_parc = msg.content
