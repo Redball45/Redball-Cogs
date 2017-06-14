@@ -168,7 +168,7 @@ class EventMaker():
 			name="Start time (UTC)", value=datetime.utcfromtimestamp(
 				new_event["event_start_time"]))
 		channel = discord.utils.get(self.bot.get_all_channels(),
-								id=self.settings[server]["channel"])
+								id=self.settings[server.id]["channel"])
 		try:
 			await self.bot.send_message("A new event has been created, type !joinevent {0} to join."(new_event["id"]))
 			await self.bot.send_message(channel, embed=emb)
