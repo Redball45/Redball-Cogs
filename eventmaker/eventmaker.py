@@ -182,7 +182,6 @@ class EventMaker():
 					print(len(event["participants"]))
 					if len(event["participants"]) < 1:
 						if ctx.message.author.id not in event["participants"]:
-							event["participants"].append(ctx.message.author.id)
 							event["participants"][ctx.message.author.id] = ""
 							await self.bot.say("Joined the event!")
 							dataIO.save_json(
@@ -197,7 +196,6 @@ class EventMaker():
 						response = response.lower()
 						if response == "yes":
 							if ctx.message.author.id not in event["participants"]:
-								event["participants"].append(ctx.message.author.id)
 								event["participants"][ctx.message.author.id] = "Reserve"
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
