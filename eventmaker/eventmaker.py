@@ -118,7 +118,7 @@ class EventMaker():
         if msg is None:
             await self.bot.say("No start time provided!")
             return
-        datetimestring = msg
+        datetimestring = msg.content
         start_time =  time.mktime(time.strptime(datetimestring, '%a, %d %b %Y %H:%M:%S GMT'))
         if start_time is None:
             await self.bot.say("Something went wrong with parsing the time you entered!")
