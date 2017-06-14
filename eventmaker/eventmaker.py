@@ -128,6 +128,16 @@ class EventMaker():
 			await self.bot.say("Something went wrong with parsing the time you entered!")
 			return
 		msg = None
+		await self.bot.say("Enter the maximum number of participants, 0 for no limit.")
+		msg = await self.bot_wait_for_message(author=author, timeout=30)
+		if msg is None:
+			await self.bot.say("No number provided!")
+			return
+		elif msg.content == 0
+			max_parc = 99999999
+		else:
+			max_parc = msg.content
+		msg = None
 		await self.bot.say("Enter a description for the event: ")
 		msg = await self.bot.wait_for_message(author=author, timeout=30)
 		if msg is None:
@@ -147,6 +157,7 @@ class EventMaker():
 			"event_start_time": start_time,
 			"description": desc,
 			"has_started": False,
+			"max_participants" : max_parc
 			"participants": [author.id],
 			"reserves": []
 		}
@@ -185,7 +196,7 @@ class EventMaker():
 			if event["id"] == event_id:
 				if not event["has_started"]:
 					#print(len(event["participants"]))
-					if len(event["participants"]) < 10:
+					if len(event["participants"]) < event["max_participants"]:
 						if ctx.message.author.id not in event["participants"]:
 							event["participants"].append(ctx.message.author.id)
 							await self.bot.say("Joined the event!")
@@ -195,7 +206,7 @@ class EventMaker():
 						else:
 							await self.bot.say("You have already joined that event!")
 					else:
-						await self.bot.say("This event has 10 participants already, do you want to signup as a reserve?")
+						await self.bot.say("This event already has its max number of participants, do you want to signup as a reserve?")
 						msg = await self.bot.wait_for_message(author=author, timeout=30)
 						response = msg.content
 						response = response.lower()
