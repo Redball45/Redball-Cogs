@@ -178,14 +178,32 @@ class EventMaker():
 		for event in self.events[server.id]:
 			if event["id"] == event_id:
 				if not event["has_started"]:
-					if ctx.message.author.id not in event["participants"]:
-						event["participants"].append(ctx.message.author.id)
-						await self.bot.say("Joined the event!")
-						dataIO.save_json(
-							os.path.join("data", "eventmaker", "events.json"),
-							self.events)
+					if len(event["participants"]) <= 1:
+						if ctx.message.author.id not in event["participants"]:
+							event["participants"].append(ctx.message.author.id)
+							await self.bot.say("Joined the event!")
+							dataIO.save_json(
+								os.path.join("data", "eventmaker", "events.json"),
+								self.events)
+						else:
+							await self.bot.say("You have already joined that event!")
 					else:
-						await self.bot.say("You have already joined that event!")
+						await self.bot.say("This event has 10 participants already, do you want to signup as a reserve?")
+						msg = await self.bot.wait_for_message(author=author, timeout=30)
+						response = msg.content
+						response = response.lower()
+						if response = "yes":
+							if ctx.message.author.id not in event["participants"]:
+							reservename = "Reserve" + ctx.message.author.id
+							event["participants"].append(reservename)
+							await self.bot.say("Joined the event!")
+							dataIO.save_json(
+								os.path.join("data", "eventmaker", "events.json"),
+								self.events)
+							else:
+								await self.bot.say("You have already joined that event!")
+						else:
+							await self.bot.say("You have not been signed up for this event")
 				else:
 					await self.bot.say("That event has already started!")
 				break
