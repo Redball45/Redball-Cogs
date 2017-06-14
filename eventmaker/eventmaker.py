@@ -157,7 +157,7 @@ class EventMaker():
 			"event_start_time": start_time,
 			"description": desc,
 			"has_started": False,
-			"max_participants" : max_parc
+			"max_participants" : max_parc,
 			"participants": [author.id],
 			"reserves": []
 		}
