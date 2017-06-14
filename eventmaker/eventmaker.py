@@ -129,7 +129,7 @@ class EventMaker():
 			return
 		msg = None
 		await self.bot.say("Enter the maximum number of participants, 0 for no limit.")
-		msg = await self.bot_wait_for_message(author=author, timeout=30)
+		msg = await self.bot.wait_for_message(author=author, timeout=30)
 		if msg is None:
 			await self.bot.say("No number provided!")
 			return
