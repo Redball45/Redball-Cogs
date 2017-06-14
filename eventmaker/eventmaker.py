@@ -200,6 +200,7 @@ class EventMaker():
 								dataIO.save_json(
 									os.path.join("data", "eventmaker", "events.json"),
 									self.events)
+								await self.bot.say("Joined the event!")
 							else:
 								await self.bot.say("You have already joined that event!")
 						else:
