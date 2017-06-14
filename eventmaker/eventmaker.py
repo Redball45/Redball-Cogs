@@ -123,7 +123,7 @@ class EventMaker():
 		datetimestring = msg.content
 		try: 
 			dt = dateparser.parse(datetimestring)
-			start_time =  int(time.mktime(dt.timetuple()))
+			start_time =  int(time.mktime(dt.utctimetuple()))
 		except:
 			await self.bot.say("Something went wrong with parsing the time you entered!")
 			return
