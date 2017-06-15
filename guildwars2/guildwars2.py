@@ -2772,7 +2772,7 @@ class Guildwars2:
 			except:
 				pass
 		else:
-			message = await self.bot.say("Finding tradepost data...")
+			message = await self.bot.say("Searching...")
 			choice = items[0]
 		return choice
 
