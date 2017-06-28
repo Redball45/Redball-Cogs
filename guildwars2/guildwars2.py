@@ -2191,15 +2191,6 @@ class Guildwars2:
 		except:
 			await self.bot.say("Need permission to embed links")
 
-	@commands.command(pass_context=True, aliases=["eventtimer", "eventtimers"])
-	async def hot(self, ctx):
-		"""The heart of thorns event timer. Shows heart of thorns meta status."""
-		embed = self.schedule_embed(self.get_hot_meta())
-		try:
-			await self.bot.say(embed=embed)
-		except:
-			await self.bot.say("Need permission to embed links")
-
 	@commands.group(pass_context=True)
 	async def daily(self, ctx):
 		"""Commands showing daily things"""
