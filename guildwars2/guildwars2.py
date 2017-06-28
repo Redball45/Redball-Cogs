@@ -15,7 +15,7 @@ import random
 import time
 import urllib
 import re
-import xml.etree.Elementtree as et
+import xml.etree.ElementTree as et
 from itertools import chain
 from operator import itemgetter
 from motor.motor_asyncio import AsyncIOMotorClient
