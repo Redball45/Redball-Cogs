@@ -2191,6 +2191,15 @@ class Guildwars2:
 		except:
 			await self.bot.say("Need permission to embed links")
 
+	@commands.command(pass_context=True, aliases=["eventtimer", "eventtimers"])
+	async def hot(self, ctx):
+		"""The heart of thorns event timer. Shows heart of thorns meta status."""
+		embed = self.schedule_embed(self.get_hot_meta())
+		try:
+			await self.bot.say(embed=embed)
+		except:
+			await self.bot.say("Need permission to embed links")
+
 	@commands.group(pass_context=True)
 	async def daily(self, ctx):
 		"""Commands showing daily things"""
@@ -2620,23 +2629,29 @@ class Guildwars2:
 			dailies.append(self.get_psna(1))
 		fractals = []
 		sections = ["pve", "pvp", "wvw", "fractals"]
-		for x in sections:
-			section = dailylist[x]
-			dailies.append("{0} DAILIES:".format(x.upper()))
-			if x == "fractals":
-				for x in section:
-					d = await self.db.achievements.find_one({"_id": x["id"]})
-					fractals.append(d)
-				for frac in fractals:
-					if not frac["name"].startswith("Daily Tier"):
-						dailies.append(frac["name"])
-					if frac["name"].startswith("Daily Tier 4"):
-						dailies.append(frac["name"])
-			else:
-				for x in section:
-					if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
+		try:
+			for x in sections:
+				section = dailylist[x]
+				dailies.append("{0} DAILIES:".format(x.upper()))
+				if x == "fractals":
+					for x in section:
 						d = await self.db.achievements.find_one({"_id": x["id"]})
-						dailies.append(d["name"])
+						fractals.append(d)
+					for frac in fractals:
+						if not frac["name"].startswith("Daily Tier"):
+							dailies.append(frac["name"])
+						if frac["name"].startswith("Daily Tier 4"):
+							dailies.append(frac["name"])
+				else:
+					for x in section:
+						if x["level"]["max"] == 80 and "HeartOfThorns" in x["required_access"]:
+							d = await self.db.achievements.find_one({"_id": x["id"]})
+							dailies.append(d["name"])
+		except:
+			Redball_ID = 77910702664200192
+			Redball = await self.bot.get_user_info(Redball_ID)
+			await self.bot.say("Error in generating daily list - {0.mention} please fix.".format(Redball))
+			return
 		return "\n".join(dailies)
 
 	def get_psna(self, modifier=0):
