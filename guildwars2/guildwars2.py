@@ -15,6 +15,7 @@ import random
 import time
 import urllib
 import re
+import xml.etree.Elementtree as et
 from itertools import chain
 from operator import itemgetter
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -29,6 +30,8 @@ except:
 DEFAULT_HEADERS = {'User-Agent': "A GW2 Discord bot",
 'Accept': 'application/json'}
 
+TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 class APIError(Exception):
 	pass
 
@@ -36,6 +39,9 @@ class APIConnectionError(APIError):
 	pass
 
 class APIForbidden(APIError):
+	pass
+
+class APIBadRequest(APIError):
 	pass
 
 class ShinyAPIError(Exception):
@@ -59,7 +65,7 @@ class Guildwars2:
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
-		self.current_day = dataIO.load_json("data/guildwars2/day.json")
+		self.current_day = dataIO.load_json("data/guildwars2/current.json")
 		self.boss_schedule = self.generate_schedule()
 		
 	def __unload(self):
@@ -1552,7 +1558,9 @@ class Guildwars2:
 		if not serverdoc:
 			default_channel = server.default_channel.id
 			serverdoc = {"_id": server.id, "on": False,
-						 "channel": default_channel, "language": "en", "daily" : {"on": False, "channel": None}}
+						 "channel": default_channel, "language": "en",
+						 "daily" : {"on": False, "channel": None},
+						 "news" : {"on": False, "channel": None}}			
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
@@ -1615,6 +1623,9 @@ class Guildwars2:
 				accountname = keydoc["account_name"]
 				results = await self.call_api(endpoint, headers)
 			except APIKeyError as e:
+				await self.bot.say(e)
+				return
+			except APIBadRequest:
 				await self.bot.say(e)
 				return
 			except APIError as e:
@@ -2282,7 +2293,9 @@ class Guildwars2:
 		if not serverdoc:
 			default_channel = server.default_channel.id
 			serverdoc = {"_id": server.id, "on": False,
-						 "channel": default_channel, "language": "en", "daily" : {"on": False, "channel": None}}
+						 "channel": default_channel, "language": "en",
+						 "daily" : {"on": False, "channel": None},
+						 "news" : {"on": False, "channel": None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
@@ -2326,14 +2339,13 @@ class Guildwars2:
 			await self.bot.say("I will notify you on this server about dailies")
 		else:
 			await self.bot.say("I will not send "
-								"notifications about new builds")
+								"notifications about dailies")
 
 	def check_day(self):
-		self.current_day = dataIO.load_json("data/guildwars2/day.json")
 		current = datetime.datetime.utcnow().weekday()
 		if self.current_day["day"] != current:
 			self.current_day["day"] = current
-			dataIO.save_json('data/guildwars2/day.json', self.current_day)
+			dataIO.save_json('data/guildwars2/current.json', self.current_day)
 			return True
 		else:
 			return False
@@ -2418,6 +2430,57 @@ class Guildwars2:
 				await asyncio.sleep(60)
 				continue
 
+   @checks.admin_or_permissions(manage_server=True)
+	@commands.group(pass_context=True)
+	async def newsfeed(self, ctx):
+		"""Commands for setting up automatic guildwars2.com news feed"""
+		server = ctx.message.server
+		serverdoc = await self.fetch_server(server)
+		if not serverdoc:
+			default_channel = server.default_channel.id
+			serverdoc = {"_id": server.id, "on": False,
+						 "channel": default_channel, "language": "en",
+						 "daily" : {"on": False, "channel": None},
+						 "news" : {"on": False, "channel": None}}
+			await self.db.settings.insert_one(serverdoc)
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+
+	@newsfeed.command(pass_context=True, name="channel")
+	async def newsfeed_channel(self, ctx, channel: discord.Channel=None):
+		"""Sets the channel to send the news to
+		If channel isn't specified, the server's default channel will be used"""
+		server = ctx.message.server
+		if channel is None:
+			channel = ctx.message.server.default_channel
+		if not server.get_member(self.bot.user.id
+								 ).permissions_in(channel).send_messages:
+			await self.bot.say("I do not have permissions to send "
+							   "messages to {0.mention}".format(channel))
+			return
+		await self.db.settings.update_one({"_id": server.id}, {"$set": {"news.channel": channel.id}})
+		await self.bot.send_message(channel, "I will now send guildwars2.com news "
+									"to {0.mention}. Make sure it's toggled "
+									"on using $newsfeed toggle on. ".format(channel))
+
+	@newsfeed.command(pass_context=True, name="toggle")
+	async def newsfeed_toggle(self, ctx, on_off: bool):
+		"""Toggles posting news"""
+		server = ctx.message.server
+		if on_off is not None:
+			await self.db.settings.update_one({"_id": server.id}, {"$set": {"news.on" : on_off}})
+		serverdoc = await self.fetch_server(server)
+		if serverdoc["news"]["on"]:
+			await self.bot.say("I will send news from guildwars2.com")
+		else:
+			await self.bot.say("I will not send "
+							   "notifications about news")
+
+	def news_embed(self, item):
+		description = "[Click here]({0})\n{1}".format(item["link"], item["description"])
+		data = discord.Embed(title="{0}".format(item["title"]), description=description, color=0xc12d2b)
+		return data
+
 	@commands.group(pass_context=True)
 	@checks.is_owner()
 	async def database(self, ctx):
@@ -2439,8 +2502,14 @@ class Guildwars2:
 		result = await cursor.count()
 		await self.bot.say("{} registered users".format(result))
 		cursor_servers = self.db.settings.find()
+		cursor_daily = self.db.settings.find({"daily.on" : True}, modifiers={"$snapshot": True})
+		cursor_news = self.db.settings.find({"news.on" : True}, modifiers={"$snapshot": True})
 		result_servers = await cursor_servers.count()
-		await self.bot.say("{} servers for update notifs".format(result_servers))
+		result_daily = await cursor_daily.count()
+		result_news = await cursor_news.count()
+		await self.bot.say("{} servers for update notifs\n{} servers for daily "
+						   "notifs\n{} servers for news "
+						   "feed".format(result_servers, result_daily, result_news))
 
 	async def rebuild_database(self):
 		# Needs a lot of cleanup, but works anyway.
@@ -2719,6 +2788,8 @@ class Guildwars2:
 		url = apiserv + endpoint
 		async with self.session.get(url, headers=headers) as r:
 			if r.status != 200 and r.status != 206:
+				if r.status == 400:
+					raise APIBadRequest("No ongoing transactions")
 				if r.status == 404:
 					raise APINotFound("Not found")
 				if r.status == 403:
@@ -2807,9 +2878,72 @@ class Guildwars2:
 				await asyncio.sleep(300)
 			except Exception as e:
 				print(
-					"Update ontifier has encountered an exception: {0}\nExecution will continue".format(e))
+					"Update notifier has encountered an exception: {0}".format(e))
 				await asyncio.sleep(300)
 				continue
+
+	async def news_checker(self):
+		while self is self.bot.get_cog("GuildWars2"):
+			try:
+				to_post = await self.check_news()
+				if to_post:
+					embeds = []
+					for item in to_post:
+						embeds.append(self.news_embed(item))
+					await self.send_news(embeds)
+				self.current_day["last_checked"] = datetime.datetime.utcnow().strftime(TIME_FORMAT)
+				dataIO.save_json('data/guildwars2/current.json', self.current_day)
+				await asyncio.sleep(3600)
+			except APIError as e:
+				print(
+					"News ontifier has encountered an exception: {0}".format(e))
+				await asyncio.sleep(600)
+				continue
+
+	async def check_news(self):
+		#Turns out this doesnt work, because anet posts wrong times. #TODO better solution
+		last_checked = datetime.datetime.strptime(self.current_day["last_checked"],
+												  TIME_FORMAT)
+		url = "https://www.guildwars2.com/en/feed/"
+		async with self.session.get(url) as r:
+			feed = et.fromstring(await r.text())[0]
+		to_post = []
+		for item in feed.findall("item"):
+			try:
+				time = datetime.datetime.strptime(item.find("pubDate").text,
+												  "%a, %d %b %Y %H:%M:%S %z"
+												  ).replace(tzinfo=None)
+				if time > last_checked:
+					link = item.find('link').text
+					title = item.find("title").text
+					description = item.find("description").text.split("</p>", 1)[0]
+					item_dict = {"link" : link, "title" : title, "description" : description}
+					to_post.append(item_dict)
+			except:
+				pass
+		return to_post
+
+	async def send_news(self, embeds):
+		try:
+			channels = []
+			cursor = self.db.settings.find({"news.on" : True}, modifiers={"$snapshot": True})
+			async for server in cursor:
+				try:
+					if "channel" in server["news"]:
+						if server["news"]["channel"] is not None:
+							channels.append(server["news"]["channel"])
+				except:
+					pass
+			for chanid in channels:
+				try:
+					channel = self.bot.get_channel(chanid)
+					for embed in embeds:
+						await self.bot.send_message(channel, embed=embed)
+				except:
+					pass
+		except Exception as e:
+			print ("Erorr while sending news: {0}".format(e))
+			return
 
 	async def get_patchnotes(self):
 		url = "https://forum-en.guildwars2.com/forum/info/updates"
@@ -3001,7 +3135,8 @@ def check_files():
 		"gamedata.json": {},
 		"build.json": {"id": None},
 		"containers.json": {},
-		"day.json": {"day": datetime.datetime.utcnow().weekday()}
+		"current.json": {"day": datetime.datetime.utcnow().weekday(),
+					 "last_checked":datetime.datetime.utcnow().strftime(TIME_FORMAT)}
 	}
 
 	for filename, value in files.items():
@@ -3018,6 +3153,7 @@ def setup(bot):
 	loop.create_task(n._gemprice_tracker())
 	loop.create_task(n._gamebuild_checker())
 	loop.create_task(n.daily_notifs())
+	loop.create_task(n.news_checker())
 	if soupAvailable:
 		bot.add_cog(n)
 	else:
