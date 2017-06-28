@@ -2430,7 +2430,7 @@ class Guildwars2:
 				await asyncio.sleep(60)
 				continue
 
-   @checks.admin_or_permissions(manage_server=True)
+	@checks.admin_or_permissions(manage_server=True)
 	@commands.group(pass_context=True)
 	async def newsfeed(self, ctx):
 		"""Commands for setting up automatic guildwars2.com news feed"""
