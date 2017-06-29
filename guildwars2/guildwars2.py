@@ -30,7 +30,6 @@ except:
 DEFAULT_HEADERS = {'User-Agent': "A GW2 Discord bot",
 'Accept': 'application/json'}
 
-TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 class APIError(Exception):
 	pass
@@ -65,7 +64,7 @@ class Guildwars2:
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
-		self.current_day = dataIO.load_json("data/guildwars2/current.json")
+		self.cache = dataIO.load_json("data/guildwars2/cache.json")
 		self.boss_schedule = self.generate_schedule()
 		
 	def __unload(self):
@@ -2343,9 +2342,9 @@ class Guildwars2:
 
 	def check_day(self):
 		current = datetime.datetime.utcnow().weekday()
-		if self.current_day["day"] != current:
-			self.current_day["day"] = current
-			dataIO.save_json('data/guildwars2/current.json', self.current_day)
+		if self.cache["day"] != current:
+			self.cache["day"] = current
+			dataIO.save_json('data/guildwars2/cache.json', self.cache)
 			return True
 		else:
 			return False
@@ -2891,36 +2890,32 @@ class Guildwars2:
 					for item in to_post:
 						embeds.append(self.news_embed(item))
 					await self.send_news(embeds)
-				self.current_day["last_checked"] = datetime.datetime.utcnow().strftime(TIME_FORMAT)
-				dataIO.save_json('data/guildwars2/current.json', self.current_day)
-				await asyncio.sleep(3600)
+				await asyncio.sleep(300)
 			except APIError as e:
 				print(
-					"News ontifier has encountered an exception: {0}".format(e))
-				await asyncio.sleep(600)
+					"News notifier has encountered an exception: {0}".format(e))
+				await asyncio.sleep(300)
 				continue
 
 	async def check_news(self):
-		#Turns out this doesnt work, because anet posts wrong times. #TODO better solution
-		last_checked = datetime.datetime.strptime(self.current_day["last_checked"],
-												  TIME_FORMAT)
+		last_news = self.cache["news"]
 		url = "https://www.guildwars2.com/en/feed/"
 		async with self.session.get(url) as r:
 			feed = et.fromstring(await r.text())[0]
 		to_post = []
-		for item in feed.findall("item"):
-			try:
-				time = datetime.datetime.strptime(item.find("pubDate").text,
-												  "%a, %d %b %Y %H:%M:%S %z"
-												  ).replace(tzinfo=None)
-				if time > last_checked:
-					link = item.find('link').text
-					title = item.find("title").text
-					description = item.find("description").text.split("</p>", 1)[0]
-					item_dict = {"link" : link, "title" : title, "description" : description}
-					to_post.append(item_dict)
-			except:
-				pass
+		if last_news:
+			for item in feed.findall("item"):
+				try:
+					if item.find("title").text not in last_news:
+						to_post.append({
+						"link" : item.find("link").text,
+						"title" : item.find("title").text,
+						"description" : item.find("description").text.split("</p>", 1)[0]
+						})
+				except:
+					pass
+		self.cache["news"] = [x.find("title").text for x in feed.findall("item")]
+		dataIO.save_json('data/guildwars2/cache.json', self.cache)
 		return to_post
 
 	async def send_news(self, embeds):
@@ -3135,8 +3130,7 @@ def check_files():
 		"gamedata.json": {},
 		"build.json": {"id": None},
 		"containers.json": {},
-		"current.json": {"day": datetime.datetime.utcnow().weekday(),
-					 "last_checked":datetime.datetime.utcnow().strftime(TIME_FORMAT)}
+		"cache.json": {"day": datetime.datetime.utcnow().weekday(), "news" : []}
 	}
 
 	for filename, value in files.items():
