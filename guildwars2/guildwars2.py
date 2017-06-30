@@ -2475,6 +2475,19 @@ class Guildwars2:
 			await self.bot.say("I will not send "
 							   "notifications about news")
 
+	@newsfeed.command(pass_context=True, name="force")		
+	async def news_force(self):
+		try:
+			to_post = await self.check_news()
+			if to_post:
+				embeds = []
+				for item in to_post:
+					embeds.append(self.news_embed(item))
+				await self.bot.say("Attempted to post news")
+				await self.send_news(embeds)
+		except APIError as e:
+			await self.bot.say("News notifier has encountered an exception: {0}".format(e))
+
 	def news_embed(self, item):
 		description = "[Click here]({0})\n{1}".format(item["link"], item["description"])
 		data = discord.Embed(title="{0}".format(item["title"]), description=description, color=0xc12d2b)
