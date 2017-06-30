@@ -2882,7 +2882,7 @@ class Guildwars2:
 				continue
 
 	async def news_checker(self):
-		while self is self.bot.get_cog("GuildWars2"):
+		while self is self.bot.get_cog("Guildwars2"):
 			try:
 				to_post = await self.check_news()
 				if to_post:
