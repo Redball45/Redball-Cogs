@@ -16,9 +16,15 @@ class arkserver:
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def arkrestart(self):
 		"""Restarts the ARK Server"""
-		await os.system("arkmanager restart")
+		os.system("arkmanager restart")
 		await self.bot.say("Server restarted.")
 
+	@commands.command(pass_context=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def broadcast(self):
+		"""Sends a message ingame"""
+		os.system("arkmanager broadcast")
+		await self.bot.say("Server restarted.")
 
 def setup(bot):
 	n = arkserver(bot)
