@@ -14,7 +14,7 @@ class arkserver:
 
 	@commands.command(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def restart(self):
+	async def arkrestart(self):
 		"""Restarts the ARK Server"""
 		await os.system("arkmanager restart")
 		await self.bot.say("Server restarted.")
