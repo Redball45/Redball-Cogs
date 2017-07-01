@@ -21,5 +21,5 @@ class arkserver:
 
 
 def setup(bot):
-	n = misc(bot)
+	n = arkserver(bot)
 	bot.add_cog(n)
