@@ -42,7 +42,7 @@ class arkserver:
 
 	def out(command):
 		result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-    	return result.stdout
+		return result.stdout
 
 def setup(bot):
 	n = arkserver(bot)
