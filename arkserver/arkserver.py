@@ -52,19 +52,21 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self):
 		"""Restarts the ARK Server"""
-		output = out("arkmanager restart --warn")
+		await self.bot.say("Restarting in 60 seconds...")
+		text = "This server will restart in 60 seconds for maintenance."
+		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
+		await asyncio.sleep(60)
+		output = out("arkmanager restart")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		output = out("arkmanager update --update-mods --backup --warn")
-		await self.bot.say("{0}".format(output))
-
-	@ark.command(pass_context=True, name="cancel")
-	async def ark_cancel(self):
-		"""Cancels a pending server shutdown"""
-		output = out("arkmanager cancelshutdown")
+		await self.bot.say("Restarting in 60 seconds...")
+		text = "This server will restart in 60 seconds for updates."
+		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
+		await asyncio.sleep(60)
+		output = out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="save")
