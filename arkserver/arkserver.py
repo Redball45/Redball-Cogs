@@ -23,7 +23,7 @@ class arkserver:
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def arkupdate(self):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		os.system("arkmanager update--update-mods")
+		os.system("arkmanager update --update-mods")
 		await self.bot.say("Attempting to update..")
 
 	@commands.command(pass_context=True)
