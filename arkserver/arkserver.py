@@ -89,7 +89,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="forceupdate")
 	@checks.is_owner()
 	async def ark_forceupdate(self):
-		"""Updates without warning"""
+		"""Updates without warning with the -force parameter"""
 		output = out("arkmanager update --update-mods --backup --force")
 		await self.bot.say("{0}".format(output))
 
