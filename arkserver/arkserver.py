@@ -50,22 +50,26 @@ class arkserver:
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="restart")
-	async def ark_restart(self):
-		"""Restarts the ARK Server"""
-		await self.bot.say("Restarting in 60 seconds...")
-		text = "This server will restart in 60 seconds for maintenance."
+	async def ark_restart(self, ctx, delay : int = 60):
+		"""Restarts the ARK Server - delay in seconds can be specified after restart, default 60 maximum 600"""
+		if delay > 600:
+			delay = 600
+		await self.bot.say("Restarting in {0} seconds...".format(delay))
+		text = "This server will restart in" + str(delay) + "seconds for maintenance."
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
-		await asyncio.sleep(60)
+		await asyncio.sleep(delay)
 		output = out("arkmanager restart")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		await self.bot.say("Restarting in 60 seconds...")
-		text = "This server will restart in 60 seconds for updates."
+		if delay > 600:
+			delay = 600
+		await self.bot.say("Restarting in {0} seconds...".format(delay))
+		text = "This server will restart in" + str(delay) + "seconds for updates."
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
-		await asyncio.sleep(60)
+		await asyncio.sleep(delay)
 		output = out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
 
