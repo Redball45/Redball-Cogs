@@ -6,6 +6,9 @@ import os
 import asyncio
 from subprocess import PIPE, run
 
+def out(command):
+	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
+	return result.stdout
 
 class arkserver:
 	"""Ark Server commands"""
@@ -40,9 +43,6 @@ class arkserver:
 		"""Sends a message ingame"""
 		os.system("arkmanager broadcast")
 
-	def out(command):
-		result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-		return result.stdout
 
 def setup(bot):
 	n = arkserver(bot)
