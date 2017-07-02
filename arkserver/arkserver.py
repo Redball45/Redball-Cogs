@@ -55,7 +55,7 @@ class arkserver:
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
-		text = "This server will restart in" + str(delay) + "seconds for maintenance."
+		text = "This server will restart in " + str(delay) + " seconds for maintenance."
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 		await asyncio.sleep(delay)
 		output = out("arkmanager restart")
@@ -67,7 +67,7 @@ class arkserver:
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
-		text = "This server will restart in" + str(delay) + "seconds for updates."
+		text = "This server will restart in " + str(delay) + " seconds for updates."
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 		await asyncio.sleep(delay)
 		output = out("arkmanager update --update-mods --backup")
