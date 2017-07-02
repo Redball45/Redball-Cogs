@@ -92,6 +92,13 @@ class arkserver:
 		output = out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
 
+	@ark.command(pass_context=True, name="validate")
+	@checks.is_owner()
+	async def ark_validate(self):
+		"""Validates the server files with steamcmd"""
+		output = out("arkmanager update --validate")
+		await self.bot.say("{0}".format(output))
+
 	@ark.command(pass_context=True, name="forceupdate")
 	@checks.is_owner()
 	async def ark_forceupdate(self):
