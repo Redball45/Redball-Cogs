@@ -25,6 +25,13 @@ class arkserver:
 
 	@commands.command(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
+	async def status(self):
+		"""Checks the server status"""
+		output = out("arkmanager status")
+		await self.bot.say("{0}".format(output))
+
+	@commands.command(pass_context=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
 	async def arkrestart(self):
 		"""Restarts the ARK Server"""
 		output = out("arkmanager restart")
