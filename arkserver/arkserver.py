@@ -40,7 +40,7 @@ class arkserver:
 		"""Sends a message ingame"""
 		os.system("arkmanager broadcast")
 
-	def out(command)
+	def out(command):
 		result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
     	return result.stdout
 
