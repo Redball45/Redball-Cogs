@@ -62,7 +62,7 @@ class arkserver:
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="update")
-	async def ark_update(self):
+	async def ark_update(self, ctx, delay : int = 60):
 		"""Stops the ARK Server, installs updates, then reboots"""
 		if delay > 600:
 			delay = 600
