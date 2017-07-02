@@ -21,10 +21,16 @@ class arkserver:
 
 	@commands.command(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
+	async def arkupdate(self):
+		"""Stops the ARK Server, installs updates, then reboots"""
+		os.system("arkmanager update--update-mods")
+		await self.bot.say("Attempting to update..")
+
+	@commands.command(pass_context=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
 	async def broadcast(self):
 		"""Sends a message ingame"""
 		os.system("arkmanager broadcast")
-		await self.bot.say("Server restarted.")
 
 def setup(bot):
 	n = arkserver(bot)
