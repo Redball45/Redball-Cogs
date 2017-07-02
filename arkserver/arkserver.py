@@ -33,7 +33,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_stop(self):
 		"""Stops the Ark Server"""
-		output = out("arkmanager stop --warn")
+		output = out("arkmanager stop")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="start")
