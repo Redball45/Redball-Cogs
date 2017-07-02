@@ -39,7 +39,7 @@ class arkserver:
 
 	@commands.command(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
-	async def broadcast(self, ctx, text):
+	async def broadcast(self, ctx, *, text):
 		"""Sends a message ingame"""
 		output = out("arkmanager broadcast" + " " + text)
 
