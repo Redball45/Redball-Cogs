@@ -96,8 +96,14 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_validate(self):
 		"""Validates the server files with steamcmd"""
-		output = out("arkmanager update --validate")
-		await self.bot.say("{0}".format(output))
+		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
+		answer = await self.bot.wait_for_message(timeout=30, author=user)
+		if answer.content == "Yes"
+			output = out("arkmanager update --validate")
+			await self.bot.say("{0}".format(output))
+		else: 
+			await self.bot.edit_message(message, "Okay, validation cancelled")
+			return
 
 	@ark.command(pass_context=True, name="forceupdate")
 	@checks.is_owner()
