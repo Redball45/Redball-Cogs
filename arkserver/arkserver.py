@@ -23,7 +23,7 @@ class arkserver:
 		self.bot = bot
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 
-	async def out(command, channel):
+	async def out(self, command, channel):
 		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		await self.bot.send_message(channel,"Debug message")
 		for line in p.stdout.readlines():
