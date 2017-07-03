@@ -126,7 +126,7 @@ class arkserver:
 
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
-		while self is self.bot.get_cog("arkserver") and Updating == False
+		while self is self.bot.get_cog("arkserver") and Updating == False:
 			output = out("arkmanager checkupdate")
 			if 'Your server is up to date!' in output:
 				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"No updates found")
