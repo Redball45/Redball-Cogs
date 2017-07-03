@@ -48,6 +48,11 @@ class arkserver:
 		channel = ctx.message.channel
 		output = await self.out("arkmanager checkupdate", channel)
 
+	@ark.command(pass_context=True)
+	async def checkmodupdate(self, ctx):
+		"""Checks for ark mod updates - does not actually start the update"""
+		channel = ctx.message.channel
+		output = await self.out("arkmanager checkmodupdate", channel)
 
 	@ark.command(pass_context=True, name="stop")
 	@checks.is_owner()
