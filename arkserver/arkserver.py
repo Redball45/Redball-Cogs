@@ -25,7 +25,7 @@ class arkserver:
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 
 	async def out(self, command, channel):
-		p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
 		while True:
 			output = process.stdout.readline().decode()
 			if output == '' and process.poll() is not None:
