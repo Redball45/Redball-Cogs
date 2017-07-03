@@ -14,13 +14,6 @@ import subprocess
 #	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 #	return result.stdout
 
-async def out(command, channel):
-	channel = ctx.message.channel
-	p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	await self.bot.send_message(channel,"Debug message")
-	for line in p.stdout.readlines():
-		await self.bot.send_message(channel,"{0}".format(line))
-	revtal = p.wait()
 
 
 class arkserver:
@@ -29,6 +22,14 @@ class arkserver:
 	def __init__(self, bot):
 		self.bot = bot
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
+
+	async def out(command, channel):
+		channel = ctx.message.channel
+		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		await self.bot.send_message(channel,"Debug message")
+		for line in p.stdout.readlines():
+		await self.bot.send_message(channel,"{0}".format(line))
+		revtal = p.wait()
 
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -40,14 +41,14 @@ class arkserver:
 	@ark.command(pass_context=True)
 	async def checkupdate(self):
 		"""Checks for ark updates - does not actually start the update"""
-		output = out("arkmanager checkupdate")
+		output = self.out("arkmanager checkupdate")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="stop")
 	@checks.is_owner()
 	async def ark_stop(self):
 		"""Stops the Ark Server"""
-		output = out("arkmanager stop")
+		output = self.out("arkmanager stop")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="toggle")
@@ -66,13 +67,13 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_start(self):
 		"""Starts the Ark Server"""
-		output = out("arkmanager start")
+		output = self.out("arkmanager start")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
-		output = out("arkmanager status", ctx)
+		await output = self.out("arkmanager status", ctx)
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
@@ -98,29 +99,29 @@ class arkserver:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
 		text = "This server will restart in " + str(delay) + " seconds for updates."
-		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
+		output = self.out('arkmanager broadcast' + ' ' + '"' + text + '"')
 		await asyncio.sleep(delay)
-		output = out("arkmanager update --update-mods --backup")
+		output = self.out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self):
 		"""Saves the world state"""
-		output = out("arkmanager saveworld")
+		output = self.out("arkmanager saveworld")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="backup")
 	async def ark_backup(self):
 		"""Creates a backup of the save and config files"""
-		output = out("arkmanager backup")
+		output = self.out("arkmanager backup")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="updatenow")
 	@checks.is_owner()
 	async def ark_updatenow(self):
 		"""Updates without warning"""
-		output = out("arkmanager update --update-mods --backup")
+		output = self.out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="validate")
@@ -130,7 +131,7 @@ class arkserver:
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		if answer.content == "Yes":
-			output = out("arkmanager update --validate")
+			output = self.out("arkmanager update --validate")
 			await self.bot.say("{0}".format(output))
 		else: 
 			await self.bot.edit_message(message, "Okay, validation cancelled")
@@ -140,7 +141,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_forceupdate(self):
 		"""Updates without warning with the -force parameter"""
-		output = out("arkmanager update --update-mods --backup --force --ifempty")
+		output = self.out("arkmanager update --update-mods --backup --force --ifempty")
 		await self.bot.say("{0}".format(output))
 
 	async def update_checker(self):
@@ -149,12 +150,12 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				output = out("arkmanager checkupdate", channel)
+				output = self.out("arkmanager checkupdate", channel)
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
 					await asyncio.sleep(3600)
 				else:
-					newoutput = out("arkmanager update --update-mods --backup --ifempty", adminchannel)
+					newoutput = self.out("arkmanager update --update-mods --backup --ifempty", adminchannel)
 					if 'players are still connected' in newoutput:
 						await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 						await asyncio.sleep(3600)
