@@ -117,7 +117,7 @@ class arkserver:
 	async def broadcast(self, ctx, *, text):
 		"""Sends a message ingame"""
 		channelid = "331076958425186305"
-		channel = await self.bot.get_channel(channelid)
+		channel = self.bot.get_channel(channelid)
 		await self.bot.send_message(channel, "debug")
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
