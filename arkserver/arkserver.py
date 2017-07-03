@@ -158,18 +158,16 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
+				asyncio.sleep(3600)
 				output = await self.runcommand("arkmanager checkupdate", adminchannel)
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
-					await asyncio.sleep(3600)
 				else:
 					newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
 					if 'players are still connected' in newoutput:
 						await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
-						await asyncio.sleep(3600)
 					else:
 						await self.bot.send_message(channel,"Server has been updated.")
-						await asyncio.sleep(3600)
 			else:
 				await self.bot.send_message(adminchannel,"Automatic updating is disabled, if the option is toggled on this might be because the server is already restarting or updating.")
 				await asyncio.sleep(1800)
