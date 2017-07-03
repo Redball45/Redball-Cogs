@@ -158,7 +158,7 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				asyncio.sleep(3600)
+				await asyncio.sleep(3600)
 				output = await self.runcommand("arkmanager checkupdate", adminchannel)
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
