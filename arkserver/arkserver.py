@@ -67,9 +67,9 @@ class arkserver:
 		"""Toggles autoupdating"""
 		togglestatus = self.settings["AutoUpdate"]
 		if toggle == 'info':
-			if togglestatus = True:
+			if togglestatus == True:
 				await self.bot.say("Automatic updating is currently enabled.")
-			elif togglestatus = False:
+			elif togglestatus == False:
 				await self.bot.say("Automatic updating is currently disabled.")
 		if toggle.lower() == 'off':
 			self.settings["AutoUpdate"] = False
