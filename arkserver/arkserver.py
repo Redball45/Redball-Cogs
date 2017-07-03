@@ -23,7 +23,7 @@ class arkserver:
 	async def runcommand(self, command, channel):
 		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
-		updateNeeded = False
+		updateNeeded = "False"
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None:
@@ -31,9 +31,11 @@ class arkserver:
 			if output: 
 				await self.bot.send_message(channel,"{0}".format(output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
-					updateNeeded = True
+					updateNeeded = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
 					break
+				if 'players are still connected' in newoutput:
+					updateNeeded = "PlayersConnected"
 		rc = process.poll()
 		return updateNeeded
 
@@ -167,32 +169,27 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
-			await self.bot.send_message(adminchannel,"{0}".format(self.settings["AutoUpdate"]))
+			await asyncio.sleep(3600)
 			if self.settings["AutoUpdate"] == True:
 				if self.updating == False:
-					await asyncio.sleep(30)
 					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel)
-					if updateNeeded == False:
-						await self.bot.send_message(adminchannel,"No updates found.")
-					else:
+					if updateNeeded == "True":
 						await asyncio.sleep(5)
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
-						if 'players are still connected' in newoutput:
+						if updateNeeded == "PlayersConnected"
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
-							await asyncio.sleep(30)
+							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 							self.updating = False
 						else:
 							await self.bot.send_message(channel,"Server has been updated.")
-							await asyncio.sleep(30)
+							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 							self.updating = False
 				else:
 					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
-			else:
-				await asyncio.sleep(3600)
 
 def check_folders():
 	if not os.path.exists("data/arkserver"): #create folder for settings file
