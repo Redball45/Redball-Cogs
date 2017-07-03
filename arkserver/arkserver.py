@@ -2,6 +2,9 @@ import discord
 from discord.ext import commands
 from .utils import checks
 from __main__ import send_cmd_help
+from cogs.utils.dataIO import dataIO, fileIO
+
+import json
 import os
 import asyncio
 from subprocess import PIPE, run
@@ -11,13 +14,13 @@ def out(command):
 	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 	return result.stdout
 
-Updating = True
 
 class arkserver:
 	"""Ark Server commands"""
 
 	def __init__(self, bot):
 		self.bot = bot
+		self.settings = dataIO.load_json("data/arkserver/settings.json")
 
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -43,12 +46,13 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_toggle(self):
 		"""Toggles autoupdating - is not saved and will revert to on upon bot/cog restart"""
-		if Updating == True:
-			Updating = False
+		if self.settings["AutoUpdate"] == True:
+			self.settings["AutoUpdate"] = False
 			await self.bot.say("Automatic updating is now disabled.")
 		else:
-			Updating = True
+			self.settings["AutoUpdate"] = True
 			await self.bot.say("Automatic server updating is now enabled.")
+		dataIO.save_json('data/arkserver/settings.json', self.settings)
 
 	@ark.command(pass_context=True, name="start")
 	@checks.is_owner()
@@ -66,8 +70,8 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
 		"""Restarts the ARK Server - delay in seconds can be specified after restart, default 60 maximum 600"""
-		CurrentUpdating = Updating
-		Updating = False #this makes sure autoupdate does not activate while the server is already busy
+		CurrentUpdating = self.settings["AutoUpdate"]
+		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
@@ -76,13 +80,13 @@ class arkserver:
 		await asyncio.sleep(delay)
 		output = out("arkmanager restart")
 		await self.bot.say("{0}".format(output))
-		Updating = CurrentUpdating #sets Updating back to the state it was before the command was run
+		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx, delay : int = 60):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		CurrentUpdating = Updating
-		Updating = False #this makes sure autoupdate does not activate while the server is already busy
+		CurrentUpdating = self.settings["AutoUpdate"]
+		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
@@ -91,7 +95,7 @@ class arkserver:
 		await asyncio.sleep(delay)
 		output = out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
-		Updating = CurrentUpdating #sets Updating back to the state it was before the command was run
+		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self):
@@ -143,7 +147,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
-			if Updating == True:
+			if self.settings["AutoUpdate"] == True:
 				output = out("arkmanager checkupdate")
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
@@ -160,8 +164,24 @@ class arkserver:
 				await self.bot.send_message(adminchannel,"Automatic updating is disabled, if the option is toggled on this might be because the server is already restarting or updating.")
 				await asyncio.sleep(1800)
 
+def check_folders():
+	if not os.path.exists("data/arkserver"):
+		print("Creating data/arkserver")
+		os.makedirs("data/arkserver")
+
+def check_files():
+	files = {
+		"settings.json": {"AutoUpdate": True}
+	}
+
+	for filename, value in files.items():
+		if not os.path.isfile("data/arkserver/{}".format(filename)):
+			print("Creating empty {}".format(filename))
+			dataIO.save_json("data/arkserver/{}".format(filename), value)
 
 def setup(bot):
+	check_folders()
+	check_files()
 	n = arkserver(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n.update_checker())
