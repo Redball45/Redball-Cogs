@@ -31,7 +31,7 @@ class arkserver:
 				break
 			if output: 
 				sani = output
-				sani = sani.lstrip(7)
+				sani = sani.lstrip("7")
 				for elem in list_replacements:
 					sani = sani.replace(elem, "")
 				await self.bot.send_message(channel,"{0}".format(sani))
