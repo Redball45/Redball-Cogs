@@ -116,16 +116,13 @@ class arkserver:
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def broadcast(self, ctx, *, text):
 		"""Sends a message ingame"""
-		channelid = "331076958425186305"
-		channel = self.bot.get_channel(channelid)
-		await self.bot.send_message(channel, "debug")
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
 	async def update_checker(self):
 		"""Checks for updates automatically every 30 minutes"""
 		while self is self.bot.get_cog("arkserver"):
 			output = out("arkmanager checkupdate")
-			await self.bot.send_message(self.bot.get_channel(331076958425186305),"{0}".format(output))
+			await self.bot.send_message(self.bot.get_channel("331076958425186305"),"{0}".format(output))
 			await asyncio.sleep(60)
 
 def setup(bot):
