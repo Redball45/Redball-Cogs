@@ -29,9 +29,9 @@ class arkserver:
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
-				sani_output = output.replace("[1;32m", "")
-				sani_output = sani_output.replace("[0;39m", "")
-				sani_output = sani_output.replace("8[J", "")
+				sani_output = output.replace("[1;32m ", "")
+				sani_output = sani_output.replace("[0;39m ", "")
+				sani_output = sani_output.replace("8[J ", "")
 				await self.bot.send_message(channel,"{0}".format(sani_output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = "True"
