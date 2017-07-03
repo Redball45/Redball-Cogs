@@ -29,6 +29,9 @@ class arkserver:
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
+				sani_output = output.replace("[1;32m", "")
+				sani_output = sani_output.replace("[0;39m", "")
+				sani_output = sani_output.replace("8[J", "")
 				await self.bot.send_message(channel,"{0}".format(output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = "True"
@@ -170,24 +173,24 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			await asyncio.sleep(3600)
-			if self.settings["AutoUpdate"] == True:
-				if self.updating == False:
+			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
+				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel)
-					if updateNeeded == "True":
-						await asyncio.sleep(5)
+					if updateNeeded == "True": #proceed with update if checkupdate tells us that an update is available
+						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
-						self.updating = True
+						self.updating = True #this stops a manually update from being triggered by a user
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
 						if updateNeeded == "PlayersConnected":
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-							self.updating = False
+							self.updating = False #update was cancelled so remove the lock on updating/restarting
 						else:
 							await self.bot.send_message(channel,"Server has been updated.")
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-							self.updating = False
+							self.updating = False #update was completed so remove the lock on updating/restarting
 				else:
 					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
 
