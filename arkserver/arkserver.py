@@ -7,12 +7,17 @@ from cogs.utils.dataIO import dataIO, fileIO
 import json
 import os
 import asyncio
-from subprocess import PIPE, run
+import subprocess
 
-def out(command):
+#def out(command):
 	"""This function runs a shell script and collects the terminal response"""
-	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-	return result.stdout
+#	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
+#	return result.stdout
+
+def out(command, tochannel):
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	for line in iter(p.stdout.readline,''):
+		await self.bot.send_message(tochannel,"{0}".format(line))
 
 
 class arkserver:
@@ -64,7 +69,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self):
 		"""Checks the server status"""
-		output = out("arkmanager status")
+		output = out("arkmanager status", ctx.message.channel)
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="restart")
@@ -142,12 +147,12 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				output = out("arkmanager checkupdate")
+				output = out("arkmanager checkupdate", channel)
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
 					await asyncio.sleep(3600)
 				else:
-					newoutput = out("arkmanager update --update-mods --backup --ifempty")
+					newoutput = out("arkmanager update --update-mods --backup --ifempty", adminchannel)
 					if 'players are still connected' in newoutput:
 						await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 						await asyncio.sleep(3600)
