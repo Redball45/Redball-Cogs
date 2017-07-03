@@ -32,6 +32,8 @@ class arkserver:
 				await self.bot.send_message(channel,"{0}".format(output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = True
+				if 'The server is now running, and should be up within 10 minutes' in output:
+					break
 		rc = process.poll()
 		return updateNeeded
 
@@ -172,6 +174,7 @@ class arkserver:
 					if updateNeeded == False:
 						await self.bot.send_message(adminchannel,"No updates found.")
 					else:
+						await asyncio.sleep(5)
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
