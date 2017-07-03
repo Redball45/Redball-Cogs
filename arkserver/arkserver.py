@@ -24,20 +24,16 @@ class arkserver:
 		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
 		updateNeeded = "False"
+		list_replacements = ["[1;32m ", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
-				sani_output = output.replace("[1;32m ", "").lstrip('7')
-				sani_output = sani_output.replace("[0;39m ", "")
-				sani_output = sani_output.replace("[0;39m   ","")
-				sani_output = sani_output.replace("[0;39m", "")
-				sani_output = sani_output.replace("8[J", "")
-				sani_output = sani_output.replace("[68G[   [1;32m", "")
-				sani_output = sani_output.replace("  ]", "")
-				sani_output = sani_output.replace("\033", "")
-				await self.bot.send_message(channel,"{0}".format(sani_output))
+				sani = output
+				for elem in list_replacements
+					sani = sani.replace(elem, "")
+				await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
