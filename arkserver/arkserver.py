@@ -122,12 +122,14 @@ class arkserver:
 			self.updating = False
 
 	@ark.command(pass_context=True, name="save")
+	@checks.is_owner()
 	async def ark_save(self, ctx):
 		"""Saves the world state"""
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager saveworld", channel)
 
 	@ark.command(pass_context=True, name="backup")
+	@checks.is_owner()
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config files"""
 		output = await self.runcommand("arkmanager backup", channel)
