@@ -10,7 +10,7 @@ import asyncio
 import subprocess
 
 #def out(command):
-	"""This function runs a shell script and collects the terminal response"""
+#"""This function runs a shell script and collects the terminal response"""
 #	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 #	return result.stdout
 
