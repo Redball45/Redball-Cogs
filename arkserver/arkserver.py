@@ -176,7 +176,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
-			await asyncio.sleep(30)
+			await asyncio.sleep(60)
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel)
@@ -190,13 +190,18 @@ class arkserver:
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 							self.updating = False #update was cancelled so remove the lock on updating/restarting
+							await asyncio.sleep(3540)
 						else:
 							await self.bot.send_message(channel,"Server has been updated.")
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 							self.updating = False #update was completed so remove the lock on updating/restarting
+							await asyncio.sleep(3540)
+					else:
+						await asyncio.sleep(3540)
 				else:
 					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
+					await asyncio.sleep(3540)
 
 def check_folders():
 	if not os.path.exists("data/arkserver"): #create folder for settings file
