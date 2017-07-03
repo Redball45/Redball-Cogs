@@ -8,6 +8,7 @@ import json
 import os
 import asyncio
 import subprocess
+import shlex
 
 #def out(command):
 #"""This function runs a shell script and collects the terminal response"""
@@ -24,10 +25,15 @@ class arkserver:
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 
 	async def out(self, command, channel):
-		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-		for line in p.stdout.readlines():
-			await self.bot.send_message(channel,"{0}".format(line))
-		revtal = p.wait()
+		p = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+		while True:
+			output = process.stdout.readline().decode()
+			if output == '' and process.poll() is not None:
+				break
+			if output: 
+				await self.bot.send_message(channel,"{0}".format(output))
+		rc = process.poll()
+		return rc
 
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -93,6 +99,7 @@ class arkserver:
 	async def ark_update(self, ctx, delay : int = 60):
 		"""Stops the ARK Server, installs updates, then reboots"""
 		CurrentUpdating = self.settings["AutoUpdate"]
+		channel = ctx.message.channel
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		if delay > 600:
 			delay = 600
