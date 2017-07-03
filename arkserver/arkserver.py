@@ -22,7 +22,7 @@ class arkserver:
 
 	async def runcommand(self, command, channel):
 		"""This function runs a command in the terminal and collects the response"""
-		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
 		updateNeeded = "False"
 		list_replacements = ["[1;32m ", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
@@ -31,6 +31,7 @@ class arkserver:
 				break
 			if output: 
 				sani = output
+				sani = sani.lstrip(7)
 				for elem in list_replacements:
 					sani = sani.replace(elem, "")
 				await self.bot.send_message(channel,"{0}".format(sani))
@@ -40,7 +41,8 @@ class arkserver:
 					break
 				if 'players are still connected' in output:
 					updateNeeded = "PlayersConnected"
-		rc = process.poll()
+		if process.poll() is None:
+			process.kill()
 		return updateNeeded
 
 	@commands.group(pass_context=True)
