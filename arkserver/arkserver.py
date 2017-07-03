@@ -11,11 +11,6 @@ import asyncio
 import subprocess
 import shlex
 
-#def out(command):
-#"""This function runs a shell script and collects the terminal response"""
-#	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-#	return result.stdout
-
 
 class arkserver:
 	"""Ark Server commands"""
@@ -26,13 +21,14 @@ class arkserver:
 		self.updating = False
 
 	async def runcommand(self, command, channel):
+		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
 		while True:
-			output = process.stdout.readline().decode()
+			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
-				await self.bot.send_message(channel,"{0}".format(output))
+				await self.bot.send_message(channel,"{0}".format(output)) 
 		rc = process.poll()
 		return rc
 
@@ -46,7 +42,7 @@ class arkserver:
 	@ark.command(pass_context=True)
 	async def checkupdate(self, ctx):
 		"""Checks for ark updates - does not actually start the update"""
-		channel = ctx.message.channel
+		channel = ctx.message.channel #gets channel from user message command
 		output = await self.runcommand("arkmanager checkupdate", channel)
 
 	@ark.command(pass_context=True)
@@ -66,7 +62,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_toggle(self, ctx, toggle : str = 'info'):
 		"""Toggles autoupdating"""
-		togglestatus = self.settings["AutoUpdate"]
+		togglestatus = self.settings["AutoUpdate"] #retrives current status of toggle from settings file
 		if toggle.lower() == 'off':
 			self.settings["AutoUpdate"] = False
 			await self.bot.say("Automatic updating is now disabled.")
@@ -192,13 +188,13 @@ class arkserver:
 				await asyncio.sleep(3600)
 
 def check_folders():
-	if not os.path.exists("data/arkserver"):
+	if not os.path.exists("data/arkserver"): #create folder for settings file
 		print("Creating data/arkserver")
 		os.makedirs("data/arkserver")
 
 def check_files():
 	files = {
-		"settings.json": {"AutoUpdate": True}
+		"settings.json": {"AutoUpdate": True} #create settings file if it doesn't already exist
 	}
 
 	for filename, value in files.items():
