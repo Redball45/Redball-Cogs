@@ -37,7 +37,7 @@ class arkserver:
 			await self.bot.send_cmd_help(ctx)
 
 	@ark.command(pass_context=True)
-	async def checkupdate(self):
+	async def checkupdate(self, ctx):
 		"""Checks for ark updates - does not actually start the update"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager checkupdate", channel)
@@ -45,7 +45,7 @@ class arkserver:
 
 	@ark.command(pass_context=True, name="stop")
 	@checks.is_owner()
-	async def ark_stop(self):
+	async def ark_stop(self, ctx):
 		"""Stops the Ark Server"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager stop", channel)
@@ -64,7 +64,7 @@ class arkserver:
 
 	@ark.command(pass_context=True, name="start")
 	@checks.is_owner()
-	async def ark_start(self):
+	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager start", channel)
@@ -105,26 +105,26 @@ class arkserver:
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="save")
-	async def ark_save(self):
+	async def ark_save(self, ctx):
 		"""Saves the world state"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager saveworld", channel)
 
 	@ark.command(pass_context=True, name="backup")
-	async def ark_backup(self):
+	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config files"""
 		output = self.out("arkmanager backup", channel)
 
 	@ark.command(pass_context=True, name="updatenow")
 	@checks.is_owner()
-	async def ark_updatenow(self):
+	async def ark_updatenow(self, ctx):
 		"""Updates without warning"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager update --update-mods --backup", channel)
 
 	@ark.command(pass_context=True, name="validate")
 	@checks.is_owner()
-	async def ark_validate(self):
+	async def ark_validate(self, ctx):
 		"""Validates the server files with steamcmd"""
 		channel = ctx.message.channel
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
@@ -137,7 +137,7 @@ class arkserver:
 
 	@ark.command(pass_context=True, name="forceupdate")
 	@checks.is_owner()
-	async def ark_forceupdate(self):
+	async def ark_forceupdate(self, ctx):
 		"""Updates without warning with the -force parameter"""
 		channel = ctx.message.channel
 		output = self.out("arkmanager update --update-mods --backup --force", channel)
