@@ -15,7 +15,6 @@ import shlex
 #	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 #	return result.stdout
 
-Updating = False
 
 class arkserver:
 	"""Ark Server commands"""
@@ -23,6 +22,7 @@ class arkserver:
 	def __init__(self, bot):
 		self.bot = bot
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
+		self.updating = False
 
 	async def runcommand(self, command, channel):
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
@@ -95,30 +95,30 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
-		if Updating == True:
+		if self.updating == True:
 			await self.bot.say("I'm already carrying out a restart or update!")
 		else:
-			Updating = True
+			self.updating = True
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			output = await self.runcommand("arkmanager restart --warn", channel)
 			await asyncio.sleep(30)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-			Updating = False
+			self.updating = False
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		if Updating == True:
+		if self.updating == True:
 			await self.bot.say("I'm already carrying out a restart or update!")
 		else:
-			Updating = True
+			self.updating = True
 			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
 			await asyncio.sleep(30)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-			Updating = False
+			self.updating = False
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self, ctx):
@@ -164,20 +164,23 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				if Updating == False:
+				if self.updating == False:
 					await asyncio.sleep(3600)
 					output = await self.runcommand("arkmanager checkupdate", adminchannel)
 					if 'Your server is up to date!' in output:
 						await self.bot.send_message(adminchannel,"No updates found.")
 					else:
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+						self.updating = True
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
 						if 'players are still connected' in newoutput:
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
+							self.updating = False
 							await asyncio.sleep(30)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 						else:
 							await self.bot.send_message(channel,"Server has been updated.")
+							self.updating = False
 							await asyncio.sleep(30)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				else:
