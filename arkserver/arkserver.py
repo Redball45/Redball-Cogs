@@ -116,7 +116,8 @@ class arkserver:
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def broadcast(self, ctx, *, text):
 		"""Sends a message ingame"""
-		await self.bot.send_message(self.bot.get_channel(331076958425186305),"debug")
+		channel = self.bot.get_channel(331076958425186305)
+		await self.bot.send_message(channel, "debug")
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
 	async def update_checker(self):
