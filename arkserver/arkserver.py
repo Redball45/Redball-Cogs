@@ -33,7 +33,7 @@ class arkserver:
 				sani_output = sani_output.replace("[0;39m ", "")
 				sani_output = sani_output.replace("[0;39m   ","")
 				sani_output = sani_output.replace("[0;39m", "")
-				sani_output = sani_output.replace("8[J", "")
+				sani_output = sani_output.replace("8[J", "")
 				sani_output = sani_output.replace("[68G[   [1;32m", "")
 				sani_output = sani_output.replace("  ]", "")
 				await self.bot.send_message(channel,"{0}".format(sani_output))
