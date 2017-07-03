@@ -46,7 +46,7 @@ class arkserver:
 	async def checkupdate(self, ctx):
 		"""Checks for ark updates - does not actually start the update"""
 		channel = ctx.message.channel
-		output = self.out("arkmanager checkupdate", channel)
+		output = await self.out("arkmanager checkupdate", channel)
 
 
 	@ark.command(pass_context=True, name="stop")
@@ -54,7 +54,7 @@ class arkserver:
 	async def ark_stop(self, ctx):
 		"""Stops the Ark Server"""
 		channel = ctx.message.channel
-		output = self.out("arkmanager stop", channel)
+		output = await self.out("arkmanager stop", channel)
 
 	@ark.command(pass_context=True, name="toggle")
 	@checks.is_owner()
@@ -73,7 +73,7 @@ class arkserver:
 	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
 		channel = ctx.message.channel
-		output = self.out("arkmanager start", channel)
+		output = await self.out("arkmanager start", channel)
 
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self, ctx):
@@ -89,7 +89,7 @@ class arkserver:
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		await self.bot.say("Restarting in 60 seconds...")
 		await asyncio.sleep(60)
-		output = out("arkmanager restart --warn", channel)
+		output = await self.out("arkmanager restart --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="update")
@@ -100,26 +100,26 @@ class arkserver:
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		await self.bot.say("Restarting in 60 seconds...")
 		await asyncio.sleep(60)
-		output = self.out("arkmanager update --update-mods --backup --warn", channel)
+		output = await self.out("arkmanager update --update-mods --backup --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self, ctx):
 		"""Saves the world state"""
 		channel = ctx.message.channel
-		output = self.out("arkmanager saveworld", channel)
+		output = await self.out("arkmanager saveworld", channel)
 
 	@ark.command(pass_context=True, name="backup")
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config files"""
-		output = self.out("arkmanager backup", channel)
+		output = await self.out("arkmanager backup", channel)
 
 	@ark.command(pass_context=True, name="updatenow")
 	@checks.is_owner()
 	async def ark_updatenow(self, ctx):
 		"""Updates without warning"""
 		channel = ctx.message.channel
-		output = self.out("arkmanager update --update-mods --backup", channel)
+		output = await self.out("arkmanager update --update-mods --backup", channel)
 
 	@ark.command(pass_context=True, name="validate")
 	@checks.is_owner()
@@ -129,7 +129,7 @@ class arkserver:
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		if answer.content == "Yes":
-			output = self.out("arkmanager update --validate", channel)
+			output = await self.out("arkmanager update --validate", channel)
 		else: 
 			await self.bot.edit_message(message, "Okay, validation cancelled")
 			return
@@ -147,12 +147,12 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				output = self.out("arkmanager checkupdate", channel)
+				output = await self.out("arkmanager checkupdate", channel)
 				if 'Your server is up to date!' in output:
 					await self.bot.send_message(adminchannel,"No updates found.")
 					await asyncio.sleep(3600)
 				else:
-					newoutput = self.out("arkmanager update --update-mods --backup --ifempty", adminchannel)
+					newoutput = await self.out("arkmanager update --update-mods --backup --ifempty", adminchannel)
 					if 'players are still connected' in newoutput:
 						await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 						await asyncio.sleep(3600)
