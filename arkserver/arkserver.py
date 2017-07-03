@@ -120,9 +120,10 @@ class arkserver:
 
 	async def update_checker(self):
 		"""Checks for updates automatically every 30 minutes"""
-		output = out("arkmanager checkupdate")
-		await self.bot.send_message(self.bot.get_channel(331076958425186305),"{0}".format(output))
-		await asyncio.sleep(60)
+		while self is self.bot.get_cog("arkserver"):
+			output = out("arkmanager checkupdate")
+			await self.bot.send_message(self.bot.get_channel(331076958425186305),"{0}".format(output))
+			await asyncio.sleep(60)
 
 def setup(bot):
 	n = arkserver(bot)
