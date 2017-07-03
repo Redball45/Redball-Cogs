@@ -66,12 +66,12 @@ class arkserver:
 	async def ark_toggle(self, ctx, toggle : str = 'info'):
 		"""Toggles autoupdating"""
 		togglestatus = self.settings["AutoUpdate"]
-		if toggle == 'info'
+		if toggle == 'info':
 			await self.bot.say("{0}".format(togglestatus))
 		if toggle.lower() == 'off':
 			self.settings["AutoUpdate"] = False
 			await self.bot.say("Automatic updating is now disabled.")
-		elseif toggle.lower() == 'on':
+		elif toggle.lower() == 'on':
 			self.settings["AutoUpdate"] = True
 			await self.bot.say("Automatic server updating is now enabled.")
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
