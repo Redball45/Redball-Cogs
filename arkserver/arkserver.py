@@ -178,7 +178,7 @@ class arkserver:
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
-						if updateNeeded == "PlayersConnected"
+						if updateNeeded == "PlayersConnected":
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
