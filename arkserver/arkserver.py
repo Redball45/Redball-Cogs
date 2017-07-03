@@ -98,7 +98,7 @@ class arkserver:
 		"""Validates the server files with steamcmd"""
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
-		if answer.content == "Yes"
+		if answer.content == "Yes":
 			output = out("arkmanager update --validate")
 			await self.bot.say("{0}".format(output))
 		else: 
