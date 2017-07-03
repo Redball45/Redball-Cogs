@@ -23,14 +23,17 @@ class arkserver:
 	async def runcommand(self, command, channel):
 		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+		updateNeeded = False
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
-				await self.bot.send_message(channel,"{0}".format(output)) 
+				await self.bot.send_message(channel,"{0}".format(output))
+				if 'Your server needs to be restarted in order to receive the latest update'
+					updateNeeded = True
 		rc = process.poll()
-		return rc
+		return updateNeeded
 
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -165,9 +168,8 @@ class arkserver:
 			if self.settings["AutoUpdate"] == True:
 				if self.updating == False:
 					await asyncio.sleep(30)
-					output = ""
-					output = await self.runcommand("arkmanager checkupdate", adminchannel)
-					if 'Your server is up to date!' in output:
+					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel)
+					if updateNeeded == False:
 						await self.bot.send_message(adminchannel,"No updates found.")
 					else:
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
