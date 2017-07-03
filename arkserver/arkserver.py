@@ -29,7 +29,7 @@ class arkserver:
 			if output == '' and process.poll() is not None:
 				break
 			if output: 
-				sani_output = output.replace("[1;32m ", "")
+				sani_output = output.replace("[1;32m ", "").lstrip('7')
 				sani_output = sani_output.replace("[0;39m ", "")
 				sani_output = sani_output.replace("[0;39m", "")
 				sani_output = sani_output.replace("8[J", "")
@@ -139,6 +139,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config files"""
+		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager backup", channel)
 
 	@ark.command(pass_context=True, name="updatenow")
