@@ -96,19 +96,17 @@ class arkserver:
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="update")
-	async def ark_update(self, ctx, delay : int = 60):
+	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
 		CurrentUpdating = self.settings["AutoUpdate"]
 		channel = ctx.message.channel
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
-		if delay > 600:
-			delay = 600
+		delay = 60
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
 		text = "This server will restart in " + str(delay) + " seconds for updates."
 		output = self.out('arkmanager broadcast' + ' ' + '"' + text + '"', channel)
 		await asyncio.sleep(delay)
-		output = self.out("arkmanager update --update-mods --backup")
-		await self.bot.say("{0}".format(output))
+		output = self.out("arkmanager update --update-mods --backup", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
 
 	@ark.command(pass_context=True, name="save")
