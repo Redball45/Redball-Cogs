@@ -129,7 +129,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver") and Updating == False:
 			output = out("arkmanager checkupdate")
 			if 'Your server is up to date!' in output:
-				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"No updates found")
+				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"No updates found.")
 				await asyncio.sleep(3600)
 			else:
 				newoutput = out("arkmanager update --update-mods --backup --ifempty")
@@ -138,6 +138,7 @@ class arkserver:
 					await asyncio.sleep(3600)
 				else:
 					await self.bot.send_message(self.bot.get_channel("330795712067665923"),"{0}".format(newoutput))
+					await asyncio.sleep(3600)
 def setup(bot):
 	n = arkserver(bot)
 	loop = asyncio.get_event_loop()
