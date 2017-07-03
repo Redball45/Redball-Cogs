@@ -32,7 +32,7 @@ class arkserver:
 				sani_output = output.replace("[1;32m", "")
 				sani_output = sani_output.replace("[0;39m", "")
 				sani_output = sani_output.replace("8[J", "")
-				await self.bot.send_message(channel,"{0}".format(output))
+				await self.bot.send_message(channel,"{0}".format(sani_output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
