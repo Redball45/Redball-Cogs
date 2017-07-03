@@ -167,6 +167,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
+			await self.bot.send_message(adminchannel,"{0}".format(self.settings["AutoUpdate"]))
 			if self.settings["AutoUpdate"] == True:
 				if self.updating == False:
 					await asyncio.sleep(30)
