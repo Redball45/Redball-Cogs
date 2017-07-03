@@ -14,10 +14,11 @@ import subprocess
 #	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 #	return result.stdout
 
-def out(command, tochannel):
-	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+async def out(command, tochannel):
+	result = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	for line in iter(p.stdout.readline,''):
 		await self.bot.send_message(tochannel,"{0}".format(line))
+	revtal = p.wait()
 
 
 class arkserver:
