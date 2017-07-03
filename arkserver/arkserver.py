@@ -24,7 +24,6 @@ class arkserver:
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 
 	async def out(command, channel):
-		channel = ctx.message.channel
 		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		await self.bot.send_message(channel,"Debug message")
 		for line in p.stdout.readlines():
@@ -73,7 +72,8 @@ class arkserver:
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
-		output = await self.out("arkmanager status", ctx)
+		channel = ctx.message.channel
+		output = await self.out("arkmanager status", channel)
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
