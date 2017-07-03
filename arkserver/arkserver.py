@@ -31,7 +31,7 @@ class arkserver:
 				break
 			if output: 
 				sani = output
-				for elem in list_replacements
+				for elem in list_replacements:
 					sani = sani.replace(elem, "")
 				await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
