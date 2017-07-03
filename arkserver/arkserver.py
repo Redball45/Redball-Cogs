@@ -30,7 +30,7 @@ class arkserver:
 				break
 			if output: 
 				await self.bot.send_message(channel,"{0}".format(output))
-				if 'Your server needs to be restarted in order to receive the latest update'
+				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = True
 		rc = process.poll()
 		return updateNeeded
