@@ -118,6 +118,14 @@ class arkserver:
 		"""Sends a message ingame"""
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
+	async def update_checker(self):
+		"""Checks for updates automatically every 30 minutes"""
+		output = out("arkmanager checkupdate")
+		await self.bot.send_message(self.bot.get_channel(331076958425186305),"{0}".format(output))
+		await asyncio.sleep(60)
+
 def setup(bot):
 	n = arkserver(bot)
+	loop = asyncio.get_event_loop()
+	loop.create_task(n.update_checker())
 	bot.add_cog(n)
