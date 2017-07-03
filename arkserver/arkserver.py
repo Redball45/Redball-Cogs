@@ -109,7 +109,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_forceupdate(self):
 		"""Updates without warning with the -force parameter"""
-		output = out("arkmanager update --update-mods --backup --force")
+		output = out("arkmanager update --update-mods --backup --force --ifempty")
 		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True)
@@ -119,11 +119,16 @@ class arkserver:
 		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
 	async def update_checker(self):
-		"""Checks for updates automatically every 30 minutes"""
+		"""Checks for updates automatically every hour"""
 		while self is self.bot.get_cog("arkserver"):
 			output = out("arkmanager checkupdate")
-			await self.bot.send_message(self.bot.get_channel("331076958425186305"),"{0}".format(output))
-			await asyncio.sleep(60)
+			if 'Your server is up to date!' in output:
+				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"No updates found")
+				await asyncio.sleep(3600)
+			else:
+				newoutput = out("arkmanager update --update-mods --backup --ifempty")
+				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"{0}".format(newoutput))
+				await asyncio.sleep(3600)
 
 def setup(bot):
 	n = arkserver(bot)
