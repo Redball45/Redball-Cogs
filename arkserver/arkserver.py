@@ -176,7 +176,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
-			await asyncio.sleep(3600)
+			await asyncio.sleep(30)
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel)
