@@ -101,6 +101,7 @@ class arkserver:
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		output = await self.runcommand("arkmanager restart --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
+		await asyncio.sleep(30)
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="update")
@@ -112,6 +113,7 @@ class arkserver:
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
 		output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
+		await asyncio.sleep(30)
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="save")
