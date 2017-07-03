@@ -34,7 +34,7 @@ class arkserver:
 					updateNeeded = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
 					break
-				if 'players are still connected' in newoutput:
+				if 'players are still connected' in output:
 					updateNeeded = "PlayersConnected"
 		rc = process.poll()
 		return updateNeeded
