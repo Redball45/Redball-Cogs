@@ -95,6 +95,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
+		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		CurrentUpdating = self.settings["AutoUpdate"]
 		channel = ctx.message.channel
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
@@ -102,10 +103,12 @@ class arkserver:
 		await asyncio.sleep(60)
 		output = await self.runcommand("arkmanager restart --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
+		await self.bot.change_presence(game=discord.Game(name=""),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
+		await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 		CurrentUpdating = self.settings["AutoUpdate"]
 		channel = ctx.message.channel
 		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
@@ -113,6 +116,7 @@ class arkserver:
 		await asyncio.sleep(60)
 		output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
+		await self.bot.change_presence(game=discord.Game(name=""),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self, ctx):
