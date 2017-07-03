@@ -15,7 +15,7 @@ import shlex
 #	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 #	return result.stdout
 
-
+Updating = False
 
 class arkserver:
 	"""Ark Server commands"""
@@ -95,26 +95,30 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
-		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		CurrentUpdating = self.settings["AutoUpdate"]
-		channel = ctx.message.channel
-		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
-		output = await self.runcommand("arkmanager restart --warn", channel)
-		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
-		await asyncio.sleep(30)
-		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		if Updating == True:
+			await self.bot.say("I'm already carrying out a restart or update!")
+		else:
+			Updating = True
+			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+			channel = ctx.message.channel
+			output = await self.runcommand("arkmanager restart --warn", channel)
+			await asyncio.sleep(30)
+			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+			Updating = False
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
-		CurrentUpdating = self.settings["AutoUpdate"]
-		channel = ctx.message.channel
-		self.settings["AutoUpdate"] = False #this makes sure autoupdate does not activate while the server is already busy
-		output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
-		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
-		await asyncio.sleep(30)
-		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		if Updating == True:
+			await self.bot.say("I'm already carrying out a restart or update!")
+		else:
+			Updating = True
+			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+			channel = ctx.message.channel
+			output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
+			await asyncio.sleep(30)
+			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+			Updating = False
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self, ctx):
@@ -160,19 +164,26 @@ class arkserver:
 			channel = self.bot.get_channel("330795712067665923")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			if self.settings["AutoUpdate"] == True:
-				await asyncio.sleep(3600)
-				output = await self.runcommand("arkmanager checkupdate", adminchannel)
-				if 'Your server is up to date!' in output:
-					await self.bot.send_message(adminchannel,"No updates found.")
-				else:
-					newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
-					if 'players are still connected' in newoutput:
-						await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
+				if Updating == False:
+					await asyncio.sleep(3600)
+					output = await self.runcommand("arkmanager checkupdate", adminchannel)
+					if 'Your server is up to date!' in output:
+						await self.bot.send_message(adminchannel,"No updates found.")
 					else:
-						await self.bot.send_message(channel,"Server has been updated.")
+						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
+						if 'players are still connected' in newoutput:
+							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
+							await asyncio.sleep(30)
+							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+						else:
+							await self.bot.send_message(channel,"Server has been updated.")
+							await asyncio.sleep(30)
+							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+				else:
+					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
 			else:
-				await self.bot.send_message(adminchannel,"Automatic updating is disabled, if the option is toggled on this might be because the server is already restarting or updating.")
-				await asyncio.sleep(1800)
+				await asyncio.sleep(3600)
 
 def check_folders():
 	if not os.path.exists("data/arkserver"):
