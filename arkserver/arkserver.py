@@ -45,7 +45,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="toggle")
 	@checks.is_owner()
 	async def ark_toggle(self):
-		"""Toggles autoupdating - is not saved and will revert to on upon bot/cog restart"""
+		"""Toggles autoupdating"""
 		if self.settings["AutoUpdate"] == True:
 			self.settings["AutoUpdate"] = False
 			await self.bot.say("Automatic updating is now disabled.")
@@ -135,12 +135,6 @@ class arkserver:
 		"""Updates without warning with the -force parameter"""
 		output = out("arkmanager update --update-mods --backup --force --ifempty")
 		await self.bot.say("{0}".format(output))
-
-	@ark.command(pass_context=True)
-	@checks.mod_or_permissions(manage_webhooks=True)
-	async def broadcast(self, ctx, *, text):
-		"""Sends a message ingame"""
-		output = out('arkmanager broadcast' + ' ' + '"' + text + '"')
 
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
