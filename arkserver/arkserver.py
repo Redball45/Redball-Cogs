@@ -36,6 +36,7 @@ class arkserver:
 				sani_output = sani_output.replace("8[J", "")
 				sani_output = sani_output.replace("[68G[   [1;32m", "")
 				sani_output = sani_output.replace("  ]", "")
+				sani_output = sani_output.replace("\033", "")
 				await self.bot.send_message(channel,"{0}".format(sani_output))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					updateNeeded = "True"
