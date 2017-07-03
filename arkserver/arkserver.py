@@ -71,7 +71,6 @@ class arkserver:
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
 		output = out("arkmanager status", ctx.message.channel)
-		await self.bot.say("{0}".format(output))
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
