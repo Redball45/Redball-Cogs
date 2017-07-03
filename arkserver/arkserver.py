@@ -28,7 +28,7 @@ class arkserver:
 		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 		await self.bot.send_message(channel,"Debug message")
 		for line in p.stdout.readlines():
-		await self.bot.send_message(channel,"{0}".format(line))
+			await self.bot.send_message(channel,"{0}".format(line))
 		revtal = p.wait()
 
 	@commands.group(pass_context=True)
