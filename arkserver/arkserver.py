@@ -16,6 +16,7 @@ import subprocess
 
 async def out(command, tochannel):
 	p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	await self.bot.send_message(tochannel,"Debug message")
 	for line in iter(p.stdout.readline,''):
 		await self.bot.send_message(tochannel,"{0}".format(line))
 	revtal = p.wait()
