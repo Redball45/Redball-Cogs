@@ -10,6 +10,8 @@ def out(command):
 	result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
 	return result.stdout
 
+Updating = False
+
 class arkserver:
 	"""Ark Server commands"""
 
@@ -52,6 +54,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
 		"""Restarts the ARK Server - delay in seconds can be specified after restart, default 60 maximum 600"""
+		Updating = True
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
@@ -60,10 +63,12 @@ class arkserver:
 		await asyncio.sleep(delay)
 		output = out("arkmanager restart")
 		await self.bot.say("{0}".format(output))
+		Updating = False
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx, delay : int = 60):
 		"""Stops the ARK Server, installs updates, then reboots"""
+		Updating = True
 		if delay > 600:
 			delay = 600
 		await self.bot.say("Restarting in {0} seconds...".format(delay))
@@ -72,6 +77,7 @@ class arkserver:
 		await asyncio.sleep(delay)
 		output = out("arkmanager update --update-mods --backup")
 		await self.bot.say("{0}".format(output))
+		Updating = False
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self):
@@ -120,16 +126,18 @@ class arkserver:
 
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
-		while self is self.bot.get_cog("arkserver"):
+		while self is self.bot.get_cog("arkserver") and Updating == False
 			output = out("arkmanager checkupdate")
 			if 'Your server is up to date!' in output:
 				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"No updates found")
 				await asyncio.sleep(3600)
 			else:
 				newoutput = out("arkmanager update --update-mods --backup --ifempty")
-				await self.bot.send_message(self.bot.get_channel("331076958425186305"),"{0}".format(newoutput))
-				await asyncio.sleep(3600)
-
+				if 'players are still connected' in newoutput:
+					await self.bot.send_message(self.bot.get_channel("330795712067665923"),"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
+					await asyncio.sleep(3600)
+				else:
+					await self.bot.send_message(self.bot.get_channel("330795712067665923"),"{0}".format(newoutput))
 def setup(bot):
 	n = arkserver(bot)
 	loop = asyncio.get_event_loop()
