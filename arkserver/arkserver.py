@@ -102,7 +102,7 @@ class arkserver:
 		await self.bot.say("Restarting in 60 seconds...")
 		output = await self.runcommand("arkmanager restart --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
-		await self.bot.change_presence(game=discord.Game(name=""),status=discord.Status.online)
+		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
@@ -114,7 +114,7 @@ class arkserver:
 		await self.bot.say("Restarting in 60 seconds...")
 		output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel)
 		self.settings["AutoUpdate"] = CurrentUpdating #sets Updating back to the state it was before the command was run
-		await self.bot.change_presence(game=discord.Game(name=""),status=discord.Status.online)
+		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 
 	@ark.command(pass_context=True, name="save")
 	async def ark_save(self, ctx):
