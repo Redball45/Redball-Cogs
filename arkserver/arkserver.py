@@ -15,9 +15,10 @@ import subprocess
 #	return result.stdout
 
 async def out(command, channel):
+	channel = ctx.message.channel
 	p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	await self.bot.send_message(channel,"Debug message")
-	for line in iter(p.stdout.readline,''):
+	for line in p.stdout.readlines():
 		await self.bot.send_message(channel,"{0}".format(line))
 	revtal = p.wait()
 
@@ -71,8 +72,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
-		channel = ctx.message.channel
-		output = out("arkmanager status", channel)
+		output = out("arkmanager status", ctx)
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
