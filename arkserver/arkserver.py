@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from .utils import checks
 from __main__ import send_cmd_help
+from discord.ext.commands.cooldowns import BucketType
 from cogs.utils.dataIO import dataIO, fileIO
 
 import json
@@ -175,14 +176,14 @@ class arkserver:
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
 						if 'players are still connected' in newoutput:
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
-							self.updating = False
 							await asyncio.sleep(30)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+							self.updating = False
 						else:
 							await self.bot.send_message(channel,"Server has been updated.")
-							self.updating = False
 							await asyncio.sleep(30)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+							self.updating = False
 				else:
 					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
 			else:
