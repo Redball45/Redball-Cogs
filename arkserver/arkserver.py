@@ -73,7 +73,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="status")
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
-		await output = self.out("arkmanager status", ctx)
+		output = await self.out("arkmanager status", ctx)
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
