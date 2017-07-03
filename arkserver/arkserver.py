@@ -91,7 +91,6 @@ class arkserver:
 		"""Checks the server status"""
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager status", channel)
-		await self.bot.say("Test debug command to ensure that runcommand function correctly closes.")
 
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
