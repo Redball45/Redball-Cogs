@@ -4,6 +4,7 @@ from .utils import checks
 from __main__ import send_cmd_help
 from discord.ext.commands.cooldowns import BucketType
 from cogs.utils.dataIO import dataIO, fileIO
+from datetime import datetime
 
 import json
 import os
@@ -182,7 +183,7 @@ class arkserver:
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					verbose = False
 					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
-					await self.bot.send_message(adminchannel,"Update check completed - No updates available.")
+					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
 					if updateNeeded == "True": #proceed with update if checkupdate tells us that an update is available
 						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
