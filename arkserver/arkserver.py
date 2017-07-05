@@ -57,6 +57,22 @@ class arkserver:
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
 
+	@ark.command(pass_context=True, hidden=True)
+	@checks.is_owner()
+	async def forcemap(self, ctx, minput : str = 'info'):
+		"""Swaps the settings save file to a specific map."""
+		if minput.lower() == 'ragnarok':
+			desiredMap = 'Ragnarok'
+		elif minput.lower() == 'island':
+			desiredMap = 'TheIsland'
+		elif minput.lower() == 'scorched':
+			desiredMap = 'ScorchedEarth'
+		else:
+			await self.bot.say("I don't recognize that map, available options are Ragnarok, Island and Scorched")
+			return
+		self.settings["Map"] = desiredMap
+		dataIO.save_json('data/arkserver/settings.json', self.settings)
+
 	@ark.command(pass_context=True)
 	async def map(self, ctx, minput : str = 'info'):
 		"""Swaps the server over to the desired map."""
