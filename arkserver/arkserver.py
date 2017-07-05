@@ -24,7 +24,7 @@ class arkserver:
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
-		updateNeeded = "False"
+		status = "False"
 		list_replacements = ["[1;32m ", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
@@ -38,16 +38,16 @@ class arkserver:
 						sani = sani.replace(elem, "")
 					await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
-					updateNeeded = "True"
+					status = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
 					break
 				if 'players are still connected' in output:
-					updateNeeded = "PlayersConnected"
+					status = "PlayersConnected"
 				if 'Players: 0' in output:
-					updateNeeded = "EmptyTrue"
+					status = "EmptyTrue"
 		if process.poll() is None:
 			process.kill()
-		return updateNeeded
+		return status
 
 
 	@commands.group(pass_context=True)
@@ -78,11 +78,14 @@ class arkserver:
 		"""Swaps the server over to the desired map."""
 		channel = ctx.message.channel #gets channel from user message command
 		output = await self.runcommand("arkmanager status", channel, False)
+		if minput == 'info':
+			await self.bot.say("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
+			return
 		if output != 'EmptyTrue':
 			await self.bot.say("The map cannot be swapped while players are in the server.")
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
-		if self.updating == True: #don't change the map is the server is restarting or updating
+		if self.updating == True: #don't change the map if the server is restarting or updating
 			await self.bot.say("I'm already carrying out a restart or update!")
 			return
 		if minput.lower() == 'ragnarok':
@@ -247,15 +250,15 @@ class arkserver:
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					verbose = False
-					updateNeeded = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
+					status = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
 					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
-					if updateNeeded == "True": #proceed with update if checkupdate tells us that an update is available
+					if status == "True": #proceed with update if checkupdate tells us that an update is available
 						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True #this stops a manually update from being triggered by a user
 						verbose = True
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
-						if updateNeeded == "PlayersConnected":
+						if status == "PlayersConnected":
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
