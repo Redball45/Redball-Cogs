@@ -113,7 +113,7 @@ class arkserver:
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 		self.updating = True #prevents the bot from restarting or updatinng while this is happening
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		output = await self.runcommand("arkmanager restart", channel, verbose)
+		output = await self.runcommand("arkmanager restart", channel, True)
 		await asyncio.sleep(15)
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
