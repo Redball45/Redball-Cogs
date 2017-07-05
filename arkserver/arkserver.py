@@ -43,9 +43,12 @@ class arkserver:
 					break
 				if 'players are still connected' in output:
 					updateNeeded = "PlayersConnected"
+				if 'Players: 0' in output:
+					updateNeeded = "EmptyTrue"
 		if process.poll() is None:
 			process.kill()
 		return updateNeeded
+
 
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -53,6 +56,52 @@ class arkserver:
 		"""Commands related to Ark Server Management"""
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
+
+	@ark.command(pass_context=True)
+	async def map(self, ctx, minput : str = 'info'):
+		"""Swaps the server over to the desired map."""
+		channel = ctx.message.channel #gets channel from user message command
+		output = await self.runcommand("arkmanager status", channel, False)
+		if output != 'EmptyTrue':
+			await self.bot.say("The map cannot be swapped while players are in the server.")
+			return
+		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
+		if self.updating == True: #don't change the map is the server is restarting or updating
+			await self.bot.say("I'm already carrying out a restart or update!")
+			return
+		if minput.lower() == 'ragnarok':
+			desiredMap = 'Ragnarok'
+		elif minput.lower() == 'island':
+			desiredMap = 'TheIsland'
+		elif minput.lower() == 'scorched':
+			desiredMap = 'ScorchedEarth'
+		else:
+			await self.bot.say("I don't recognize that map, available options are Ragnarok, Island and Scorched")
+			return
+		if self.settings["Map"] == desiredMap:
+			await self.bot.say("The server is already running this map!") 
+			return
+		elif self.settings["Map"] == 'Ragnarok':
+			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/rag.cfg", channel, False)
+		elif self.settings["Map"] == 'TheIsland':
+			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/island.cfg", channel, False)
+		elif self.settings["Map"] == 'ScorchedEarth':
+			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/scorched.cfg", channel, False)
+		if desiredMap == 'Ragnarok':
+			output = await self.runcommand("mv /etc/arkmanager/rag.cfg /etc/arkmanager/arkmanager.cfg", channel, False)
+		elif desiredMap == 'TheIsland':
+			output = await self.runcommand("mv /etc/arkmanager/island.cfg /etc/arkmanager/arkmanager.cfg", channel, False)
+		elif desiredMap == 'ScorchedEarth':
+			output = await self.runcommand("mv /etc/arkmanager/scorched.cfg /etc/arkmanager/arkmanager.cfg", channel, False)
+		self.settings["Map"] = desiredMap
+		dataIO.save_json('data/arkserver/settings.json', self.settings)
+		self.updating = True #prevents the bot from restarting or updatinng while this is happening
+		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+		output = await self.runcommand("arkmanager restart", channel, verbose)
+		await asyncio.sleep(15)
+		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		self.updating = False
+
 
 	@ark.command(pass_context=True)
 	async def checkupdate(self, ctx, verbose : bool = True):
