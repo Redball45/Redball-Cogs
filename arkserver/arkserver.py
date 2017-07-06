@@ -28,9 +28,8 @@ class arkserver:
 		list_replacements = ["[1;32m ", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
-			if output == '' and process.poll() is not None:
-				if command != 'arkmanager restart --warn':
-					break
+			if output == '' and process.poll() is not None and command != 'arkmanager restart --warn':
+				break
 			if output: 
 				if verbose == True:
 					sani = output
@@ -182,8 +181,8 @@ class arkserver:
 			self.updating = True
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
-			output = await self.runcommand("arkmanager restart --warn", channel, verbose)
-			await asyncio.sleep(30)
+			await asyncio.sleep(60)
+			output = await self.runcommand("arkmanager restart", channel, verbose)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 
@@ -196,8 +195,8 @@ class arkserver:
 			self.updating = True
 			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
-			output = await self.runcommand("arkmanager update --update-mods --backup --warn", channel, verbose)
 			await asyncio.sleep(30)
+			output = await self.runcommand("arkmanager update --update-mods --backup", channel, verbose)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 
