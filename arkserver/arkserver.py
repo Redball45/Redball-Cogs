@@ -29,7 +29,8 @@ class arkserver:
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None:
-				break
+				if command != 'arkmanager restart --warn':
+					break
 			if output: 
 				if verbose == True:
 					sani = output
