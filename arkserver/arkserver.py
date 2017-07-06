@@ -225,7 +225,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_validate(self, ctx, verbose : bool = True):
 		"""Validates the server files with steamcmd"""
-		user = ctx.messager.author
+		user = ctx.message.author
 		channel = ctx.message.channel
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
@@ -239,7 +239,7 @@ class arkserver:
 	@checks.is_owner()
 	async def ark_boxrestart(self, ctx, verbose : bool = True):
 		"""Restarts the VPS"""
-		user = ctx.messager.author
+		user = ctx.message.author
 		channel = ctx.message.channel
 		await self.bot.say("Please note this will restart the VPS and may take some time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
