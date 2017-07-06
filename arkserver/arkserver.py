@@ -244,7 +244,7 @@ class arkserver:
 		await self.bot.say("Please note this will restart the VPS and may take some time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		if answer.content == "Yes":
-			output = await self.runcommand("restart", channel, verbose)
+			output = await self.runcommand("reboot", channel, verbose)
 		else: 
 			await self.bot.edit_message(message, "Okay, restart cancelled")
 			return
