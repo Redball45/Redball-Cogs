@@ -175,6 +175,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, verbose : bool = True):
 		"""Restarts the ARK Server with a 60 second delay"""
+		await self.bot.say("Restarting server in 60 seconds.")
 		if self.updating == True:
 			await self.bot.say("I'm already carrying out a restart or update!")
 		else:
@@ -189,13 +190,14 @@ class arkserver:
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx, verbose : bool = True):
 		"""Stops the ARK Server, installs updates, then reboots"""
+		await self.bot.say("Server will be restarted if updates are available in 60 seconds.")
 		if self.updating == True:
 			await self.bot.say("I'm already carrying out a restart or update!")
 		else:
 			self.updating = True
 			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
-			await asyncio.sleep(30)
+			await asyncio.sleep(60)
 			output = await self.runcommand("arkmanager update --update-mods --backup", channel, verbose)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
