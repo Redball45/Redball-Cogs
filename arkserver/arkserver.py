@@ -234,6 +234,19 @@ class arkserver:
 			await self.bot.edit_message(message, "Okay, validation cancelled")
 			return
 
+	@ark.command(pass_context=True, name="vpsrestart")
+	@checks.is_owner()
+	async def ark_boxrestart(self, ctx, verbose : bool = True):
+		"""Restarts the VPS"""
+		channel = ctx.message.channel
+		await self.bot.say("Please note this will restart the VPS and may take some time, please confirm you want to do this by replying Yes")
+		answer = await self.bot.wait_for_message(timeout=30, author=user)
+		if answer.content == "Yes":
+			output = await self.runcommand("restart", channel, verbose)
+		else: 
+			await self.bot.edit_message(message, "Okay, restart cancelled")
+			return
+
 	@ark.command(pass_context=True, name="forceupdate")
 	@checks.is_owner()
 	async def ark_forceupdate(self, ctx, verbose : bool = True):
