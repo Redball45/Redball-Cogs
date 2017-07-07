@@ -283,7 +283,7 @@ class arkserver:
 			await asyncio.sleep(60)
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
-					verbose = False
+					verbose = True
 					status = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
 					modstatus = await self.runcommand("arkmanager checkmodupdate", adminchannel, verbose)
 					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
