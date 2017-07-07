@@ -25,7 +25,7 @@ class arkserver:
 		"""This function runs a command in the terminal and collects the response"""
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
 		status = "False"
-		list_replacements = ["[1;32m ", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
+		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
 			output = process.stdout.readline().decode() #read each line of terminal output
 			if output == '' and process.poll() is not None and command != 'arkmanager restart --warn':
@@ -38,6 +38,8 @@ class arkserver:
 						sani = sani.replace(elem, "")
 					await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
+					status = "True"
+				if 'has been updated on the Steam workshop' in output:
 					status = "True"
 				if 'The server is now running, and should be up within 10 minutes' in output:
 					break
@@ -268,8 +270,9 @@ class arkserver:
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					verbose = False
 					status = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
+					modstatus = await self.runcommand("arkmanager checkmodupdate", adminchannel, verbose)
 					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
-					if status == "True": #proceed with update if checkupdate tells us that an update is available
+					if status == "True" or modstatus = "True": #proceed with update if checkupdate tells us that an update is available
 						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True #this stops a manually update from being triggered by a user
