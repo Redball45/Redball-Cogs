@@ -38,9 +38,9 @@ class arkserver:
 						sani = sani.replace(elem, "")
 					await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
-					status = "True"
+					status = 'True'
 				if 'has been updated on the Steam workshop' in output:
-					status = "True"
+					status = 'True'
 				if 'The server is now running, and should be up within 10 minutes' in output:
 					break
 				if 'players are still connected' in output:
@@ -287,12 +287,12 @@ class arkserver:
 					status = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
 					modstatus = await self.runcommand("arkmanager checkmodupdate", adminchannel, verbose)
 					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
-					if status == "True" or modstatus == "True": #proceed with update if checkupdate tells us that an update is available
+					if status == 'True' or modstatus == "True": #proceed with update if checkupdate tells us that an update is available
 						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True #this stops a manually update from being triggered by a user
 						verbose = True
-						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel)
+						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel, verbose)
 						if status == "PlayersConnected":
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 							await asyncio.sleep(15)
