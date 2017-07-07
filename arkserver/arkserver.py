@@ -47,7 +47,7 @@ class arkserver:
 					status = "PlayersConnected"
 				if 'Players: 0' in output:
 					status = "EmptyTrue"
-				if 'Server listening:  Yes' in output:
+				if 'Server online:  Yes' in output:
 					status = 'NotUpdating'
 		if process.poll() is None:
 			process.kill()
