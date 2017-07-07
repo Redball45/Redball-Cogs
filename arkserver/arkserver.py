@@ -67,7 +67,7 @@ class arkserver:
 		"""Resets bot and self.updating status."""
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager status", channel, False)
-		if output == 'NotUpdating'
+		if output == 'NotUpdating':
 			self.updating = False
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		else:
