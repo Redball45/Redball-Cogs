@@ -237,7 +237,7 @@ class arkserver:
 			output = await self.runcommand("arkmanager update --update-mods --backup", channel, verbose)
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
-			if output = 'True':
+			if output == 'True':
 				await self.bot.say("Updates were found and installed.")
 			else:
 				await self.bot.say("No updates found, server was not restarted.")
