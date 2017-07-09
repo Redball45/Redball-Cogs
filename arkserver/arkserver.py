@@ -237,7 +237,7 @@ class arkserver:
 			output = await self.runcommand("arkmanager restart", channel, verbose, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
-			if output == 'Success'
+			if output == 'Success':
 				await self.bot.say("Server has been restarted.")
 			else:
 				await self.bot.say("Something went wrong :(")
