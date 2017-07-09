@@ -42,6 +42,7 @@ class arkserver:
 				if 'has been updated on the Steam workshop' in output:
 					status = 'True'
 				if 'The server is now running, and should be up within 10 minutes' in output:
+					status = 'Success'
 					break
 				if 'players are still connected' in output:
 					status = "PlayersConnected"
@@ -221,7 +222,10 @@ class arkserver:
 			output = await self.runcommand("arkmanager restart", channel, verbose, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
-			await self.bot.say("Server has been restarted.")
+			if output == 'Success'
+				await self.bot.say("Server has been restarted.")
+			else:
+				await self.bot.say("Something went wrong :(")
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
@@ -239,7 +243,7 @@ class arkserver:
 			self.updating = False
 			if output == 'True':
 				await self.bot.say("Updates were found and installed.")
-			else:
+			elif output == 'Success:
 				await self.bot.say("No updates found, server was not restarted.")
 
 	@ark.command(pass_context=True, name="save")
