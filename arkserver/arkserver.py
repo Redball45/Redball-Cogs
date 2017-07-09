@@ -231,7 +231,7 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			await asyncio.sleep(60)
-			output = await self.runcommand("arkmanager restart", channel, verbose, self.settings["Verbose"])
+			output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			if output == 'Success':
