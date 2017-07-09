@@ -208,7 +208,7 @@ class arkserver:
 		output = await self.runcommand("arkmanager status", channel, True)
 
 	@ark.command(pass_context=True, name="restart")
-	async def ark_restart(self, ctx, verbose : self.settings["Verbose"]):
+	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
 		await self.bot.say("Restarting server in 60 seconds.")
 		if self.updating == True:
@@ -218,13 +218,13 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			await asyncio.sleep(60)
-			output = await self.runcommand("arkmanager restart", channel, verbose)
+			output = await self.runcommand("arkmanager restart", channel, verbose, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			await self.bot.say("Server has been restarted.")
 
 	@ark.command(pass_context=True, name="update")
-	async def ark_update(self, ctx, verbose : self.settings["Verbose"]):
+	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
 		await self.bot.say("Server will be restarted if updates are available in 60 seconds.")
 		if self.updating == True:
@@ -234,7 +234,7 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			await asyncio.sleep(60)
-			output = await self.runcommand("arkmanager update --update-mods --backup", channel, verbose)
+			output = await self.runcommand("arkmanager update --update-mods --backup", channel, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			if output == 'True':
