@@ -32,11 +32,14 @@ class arkserver:
 				break
 			if output: 
 				if verbose == True:
-					sani = output
-					sani = sani.lstrip("7")
-					for elem in list_replacements:
-						sani = sani.replace(elem, "")
-					await self.bot.send_message(channel,"{0}".format(sani))
+					if len(sani) > 1900:
+						await self.bot.send_message(channel,"The console returned a string for this line that exceeds the discord character limit.")
+					else:
+						sani = output
+						sani = sani.lstrip("7")
+						for elem in list_replacements:
+							sani = sani.replace(elem, "")
+						await self.bot.send_message(channel,"{0}".format(sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
 					status = 'True'
 				if 'has been updated on the Steam workshop' in output:
