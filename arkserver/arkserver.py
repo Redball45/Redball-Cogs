@@ -12,6 +12,8 @@ import asyncio
 import subprocess
 import shlex
 
+class TerminalError(Exception):
+	pass
 
 class arkserver:
 	"""Ark Server commands"""
@@ -26,33 +28,43 @@ class arkserver:
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
 		status = "False"
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
-		while True:
-			output = process.stdout.readline().decode() #read each line of terminal output
-			if output == '' and process.poll() is not None:
-				break
-			if output: 
-				if verbose == True:
-					if len(sani) > 1900:
-						await self.bot.send_message(channel,"The console returned a string for this line that exceeds the discord character limit.")
-					else:
-						sani = output
-						sani = sani.lstrip("7")
-						for elem in list_replacements:
-							sani = sani.replace(elem, "")
-						await self.bot.send_message(channel,"{0}".format(sani))
-				if 'Your server needs to be restarted in order to receive the latest update' in output:
-					status = 'True'
-				if 'has been updated on the Steam workshop' in output:
-					status = 'True'
-				if 'The server is now running, and should be up within 10 minutes' in output:
-					status = 'Success'
+		try:
+			while True:
+				output = process.stdout.readline().decode() #read each line of terminal output
+				if output == '' and process.poll() is not None:
 					break
-				if 'players are still connected' in output:
-					status = "PlayersConnected"
-				if 'Players: 0' in output:
-					status = "EmptyTrue"
-				if 'online:  Yes' in output:
-					status = 'NotUpdating'
+				if output: 
+					if verbose == True:
+						if len(sani) > 1900:
+							await self.bot.send_message(channel,"The console returned a string for this line that exceeds the discord character limit.")
+						else:
+							sani = output
+							sani = sani.lstrip("7")
+							for elem in list_replacements:
+								sani = sani.replace(elem, "")
+							await self.bot.send_message(channel,"{0}".format(sani))
+					if 'Your server needs to be restarted in order to receive the latest update' in output:
+						status = 'True'
+					if 'has been updated on the Steam workshop' in output:
+						status = 'True'
+					if 'The server is now running, and should be up within 10 minutes' in output:
+						status = 'Success'
+						break
+					if 'players are still connected' in output:
+						status = "PlayersConnected"
+					if 'Players: 0' in output:
+						status = "EmptyTrue"
+					if 'online:  Yes' in output:
+						status = 'NotUpdating'
+		except TerminalError:
+			await self.bot.send_message(channel,"Something went wrong... you should check the status of the server with +ark status.")
+			await self.bot.send_message(channel,"Updating and restarting options will be locked for 3 minutes for safety.")
+			self.updating = True
+			await asyncio.sleep(180)
+			self.updating = False
+			if process.poll() is None:
+				process.kill()
+			return status
 		if process.poll() is None:
 			process.kill()
 		return status
