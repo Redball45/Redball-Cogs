@@ -278,7 +278,7 @@ class arkserver:
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
 		while self is self.bot.get_cog("arkserver"):
-			channel = self.bot.get_channel("330795712067665923")
+			channel = self.bot.get_channel("333605978560004097")
 			adminchannel = self.bot.get_channel("331076958425186305")
 			await asyncio.sleep(60)
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
