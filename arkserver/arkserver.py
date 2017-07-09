@@ -35,7 +35,7 @@ class arkserver:
 					break
 				if output: 
 					if verbose == True:
-						if len(sani) > 1900:
+						if len(output) > 1900:
 							await self.bot.send_message(channel,"The console returned a string for this line that exceeds the discord character limit.")
 						else:
 							sani = output
