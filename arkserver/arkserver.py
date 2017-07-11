@@ -228,7 +228,7 @@ class arkserver:
 		"""Restarts the ARK Server with a 60 second delay"""
 		channel = ctx.message.channel
 		empty = await self.runcommand("arkmanager status", channel, False)
-		if 'EmptyTrue' in empty:
+		if 'EmptyTrue' not in empty:
 			await self.bot.say("Players are currently in the server, update anyway?")
 			answer = await self.bot.wait_for_message(timeout=30, author=user)
 			try:	
@@ -263,7 +263,7 @@ class arkserver:
 		if 'Update' in status or 'ModUpdate' in modstatus:
 			await self.bot.say("Updates are available.")
 			empty = await self.runcommand("arkmanager status", channel, False)
-			if 'EmptyTrue' in empty:
+			if 'EmptyTrue' not in empty:
 				await self.bot.say("Players are currently in the server, update anyway?")
 				answer = await self.bot.wait_for_message(timeout=30, author=user)
 				try:
