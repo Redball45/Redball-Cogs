@@ -230,7 +230,7 @@ class arkserver:
 		channel = ctx.message.channel
 		empty = await self.runcommand("arkmanager status", channel, False)
 		if 'EmptyTrue' not in empty:
-			await self.bot.say("Players are currently in the server, update anyway?")
+			await self.bot.say("Players are currently in the server, restart anyway?")
 			answer = await self.bot.wait_for_message(timeout=30, author=user)
 			try:	
 				if answer.content != "Yes":
@@ -270,10 +270,10 @@ class arkserver:
 				answer = await self.bot.wait_for_message(timeout=30, author=user)
 				try:
 					if answer.content != "Yes":
-						await self.bot.say("Okay, restart cancelled.")
+						await self.bot.say("Okay, update cancelled.")
 						return
 				except:
-					await self.bot.say("Okay, restart cancelled.")
+					await self.bot.say("Okay, update cancelled.")
 					return
 			await self.bot.say("Server will be restarted in 60 seconds.")
 			if self.updating == True:
