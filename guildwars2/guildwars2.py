@@ -1561,8 +1561,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}},
-						 "arcdps" : {"on": False, "channel": None}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel": None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
@@ -2297,8 +2297,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}},
-						 "arcdps" : {"on": False, "channel": None}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel": None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
@@ -2444,8 +2444,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}},
-						 "arcdps" : {"on": False, "channel": None}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel": None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
@@ -2469,8 +2469,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}},
-						 "arcdps" : {"on": False, "channel": None}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel": None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
