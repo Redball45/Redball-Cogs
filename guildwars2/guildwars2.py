@@ -2435,9 +2435,9 @@ class Guildwars2:
 	@commands.group(pass_context=True)
 	async def arcdps(self, ctx):
 		"""Commands for setting up arcdps update feed"""
-			if ctx.invoked_subcommand is None:
-				await self.bot.send_cmd_help(ctx)
-				return
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+			return
 
 	@arcdps.command(pass_context=True, name="check")
 	async def arc_check(self, ctx):
