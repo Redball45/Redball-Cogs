@@ -2457,17 +2457,17 @@ class Guildwars2:
 				i = page.find("x64: current</a>")
 				current = page[i+17:i+30]
 				if self.cache["ArcDPS"] == current:
-					await asyncio.sleep(300)
+					await asyncio.sleep(600)
 				else:
 					self.cache["ArcDPS"] = current
 					dataIO.save_json('data/guildwars2/cache.json', self.cache)
-					channel = self.bot.get_channel("300040051679690755")
+					channel = self.bot.get_channel("294579681338982400")
 					await self.bot.send_message(channel,"ArcDPS has been updated. {0} Link: https://www.deltaconnected.com/arcdps/x64/".format(current))
-					await asyncio.sleep(300)
+					await asyncio.sleep(600)
 			except Exception as e:
 				print(
 					"Arcdps check has encountered an exception: {0}".format(e))
-				await asyncio.sleep(300)
+				await asyncio.sleep(600)
 				continue
 
 	@checks.admin_or_permissions(manage_server=True)
