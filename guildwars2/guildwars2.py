@@ -14,7 +14,6 @@ import datetime
 import random
 import time
 import urllib
-import urllib2
 import ssl
 import re
 import xml.etree.ElementTree as et
@@ -2454,7 +2453,7 @@ class Guildwars2:
 	async def arc_check(self, ctx):
 		context = ssl._create_unverified_context()
 		URL = "https://www.deltaconnected.com/arcdps/"
-		page = urllib2.urlopen(URL, context=context).read()
+		page = urllib.urlopen(URL, context=context).read()
 		i = page.find("x64: current</a>")
 		await self.bot.say(page[i+17:i+30])
 
