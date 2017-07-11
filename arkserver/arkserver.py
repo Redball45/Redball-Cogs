@@ -268,8 +268,8 @@ class arkserver:
 				answer = await self.bot.wait_for_message(timeout=30, author=user)
 				try:
 					if answer.content != "Yes":
-					await self.bot.say("Okay, restart cancelled.")
-					return
+						await self.bot.say("Okay, restart cancelled.")
+						return
 				except:
 					await self.bot.say("Okay, restart cancelled.")
 					return
