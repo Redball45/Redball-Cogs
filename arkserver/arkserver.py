@@ -226,6 +226,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
+		user = ctx.message.author
 		channel = ctx.message.channel
 		empty = await self.runcommand("arkmanager status", channel, False)
 		if 'EmptyTrue' not in empty:
@@ -257,6 +258,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
+		user = ctx.message.author
 		channel = ctx.message.channel
 		status = await self.runcommand("arkmanager checkupdate", channel, False)
 		modstatus = await self.runcommand("arkmanager checkmodupdate", channel, False)
