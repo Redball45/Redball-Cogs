@@ -266,8 +266,12 @@ class arkserver:
 			if empty != 'EmptyTrue':
 				await self.bot.say("Players are currently in the server, update anyway?")
 				answer = await self.bot.wait_for_message(timeout=30, author=user)
-				if answer.content != "Yes":
-					await self.bot.say("Okay, restart cancelled")
+				try:
+					if answer.content != "Yes":
+					await self.bot.say("Okay, restart cancelled.")
+					return
+				except:
+					await self.bot.say("Okay, restart cancelled.")
 					return
 			await self.bot.say("Server will be restarted in 60 seconds.")
 			if self.updating == True:
