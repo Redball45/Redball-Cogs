@@ -2436,7 +2436,7 @@ class Guildwars2:
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.group(pass_context=True)
 	async def arcdps(self, ctx):
-		"""Commands for setting up automatic guildwars2.com news feed"""
+		"""Commands for setting up arcdps update feed"""
 		server = ctx.message.server
 		serverdoc = await self.fetch_server(server)
 		if not serverdoc:
@@ -2452,9 +2452,10 @@ class Guildwars2:
 
 	@arcdps.command(pass_context=True, name="check")
 	async def arc_check(self, ctx):
+		"""Checks and returns current arcdps version"""
 		context = ssl._create_unverified_context()
 		URL = "https://www.deltaconnected.com/arcdps/"
-		page = urlopen(URL, context=context).read()
+		page = urlopen(URL, context=context).read().decode('utf8')
 		i = page.find("x64: current</a>")
 		await self.bot.say(page[i+17:i+30])
 
