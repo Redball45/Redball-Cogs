@@ -44,8 +44,8 @@ class arkserver:
 								sani = sani.replace(elem, "")
 							try:
 								await self.bot.send_message(channel,"{0}".format(sani))
-							except discord.HTTPException:
-								print("Error posting to discord")
+							except discord.HTTPException as e:
+								print("Error posting to discord {0}".format(e))
 					if 'Your server needs to be restarted in order to receive the latest update' in output:
 						status = 'True'
 					if 'has been updated on the Steam workshop' in output:
