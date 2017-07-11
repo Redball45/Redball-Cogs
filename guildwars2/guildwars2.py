@@ -20,6 +20,7 @@ import xml.etree.ElementTree as et
 from itertools import chain
 from operator import itemgetter
 from motor.motor_asyncio import AsyncIOMotorClient
+from urllib.request import urlopen
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -2453,7 +2454,7 @@ class Guildwars2:
 	async def arc_check(self, ctx):
 		context = ssl._create_unverified_context()
 		URL = "https://www.deltaconnected.com/arcdps/"
-		page = urllib.urlopen(URL, context=context).read()
+		page = urlopen(URL, context=context).read()
 		i = page.find("x64: current</a>")
 		await self.bot.say(page[i+17:i+30])
 
