@@ -226,11 +226,23 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx):
 		"""Restarts the ARK Server with a 60 second delay"""
-		await self.bot.say("Restarting server in 60 seconds.")
+		channel = ctx.message.channel
+		empty = await self.runcommand("arkmanager status", channel, False)
+		if empty != 'EmptyTrue':
+			await self.bot.say("Players are currently in the server, update anyway?")
+			answer = await self.bot.wait_for_message(timeout=30, author=user)
+			try:	
+				if answer.content != "Yes":
+					await self.bot.say("Okay, restart cancelled.")
+					return
+			except:
+				await self.bot.say("Okay, restart cancelled.")
+				return
 		if self.updating == True:
 			await self.bot.say("I'm already carrying out a restart or update!")
 		else:
 			self.updating = True
+			await self.bot.say("Restarting in 60 seconds.")
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 			channel = ctx.message.channel
 			await asyncio.sleep(60)
