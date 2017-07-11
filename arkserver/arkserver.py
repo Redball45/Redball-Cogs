@@ -51,9 +51,9 @@ class arkserver:
 						status = 'Success'
 						break
 					if 'players are still connected' in output:
-						status = "PlayersConnected"
+						status = 'PlayersConnected'
 					if 'Players: 0' in output:
-						status = "EmptyTrue"
+						status = 'EmptyTrue'
 					if 'online:  Yes' in output:
 						status = 'NotUpdating'
 		except TerminalError:
@@ -331,7 +331,7 @@ class arkserver:
 						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 						self.updating = True #this stops a manually update from being triggered by a user
 						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel, True)
-						if status == "PlayersConnected":
+						if newoutput == 'PlayersConnected':
 							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
 							await asyncio.sleep(15)
 							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
