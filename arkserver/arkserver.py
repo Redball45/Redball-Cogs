@@ -272,6 +272,8 @@ class arkserver:
 					await self.bot.say("Updates were found and installed.")
 				else:
 					await self.bot.say("Something went wrong :(")
+		else:
+			await self.bot.say("No updates found.")
 
 	@ark.command(pass_context=True, name="save")
 	@checks.is_owner()
