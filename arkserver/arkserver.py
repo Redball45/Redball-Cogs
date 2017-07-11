@@ -260,7 +260,7 @@ class arkserver:
 		channel = ctx.message.channel
 		status = await self.runcommand("arkmanager checkupdate", channel, False)
 		modstatus = await self.runcommand("arkmanager checkmodupdate", channel, False)
-		if 'True' in status or 'True' in modstatus:
+		if 'Update' in status or 'ModUpdate' in modstatus:
 			await self.bot.say("Updates are available.")
 			empty = await self.runcommand("arkmanager status", channel, False)
 			if 'EmptyTrue' in empty:
