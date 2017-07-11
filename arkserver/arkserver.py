@@ -12,7 +12,7 @@ import asyncio
 import subprocess
 import shlex
 
-class TerminalError(Exception):
+class HTTPException(Exception):
 	pass
 
 class arkserver:
@@ -36,13 +36,16 @@ class arkserver:
 				if output: 
 					if verbose == True:
 						if len(output) > 1900:
-							await self.bot.send_message(channel,"The console returned a string for this line that exceeds the discord character limit.")
+							print("The console returned a string for this line that exceeds the discord character limit.")
 						else:
 							sani = output
 							sani = sani.lstrip("7")
 							for elem in list_replacements:
 								sani = sani.replace(elem, "")
-							await self.bot.send_message(channel,"{0}".format(sani))
+							try:
+								await self.bot.send_message(channel,"{0}".format(sani))
+							except discord.HTTPException:
+								print("Error posting to discord")
 					if 'Your server needs to be restarted in order to receive the latest update' in output:
 						status = 'True'
 					if 'has been updated on the Steam workshop' in output:
@@ -56,7 +59,7 @@ class arkserver:
 						status = 'EmptyTrue'
 					if 'online:  Yes' in output:
 						status = 'NotUpdating'
-		except TerminalError:
+		except:
 			await self.bot.send_message(channel,"Something went wrong... you should check the status of the server with +ark status.")
 			await self.bot.send_message(channel,"Updating and restarting options will be locked for 3 minutes for safety.")
 			self.updating = True
