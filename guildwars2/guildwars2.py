@@ -14,6 +14,8 @@ import datetime
 import random
 import time
 import urllib
+import urllib2
+import ssl
 import re
 import xml.etree.ElementTree as et
 from itertools import chain
@@ -1559,7 +1561,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}			
+						 "news" : {"on": False, "channel": None}},
+						 "arcdps" : {"on": False, "channel": None}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
@@ -2294,7 +2297,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}
+						 "news" : {"on": False, "channel": None}},
+						 "arcdps" : {"on": False, "channel": None}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
@@ -2431,6 +2435,31 @@ class Guildwars2:
 
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.group(pass_context=True)
+	async def arcdps(self, ctx):
+		"""Commands for setting up automatic guildwars2.com news feed"""
+		server = ctx.message.server
+		serverdoc = await self.fetch_server(server)
+		if not serverdoc:
+			default_channel = server.default_channel.id
+			serverdoc = {"_id": server.id, "on": False,
+						 "channel": default_channel, "language": "en",
+						 "daily" : {"on": False, "channel": None},
+						 "news" : {"on": False, "channel": None}},
+						 "arcdps" : {"on": False, "channel": None}
+			await self.db.settings.insert_one(serverdoc)
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+
+	@arcdps.command(pass_context=True, name="check")
+	async def arc_check(self, ctx)
+		context = ssl._create_unverified_context()
+		URL = "https://www.deltaconnected.com/arcdps/"
+		page = urllib2.urlopen(URL, context=context).read()
+		i = page.find("x64: current</a>")
+		await self.bot.say(page[i+17:i+30])
+
+	@checks.admin_or_permissions(manage_server=True)
+	@commands.group(pass_context=True)
 	async def newsfeed(self, ctx):
 		"""Commands for setting up automatic guildwars2.com news feed"""
 		server = ctx.message.server
@@ -2440,7 +2469,8 @@ class Guildwars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}
+						 "news" : {"on": False, "channel": None}},
+						 "arcdps" : {"on": False, "channel": None}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
