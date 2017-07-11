@@ -2451,7 +2451,7 @@ class Guildwars2:
 			await self.bot.send_cmd_help(ctx)
 
 	@arcdps.command(pass_context=True, name="check")
-	async def arc_check(self, ctx)
+	async def arc_check(self, ctx):
 		context = ssl._create_unverified_context()
 		URL = "https://www.deltaconnected.com/arcdps/"
 		page = urllib2.urlopen(URL, context=context).read()
