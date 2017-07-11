@@ -3184,7 +3184,7 @@ def check_files():
 		"gamedata.json": {},
 		"build.json": {"id": None},
 		"containers.json": {},
-		"cache.json": {"day": datetime.datetime.utcnow().weekday(), "news" : []}
+		"cache.json": {"day": datetime.datetime.utcnow().weekday(), "news" : [], "ArcDPS" : []}
 	}
 
 	for filename, value in files.items():
