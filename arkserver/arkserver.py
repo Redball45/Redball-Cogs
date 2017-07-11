@@ -245,21 +245,35 @@ class arkserver:
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
 		"""Stops the ARK Server, installs updates, then reboots"""
-		await self.bot.say("Server will be restarted if updates are available in 60 seconds.")
-		if self.updating == True:
-			await self.bot.say("I'm already carrying out a restart or update!")
-		else:
-			self.updating = True
-			await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
-			channel = ctx.message.channel
-			await asyncio.sleep(60)
-			output = await self.runcommand("arkmanager update --update-mods --backup", channel, self.settings["Verbose"])
-			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-			self.updating = False
-			if output == 'Success':
-				await self.bot.say("Updates were found and installed.")
+		channel = ctx.message.channel
+		status = await self.runcommand("arkmanager checkupdate", channel, False)
+		modstatus = await self.runcommand("arkmanager checkmodupdate", channel, False)
+		if status == 'True' or modstatus == 'True':
+			await self.bot.say("Updates are available.")
+			empty = await self.runcommand("arkmanager status", channel, False)
+			if empty != 'EmptyTrue':
+				await self.bot.say("Players are currently in the server, update anyway?")
+				answer = await self.bot.wait_for_message(timeout=30, author=user)
+				if answer.content == "Yes":
+					continue
+				else: 
+					await self.bot.say("Okay, restart cancelled")
+					return
+			await self.bot.say("Server will be restarted in 60 seconds.")
+			if self.updating == True:
+				await self.bot.say("I'm already carrying out a restart or update!")
 			else:
-				await self.bot.say("No updates found, server was not restarted.")
+				self.updating = True
+				await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+				channel = ctx.message.channel
+				await asyncio.sleep(60)
+				output = await self.runcommand("arkmanager update --update-mods --backup", channel, self.settings["Verbose"])
+				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+				self.updating = False
+				if output == 'Success':
+					await self.bot.say("Updates were found and installed.")
+				else:
+					await self.bot.say("Something went wrong :(")
 
 	@ark.command(pass_context=True, name="save")
 	@checks.is_owner()
