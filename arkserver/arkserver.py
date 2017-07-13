@@ -149,8 +149,9 @@ class arkserver:
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 		self.updating = True #prevents the bot from restarting or updatinng while this is happening
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		output = await self.runcommand("arkmanager restart", channel, True)
-		await asyncio.sleep(15)
+		alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a restart in 60 seconds."', channel, False)
+		await asyncio.sleep(60)
+		output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
 
@@ -362,21 +363,44 @@ class arkserver:
 					modstatus = await self.runcommand("arkmanager checkmodupdate", adminchannel, verbose)
 					await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
 					if 'Update' in status or 'ModUpdate' in modstatus: #proceed with update if checkupdate tells us that an update is available
-						await asyncio.sleep(5) #small delay to make sure previous command has cleaned up properly
-						await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
-						self.updating = True #this stops a manually update from being triggered by a user
-						newoutput = await self.runcommand("arkmanager update --update-mods --backup --ifempty", adminchannel, True)
-						if 'PlayersConnected' in newoutput:
-							await self.bot.send_message(channel,"An update is available but players are still connected, automatic update will not continue.".format(newoutput))
-							await asyncio.sleep(15)
-							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-							self.updating = False #update was cancelled so remove the lock on updating/restarting
-							await asyncio.sleep(3540)
+						empty = await self.runcommand("arkmanager status", adminchannel, False)
+						if 'EmptyTrue' not in empty:
+							#players detected in the server, queue update for in 15 minutes
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 15 minutes."', channel, False)
+							await asyncio.sleep(300)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 10 minutes."', channel, False)
+							await asyncio.sleep(300)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 5 minutes."', channel, False)
+							await asyncio.sleep(240)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', channel, False)
+							await asyncio.sleep(60)
+							if self.updating == False:
+								await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+								self.updating = True
+								update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
+								if 'Success' in update:									
+									await self.bot.send_message(channel,"Server has been updated.")
+									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+									self.updating = False
+									await asyncio.sleep(3540)
+								else:
+									await self.bot.send_message(channel,"Something went wrong during automatic update :(")
+									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+									self.updating = False
+									await asyncio.sleep(240)
+							else:
+								await self.bot.send_message(adminchannel,"Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
+								await asyncio.sleep(1800)
 						else:
-							await self.bot.send_message(channel,"Server has been updated.")
-							await asyncio.sleep(15)
-							await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-							self.updating = False #update was completed so remove the lock on updating/restarting
+							update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
+							if 'Success' in update:									
+								await self.bot.send_message(channel,"Server has been updated.")
+								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+								self.updating = False
+							else:
+								await self.bot.send_message(channel,"Something went wrong during automatic update :(")
+								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+								self.updating = False
 							await asyncio.sleep(3540)
 					else:
 						await asyncio.sleep(3540)
@@ -391,7 +415,7 @@ def check_folders():
 
 def check_files():
 	files = {
-		"settings.json": {"AutoUpdate": True} #create settings file if it doesn't already exist
+		"settings.json": {"AutoUpdate": True, "Verbose" : True} #create settings file if it doesn't already exist
 	}
 
 	for filename, value in files.items():
