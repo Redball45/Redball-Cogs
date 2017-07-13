@@ -2461,8 +2461,8 @@ class Guildwars2:
 				else:
 					self.cache["ArcDPS"] = current
 					dataIO.save_json('data/guildwars2/cache.json', self.cache)
-					channel = self.bot.get_channel("294579681338982400")
-					await self.bot.send_message(channel,"ArcDPS has been updated. {0} Link: https://www.deltaconnected.com/arcdps/x64/".format(current))
+					redball = self.bot.get_user_info("77910702664200192")
+					await self.bot.send_message(redball,"ArcDPS has been updated. {0} Link: https://www.deltaconnected.com/arcdps/x64/".format(current))
 					await asyncio.sleep(600)
 			except Exception as e:
 				print(
