@@ -60,8 +60,8 @@ class arkserver:
 					if 'online:  Yes' in output:
 						status = status + 'NotUpdating'
 		except:
-			await self.bot.send_message(channel,"Something went wrong... you should check the status of the server with +ark status.")
-			await self.bot.send_message(channel,"Updating and restarting options will be locked for 3 minutes for safety.")
+			print("Something went wrong... you should check the status of the server with +ark status.")
+			print("Updating and restarting options will be locked for 3 minutes for safety.")
 			self.updating = True
 			await asyncio.sleep(180)
 			self.updating = False
