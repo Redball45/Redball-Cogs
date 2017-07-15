@@ -136,13 +136,13 @@ class arkserver:
 			return
 		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
-			try:	
-				if answer.content != "Yes":
-					await self.bot.say("Okay, change cancelled.")
-					return
-			except:
+		try:	
+			if answer.content != "Yes":
 				await self.bot.say("Okay, change cancelled.")
 				return
+		except:
+			await self.bot.say("Okay, change cancelled.")
+			return
 		self.updating = True #prevents the bot from restarting or updating while this is happening
 		if self.settings["Map"] == 'Ragnarok':
 			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/rag.cfg", channel, False)
