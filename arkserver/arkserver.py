@@ -344,13 +344,6 @@ class arkserver:
 			await self.bot.edit_message(message, "Okay, validation cancelled")
 			return
 
-	@ark.command(pass_context=True)
-	@checks.is_owner()
-	async def upgradetools(self, ctx):
-		"""Upgrades the ark server tools to the latest version"""
-		channel = ctx.message.channel #gets channel from user message command
-		output = await self.runcommand("arkmanager upgrade-tools", channel, True)
-
 	@ark.command(pass_context=True, name="vpsrestart")
 	@checks.is_owner()
 	async def ark_boxrestart(self, ctx):
