@@ -115,7 +115,7 @@ class arkserver:
 		if minput == 'info':
 			await self.bot.say("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
 			return
-		if 'EmptyTrue' in output:
+		if 'EmptyTrue' not in output:
 			await self.bot.say("The map cannot be swapped while players are in the server.")
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
