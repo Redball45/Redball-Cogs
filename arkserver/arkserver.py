@@ -109,6 +109,7 @@ class arkserver:
 	@ark.command(pass_context=True)
 	async def map(self, ctx, minput : str = 'info'):
 		"""Swaps the server over to the desired map."""
+		user = ctx.message.author
 		channel = ctx.message.channel #gets channel from user message command
 		output = await self.runcommand("arkmanager status", channel, False)
 		if minput == 'info':
@@ -133,7 +134,17 @@ class arkserver:
 		if self.settings["Map"] == desiredMap:
 			await self.bot.say("The server is already running this map!") 
 			return
-		elif self.settings["Map"] == 'Ragnarok':
+		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.")
+		answer = await self.bot.wait_for_message(timeout=30, author=user)
+			try:	
+				if answer.content != "Yes":
+					await self.bot.say("Okay, change cancelled.")
+					return
+			except:
+				await self.bot.say("Okay, change cancelled.")
+				return
+		self.updating = True #prevents the bot from restarting or updating while this is happening
+		if self.settings["Map"] == 'Ragnarok':
 			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/rag.cfg", channel, False)
 		elif self.settings["Map"] == 'TheIsland':
 			output = await self.runcommand("mv /etc/arkmanager/arkmanager.cfg /etc/arkmanager/island.cfg", channel, False)
@@ -147,11 +158,15 @@ class arkserver:
 			output = await self.runcommand("mv /etc/arkmanager/scorched.cfg /etc/arkmanager/arkmanager.cfg", channel, False)
 		self.settings["Map"] = desiredMap
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
-		self.updating = True #prevents the bot from restarting or updatinng while this is happening
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+		await self.bot.say("Server will be restarted in 60 seconds.")
 		alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a restart in 60 seconds."', channel, False)
 		await asyncio.sleep(60)
 		output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
+		if 'Success' in output:
+			await self.bot.say("Map changed and server has been restarted.")
+		else:
+			await self.bot.say("Something went wrong :(")
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
 
