@@ -134,7 +134,7 @@ class arkserver:
 		if self.settings["Map"] == desiredMap:
 			await self.bot.say("The server is already running this map!") 
 			return
-		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.")
+		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		try:	
 			if answer.content != "Yes":
@@ -221,9 +221,9 @@ class arkserver:
 			await self.bot.say("I will output all lines from the console when executing commands.")
 		else:
 			if togglestatus == True:
-				await self.bot.say("Automatic updating is currently enabled.")
+				await self.bot.say("I am currently outputting all lines from the console when executing commands.")
 			elif togglestatus == False:
-				await self.bot.say("Automatic updating is currently disabled.")
+				await self.bot.say("I am currently not being verbose when executing commands.")
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 
 	@ark.command(pass_context=True, name="start")
@@ -343,6 +343,13 @@ class arkserver:
 		else: 
 			await self.bot.edit_message(message, "Okay, validation cancelled")
 			return
+
+	@ark.command(pass_context=True)
+	@checks.is_owner()
+	async def upgradetools(self, ctx):
+		"""Upgrades the ark server tools to the latest version"""
+		channel = ctx.message.channel #gets channel from user message command
+		output = await self.runcommand("arkmanager upgrade-tools", channel, True)
 
 	@ark.command(pass_context=True, name="vpsrestart")
 	@checks.is_owner()
