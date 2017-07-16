@@ -73,15 +73,7 @@ class arkserver:
 		if process.poll() is None:
 			process.kill()
 		return status
-
-	@commands.command(pass_context=True)
-	@checks.mod_or_permissions(manage_webhooks=True)
-	async def emojitest(self, ctx):
-		"""emoji test command"""
-		await self.bot.say(":ban:312395358330421250")
-		await self.bot.say("':ban:312395358330421250'")
-		await self.bot.say("this is a <:youtried:336180558956593152> test")
-		
+	
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def ark(self, ctx):
@@ -130,7 +122,7 @@ class arkserver:
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
-			await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
+			await self.bot.say("I'm already carrying out a restart or update! <:banned:284492719202631680>")
 			return
 		if minput.lower() == 'ragnarok':
 			desiredMap = 'Ragnarok'
@@ -271,7 +263,7 @@ class arkserver:
 				await self.bot.say("Okay, restart cancelled.")
 				return
 		if self.updating == True:
-			await self.bot.say("I'm already carrying out a restart or update! ':ban:312395358330421250'")
+			await self.bot.say("I'm already carrying out a restart or update! <:banned:284492719202631680>")
 		else:
 			self.updating = True
 			await self.bot.say("Restarting in {0} seconds.".format(delay))
@@ -283,7 +275,7 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			if 'Success' in output:
-				await self.bot.say("Server has been restarted ':ok_hand_g:336175515087929356'")
+				await self.bot.say("Server has been restarted <:ok_hand_g:336175515087929356>")
 			else:
 				await self.bot.say("Something went wrong \U0001F44F")
 
@@ -309,7 +301,7 @@ class arkserver:
 					return
 			await self.bot.say("Server will be restarted in 60 seconds.")
 			if self.updating == True:
-				await self.bot.say("I'm already carrying out a restart or update! ':ban:312395358330421250'")
+				await self.bot.say("I'm already carrying out a restart or update! <:banned:284492719202631680>")
 			else:
 				self.updating = True
 				await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
@@ -319,7 +311,7 @@ class arkserver:
 				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if 'Success' in output:
-					await self.bot.say("Updates were found and installed. ':ok_hand_g:336175515087929356'")
+					await self.bot.say("Updates were found and installed. <:ok_hand_g:336175515087929356>")
 				else:
 					await self.bot.say("Something went wrong \U0001F44F")
 		else:
@@ -409,7 +401,7 @@ class arkserver:
 									self.updating = True
 									update = await self.runcommand("arkmanager update --update-mods --backup", self.adminchannel, True)
 									if 'Success' in update:									
-										await self.bot.send_message(self.channel,"Server has been updated :ok_hand_b:")
+										await self.bot.send_message(self.channel,"Server has been updated <:ok_hand_g:336175515087929356>")
 										await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 										self.updating = False
 										await asyncio.sleep(3540)
@@ -424,7 +416,7 @@ class arkserver:
 							else:
 								update = await self.runcommand("arkmanager update --update-mods --backup", self.adminchannel, True)
 								if 'Success' in update:									
-									await self.bot.send_message(self.channel,"Server has been updated :ok_hand_b:")
+									await self.bot.send_message(self.channel,"Server has been updated <:ok_hand_g:336175515087929356>")
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 								else:
