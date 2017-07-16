@@ -80,7 +80,7 @@ class arkserver:
 		"""emoji test command"""
 		await self.bot.say(":ban:312395358330421250")
 		await self.bot.say("':ban:312395358330421250'")
-		await self.bot.say("this is a <:ban:312395358330421250> test")
+		await self.bot.say("this is a <:youtried:336180558956593152> test")
 		
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
