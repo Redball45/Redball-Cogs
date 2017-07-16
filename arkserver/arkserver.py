@@ -134,7 +134,9 @@ class arkserver:
 			await self.bot.say("I don't recognize that map, available options are Ragnarok, Island and Scorched.")
 			return
 		if self.settings["Map"] == desiredMap:
-			await self.bot.say("The server is already running this map! :youtried:") 
+			message = ctx.message
+			await self.bot.say("The server is already running this map!") 
+			await self.bot.add_reaction(message, ':youtried:')
 			return
 		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
