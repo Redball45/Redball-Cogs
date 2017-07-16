@@ -120,7 +120,7 @@ class arkserver:
 			return
 		if 'EmptyTrue' not in output:
 			await self.bot.say("The map cannot be swapped while players are in the server.")
-			await self.bot.add_reaction(message, '<:youtried:336180558956593152>')
+			await self.bot.add_reaction(message, <:youtried:336180558956593152>)
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
