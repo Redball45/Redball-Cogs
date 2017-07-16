@@ -74,7 +74,14 @@ class arkserver:
 			process.kill()
 		return status
 
-
+	@commands.command(pass_context=True)
+	@checks.mod_or_permissions(manage_webhooks=True)
+	async def emojitest(self, ctx):
+		"""emoji test command"""
+		await self.bot.say(":ban:312395358330421250")
+		await self.bot.say("':ban:312395358330421250'")
+		await self.bot.say("<:ban:312395358330421250>")
+		
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
 	async def ark(self, ctx):
