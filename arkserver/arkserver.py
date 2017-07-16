@@ -267,8 +267,8 @@ class arkserver:
 			self.updating = True
 			await self.bot.say("Restarting in {0} seconds.".format(delay))
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-			alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a user-requested restart in 60 seconds."', channel, False)
 			await asyncio.sleep(delay-60)
+			alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a user-requested restart in 60 seconds."', channel, False)
 			await asyncio.sleep(60)
 			output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
