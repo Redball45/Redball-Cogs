@@ -264,7 +264,7 @@ class arkserver:
 				await self.bot.say("Okay, restart cancelled.")
 				return
 		if self.updating == True:
-			await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
+			await self.bot.say("I'm already carrying out a restart or update! ':ban:312395358330421250'")
 		else:
 			self.updating = True
 			await self.bot.say("Restarting in {0} seconds.".format(delay))
@@ -276,7 +276,7 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			if 'Success' in output:
-				await self.bot.say("Server has been restarted :ok_hand_g:336175515087929356")
+				await self.bot.say("Server has been restarted ':ok_hand_g:336175515087929356'")
 			else:
 				await self.bot.say("Something went wrong \U0001F44F")
 
@@ -302,7 +302,7 @@ class arkserver:
 					return
 			await self.bot.say("Server will be restarted in 60 seconds.")
 			if self.updating == True:
-				await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
+				await self.bot.say("I'm already carrying out a restart or update! ':ban:312395358330421250'")
 			else:
 				self.updating = True
 				await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
@@ -312,7 +312,7 @@ class arkserver:
 				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if 'Success' in output:
-					await self.bot.say("Updates were found and installed. :ok_hand_g:336175515087929356")
+					await self.bot.say("Updates were found and installed. ':ok_hand_g:336175515087929356'")
 				else:
 					await self.bot.say("Something went wrong \U0001F44F")
 		else:
