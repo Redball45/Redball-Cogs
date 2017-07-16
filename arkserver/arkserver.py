@@ -123,7 +123,7 @@ class arkserver:
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
-			await self.bot.say("I'm already carrying out a restart or update! :ban:")
+			await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
 			return
 		if minput.lower() == 'ragnarok':
 			desiredMap = 'Ragnarok'
@@ -136,7 +136,7 @@ class arkserver:
 			return
 		if self.settings["Map"] == desiredMap:
 			await self.bot.say("The server is already running this map!") 
-			await self.bot.add_reaction(message, ':youtried:')
+			await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
 			return
 		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
@@ -170,7 +170,7 @@ class arkserver:
 		if 'Success' in output:
 			await self.bot.say("Map changed and server has been restarted.")
 		else:
-			await self.bot.say("Something went wrong :clap:")
+			await self.bot.say("Something went wrong \U0001F44F")
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
 
@@ -264,7 +264,7 @@ class arkserver:
 				await self.bot.say("Okay, restart cancelled.")
 				return
 		if self.updating == True:
-			await self.bot.say("I'm already carrying out a restart or update! :ban:")
+			await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
 		else:
 			self.updating = True
 			await self.bot.say("Restarting in {0} seconds.".format(delay))
@@ -276,9 +276,9 @@ class arkserver:
 			await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 			self.updating = False
 			if 'Success' in output:
-				await self.bot.say("Server has been restarted :ok_hand_g:")
+				await self.bot.say("Server has been restarted :ok_hand_g:336175515087929356")
 			else:
-				await self.bot.say("Something went wrong :clap:")
+				await self.bot.say("Something went wrong \U0001F44F")
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
@@ -302,7 +302,7 @@ class arkserver:
 					return
 			await self.bot.say("Server will be restarted in 60 seconds.")
 			if self.updating == True:
-				await self.bot.say("I'm already carrying out a restart or update! :ban:")
+				await self.bot.say("I'm already carrying out a restart or update! :ban:312395358330421250")
 			else:
 				self.updating = True
 				await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
@@ -312,9 +312,9 @@ class arkserver:
 				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if 'Success' in output:
-					await self.bot.say("Updates were found and installed. :ok_hand_g:")
+					await self.bot.say("Updates were found and installed. :ok_hand_g:336175515087929356")
 				else:
-					await self.bot.say("Something went wrong :clap:")
+					await self.bot.say("Something went wrong \U0001F44F")
 		else:
 			await self.bot.say("No updates found.")
 
@@ -407,7 +407,7 @@ class arkserver:
 										self.updating = False
 										await asyncio.sleep(3540)
 									else:
-										await self.bot.send_message(self.channel,"Something went wrong during automatic update :clap:")
+										await self.bot.send_message(self.channel,"Something went wrong during automatic update \U0001F44F")
 										await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 										self.updating = False
 										await asyncio.sleep(240)
@@ -421,7 +421,7 @@ class arkserver:
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 								else:
-									await self.bot.send_message(self.channel,"Something went wrong during automatic update :clap:")
+									await self.bot.send_message(self.channel,"Something went wrong during automatic update \U0001F44F")
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 								await asyncio.sleep(3540)
