@@ -113,15 +113,13 @@ class arkserver:
 		"""Swaps the server over to the desired map."""
 		user = ctx.message.author
 		channel = ctx.message.channel #gets channel from user message command
-		message = ctx.message
 		output = await self.runcommand("arkmanager status", channel, False)
 		if minput == 'info':
 			await self.bot.say("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
 			return
 		if 'EmptyTrue' not in output:
 			await self.bot.say("The map cannot be swapped while players are in the server.")
-			reaction = '<:youtried:336180558956593152>'
-			await self.bot.add_reaction(message, reaction)
+			await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
