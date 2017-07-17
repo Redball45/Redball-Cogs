@@ -1713,7 +1713,7 @@ class Guildwars2:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord - EC2")
+			await self.bot.say("Issue embedding data into discord")
 
 	@tp.command(pass_context=True, name="id")
 	async def tp_id(self, ctx, *, tpdataid: str):
@@ -1789,11 +1789,11 @@ class Guildwars2:
 	async def container(self, ctx):
 		"""Command used to find out what's the most expensive item inside a container"""
 		if ctx.invoked_subcommand is None:
-			await send_cmd_help(ctx)
+			await self.bot.send_cmd_help(ctx)
 			return
 	
 	@container.command(hidden=True, pass_context=True, name="add")
-	@checks.mod_or_permissions(manage_webhooks=True)
+	@checks.is_owner()
 	async def containeradd(self, ctx, *, input_data: str):
 		"""Add a container data. Format is !container add name;data (data in JSON format)"""
 		try:
@@ -1810,7 +1810,7 @@ class Guildwars2:
 		await self.bot.say("Data added")
 	
 	@container.command(hidden=True, pass_context=True, name="del")
-	@checks.mod_or_permissions(manage_webhooks=True)
+	@checks.is_owner()
 	async def containerdelete(self, ctx, *, input_data: str):
 		"""Remove a container data. Format is !container del name"""
 		try:
@@ -1822,7 +1822,7 @@ class Guildwars2:
 		await self.bot.say("Data removed")
 	
 	@container.command(hidden=True, pass_context=True, name="list")
-	@checks.mod_or_permissions(manage_webhooks=True)
+	@checks.is_owner()
 	async def containerlist(self, ctx, *, input_data: str=""):
 		"""List container data.
 		List either all container names (without argument) or a specific container (with the name as argument)"""
@@ -1840,7 +1840,6 @@ class Guildwars2:
 	async def containercheck(self, ctx, *, input_name: str):
 		"""Gets the prices of a container's contents and give the most expensive ones.
 		container check [Container name] (copy-paste from in-game chat), also works without []"""
-		Aikan_ID = 180491225839697920
 		user = ctx.message.author
 		color = self.getColor(user)
 		# Remove the [] around the copied name
@@ -1854,10 +1853,7 @@ class Guildwars2:
 			l_contents = self.containers[clean_name]
 		except KeyError:
 			# Report and ban
-			await self.bot.say("Couldn't find said item in the container database."
-					   + " Your bullying has been reported to Aikan, who will take appropriate measures")
-			Aikan = await self.bot.get_user_info(Aikan_ID)
-			await self.bot.send_message(Aikan, "Issue with container " + input_name)
+			await self.bot.say("Couldn't find said item in the container database.")
 			return 
 		# Add prices to l_contents, result is l_tot
 		# The items will look like {'sell_price': -, 'buy_price': -, u'name': -, u'id': -}
@@ -1890,7 +1886,7 @@ class Guildwars2:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord - EC5")	
+			await self.bot.say("Issue embedding data into discord")	
 
 	@commands.command(pass_context=True)
 	async def quaggan(self, ctx, *, quaggan_name : str = 'random'):
@@ -1931,12 +1927,12 @@ class Guildwars2:
 	@commands.command(pass_context=True)
 	async def ubm(self, ctx, MC_price_str : str = "0"):
 		"""This displays which way of converting unbound magic to gold is the most profitable.
-		It takes as an optional argument the value the user gives to mystic coins (in copper), defaults to 0"""
+		It takes as an optional argument the value the user gives to mystic clovers (in copper), defaults to 0"""
 		user = ctx.message.author
 		color = self.getColor(user)
 		# The result will be the coin return per that amount of UBM
 		UBM_UNIT = 1000
-		# Mystic coin data. Required because they're not sellable on TP
+		# Mystic clover data. Required because they're not sellable on TP
 		MC_ID = "19675"
 		MC_price = self.coins_to_gold(MC_price_str)
 		# Container prices
@@ -2005,7 +2001,7 @@ class Guildwars2:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord - EC5")		
+			await self.bot.say("Issue embedding data into discord")		
 
 	@commands.group(pass_context=True)
 	async def gem(self, ctx):
@@ -2044,7 +2040,7 @@ class Guildwars2:
 		try:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord - EC3")
+			await self.bot.say("Issue embedding data into discord")
 			
 	@tp.command(pass_context=True, name="trend")
 	async def tp_trend(self, ctx, *, item: str):
