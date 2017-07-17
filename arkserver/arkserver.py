@@ -22,6 +22,8 @@ class arkserver:
 		self.bot = bot
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 		self.updating = False
+		self.channel = self.bot.get_channel("333605978560004097")
+		self.adminchannel = self.bot.get_channel("331076958425186305")
 
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal and collects the response"""
