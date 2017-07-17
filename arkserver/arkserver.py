@@ -22,8 +22,6 @@ class arkserver:
 		self.bot = bot
 		self.settings = dataIO.load_json("data/arkserver/settings.json")
 		self.updating = False
-		self.channel = self.bot.get_channel("333605978560004097")
-		self.adminchannel = self.bot.get_channel("331076958425186305")
 
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal and collects the response"""
@@ -377,13 +375,15 @@ class arkserver:
 		"""Checks for updates automatically every hour"""
 		while self is self.bot.get_cog("arkserver"):
 			await asyncio.sleep(60)
+			adminchannel = self.adminchannel
+			channel = self.channel
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose = self.settings["Verbose"]
 						status = await self.runcommand("arkmanager checkupdate", self.adminchannel, verbose)
 						modstatus = await self.runcommand("arkmanager checkmodupdate", self.adminchannel, verbose)
-						await self.bot.send_message(self.adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
+						await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
 					except Exception as e:
 						print("checkupdate commands encountered an exception {0}".format(e))
 						await asyncio.sleep(240)
@@ -414,7 +414,7 @@ class arkserver:
 									print('Updater encountered an exception in not empty loop')
 								if 'Success' in update:									
 									try:
-										await self.bot.send_message(self.channel,"Server has been updated <:ok_hand_g:336175515087929356>")
+										await self.bot.send_message(channel,"Server has been updated <:ok_hand_g:336175515087929356>")
 									except:
 										print('Exception while trying to post server has been updated.')
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
@@ -422,14 +422,14 @@ class arkserver:
 									await asyncio.sleep(3540)
 								else:
 									try:
-										await self.bot.send_message(self.channel,"Something went wrong during automatic update \U0001F44F")
+										await self.bot.send_message(channel,"Something went wrong during automatic update \U0001F44F")
 									except:
 										print('Exception while trying to post server update failed')
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 									await asyncio.sleep(240)
 							else:
-								await self.bot.send_message(self.adminchannel,"Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
+								await self.bot.send_message(adminchannel,"Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
 								await asyncio.sleep(1800)
 						else:
 							try:
@@ -438,14 +438,14 @@ class arkserver:
 								print('Updater encountered an exception in empty loop')
 							if 'Success' in update:									
 								try:
-									await self.bot.send_message(self.channel,"Server has been updated <:ok_hand_g:336175515087929356>")
+									await self.bot.send_message(channel,"Server has been updated <:ok_hand_g:336175515087929356>")
 								except:
 									print('Exception while trying to post server has updated in empty loop')
 								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 								self.updating = False
 							else:
 								try:
-									await self.bot.send_message(self.channel,"Something went wrong during automatic update \U0001F44F")
+									await self.bot.send_message(channel,"Something went wrong during automatic update \U0001F44F")
 								except:
 									print('Exception while trying to post server failed the update in empty loop')
 								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
@@ -454,7 +454,7 @@ class arkserver:
 					else:
 						await asyncio.sleep(3540)
 				else:
-					await self.bot.send_message(self.adminchannel,"Server is already updating or restarting, auto-update cancelled")
+					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
 					await asyncio.sleep(3540)
 
 
