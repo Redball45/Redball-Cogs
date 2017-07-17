@@ -62,7 +62,6 @@ class Guildwars2:
 		self.client = AsyncIOMotorClient()
 		self.db = self.client['gw2']
 		self.session = aiohttp.ClientSession(loop=self.bot.loop)
-		self.gemtrack = dataIO.load_json("data/guildwars2/gemtrack.json")
 		self.build = dataIO.load_json("data/guildwars2/build.json")
 		self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
 		self.containers = dataIO.load_json("data/guildwars2/containers.json")
@@ -2012,14 +2011,12 @@ class Guildwars2:
 	@gem.command(pass_context=True, name="track")
 	async def gem_track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
-		user = ctx.message.author
-		color = self.getColor(user)
-		price = gold * 10000
-		
-		self.gemtrack[user.id] = { "user_id": user.id, "price": price }
-		self.save_gemtrack()
-		
-		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
+        user = ctx.message.author
+        color = self.getColor(user)
+        price = gold * 10000        
+        gemtrack = { "_id": user.id, "price": price }
+        await self.db.gemtracker.insert_one(gemtrack)      
+        await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
 
 	@gem.command(pass_context=True, name="price")
 	async def gem_price(self, ctx, numberOfGems : int = 400):
@@ -2349,25 +2346,17 @@ class Guildwars2:
 
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
-		while self is self.bot.get_cog("Guildwars2"):
-			gemCost = await self.getGemPrice()			
-			doCleanup = False
-			
-			if gemCost != 0:
-				for user_id, data in self.gemtrack.items():
-					if gemCost < data["price"]:
-						user = await self.bot.get_user_info(user_id)
-						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(data["price"]), self.gold_to_coins(gemCost)))
-						self.gemtrack[user_id]["price"] = 0
-						doCleanup = True;
-			
-				if doCleanup:
-					keys = [k for k, v in self.gemtrack.items() if v["price"] == 0]
-					for x in keys:
-						del self.gemtrack[x]
-					self.save_gemtrack()
-			
-			await asyncio.sleep(300)
+        while self is self.bot.get_cog("GuildWars2"):
+            gemCost = await self.getGemPrice()
+            if gemCost != 0:
+                cursor = self.db.gemtracker.find()
+                cursor = await cursor.to_list(1000)
+                for record in cursor:
+                    if gemCost < record['price']:
+                        user = await self.bot.get_user_info(record['_id'])
+                        await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(record["price"]), self.gold_to_coins(gemCost)))
+                        await self.db.gemtracker.delete_one({'_id': user.id})    
+            await asyncio.sleep(300)
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/guildwars2/gemtrack.json", self.gemtrack)
@@ -3176,7 +3165,6 @@ def check_folders():
 
 def check_files():
 	files = {
-		"gemtrack.json": {},
 		"gamedata.json": {},
 		"build.json": {"id": None},
 		"containers.json": {},
