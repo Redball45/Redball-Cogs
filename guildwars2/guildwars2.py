@@ -1560,7 +1560,8 @@ class GuildWars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel" : None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
@@ -2289,7 +2290,8 @@ class GuildWars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel" : None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None or isinstance(ctx.invoked_subcommand, commands.Group):
 			await self.bot.send_cmd_help(ctx)
@@ -2420,9 +2422,18 @@ class GuildWars2:
 	@commands.group(pass_context=True)
 	async def arcdps(self, ctx):
 		"""Commands for setting up arcdps update feed"""
+		server = ctx.message.server
+		serverdoc = await self.fetch_server(server)
+		if not serverdoc:
+			default_channel = server.default_channel.id
+			serverdoc = {"_id": server.id, "on": False,
+						 "channel": default_channel, "language": "en",
+						 "daily" : {"on": False, "channel": None},
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel" : None}}
+			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
-			return
 
 	@arcdps.command(pass_context=True, name="check")
 	async def arc_check(self, ctx):
@@ -2432,6 +2443,36 @@ class GuildWars2:
 		page = urlopen(URL, context=context).read().decode('utf8')
 		i = page.find("x64: current</a>")
 		await self.bot.say(page[i+17:i+30])
+
+	@arcdps.command(pass_context=True, name="channel")
+	async def arcdps_channel(self, ctx, channel: discord.Channel=None):
+		"""Sets the channel to send the news to
+		If channel isn't specified, the server's default channel will be used"""
+		server = ctx.message.server
+		if channel is None:
+			channel = ctx.message.server.default_channel
+		if not server.get_member(self.bot.user.id
+								 ).permissions_in(channel).send_messages:
+			await self.bot.say("I do not have permissions to send "
+							   "messages to {0.mention}".format(channel))
+			return
+		await self.db.settings.update_one({"_id": server.id}, {"$set": {"arcdps.channel": channel.id}})
+		await self.bot.send_message(channel, "I will now send ArcDPS updates "
+									"to {0.mention}. Make sure it's toggled "
+									"on using !arcdps toggle on. ".format(channel))
+
+	@arcdps.command(pass_context=True, name="toggle")
+	async def arcdps_toggle(self, ctx, on_off: bool):
+		"""Toggles posting arcdps updates"""
+		server = ctx.message.server
+		if on_off is not None:
+			await self.db.settings.update_one({"_id": server.id}, {"$set": {"arcdps.on" : on_off}})
+		serverdoc = await self.fetch_server(server)
+		if serverdoc["arcdps"]["on"]:
+			await self.bot.say("I will send ArcDPS updates")
+		else:
+			await self.bot.say("I will not send "
+							   "notifications about ArcDPS updates")
 
 	async def arcdps_checker(self):
 		while self is self.bot.get_cog("GuildWars2"):
@@ -2446,14 +2487,34 @@ class GuildWars2:
 				else:
 					self.cache["ArcDPS"] = current
 					dataIO.save_json('data/guildwars2/cache.json', self.cache)
-					redball = await self.bot.get_user_info("77910702664200192")
-					await self.bot.send_message(redball,"ArcDPS has been updated. {0} Link: https://www.deltaconnected.com/arcdps/x64/".format(current))
+					output = await self.arcdps_send(current)
 					await asyncio.sleep(600)
 			except Exception as e:
 				print(
 					"Arcdps check has encountered an exception: {0}".format(e))
 				await asyncio.sleep(600)
 				continue
+
+	async def arcdps_send(self, current):
+		try:
+			channels = []
+			cursor = self.db.settings.find({"arcdps.on" : True}, modifiers={"$snapshot": True})
+			async for server in cursor:
+				try:
+					if "channel" in server["arcdps"]:
+						if server["arcdps"]["channel"] is not None:
+							channels.append(server["arcdps"]["channel"])
+				except:
+					pass
+			for chanid in channels:
+				try:
+					channel = self.bot.get_channel(chanid)
+					await self.bot.send_message(channel, "ArcDPS has been updated. {0} Link: https://www.deltaconnected.com/arcdps/x64/".format(current))
+				except:
+					pass
+		except Exception as e:
+			print ("Erorr while sending news: {0}".format(e))
+			return
 
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.group(pass_context=True)
@@ -2466,7 +2527,8 @@ class GuildWars2:
 			serverdoc = {"_id": server.id, "on": False,
 						 "channel": default_channel, "language": "en",
 						 "daily" : {"on": False, "channel": None},
-						 "news" : {"on": False, "channel": None}}
+						 "news" : {"on": False, "channel": None},
+						 "arcdps" : {"on": False, "channel" : None}}
 			await self.db.settings.insert_one(serverdoc)
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
