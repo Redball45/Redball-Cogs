@@ -54,7 +54,7 @@ class APIKeyError(APIError):
 class APINotFound(APIError):
 	pass
 
-class Guildwars2:
+class GuildWars2:
 	"""This cog finds tp prices"""
 
 	def __init__(self, bot):
@@ -2011,12 +2011,12 @@ class Guildwars2:
 	@gem.command(pass_context=True, name="track")
 	async def gem_track(self, ctx, gold : int):
 		"""This requests to be notified when the cost of 400 gems drops below a specified price (in gold - ex: trackgems 120)"""
-        user = ctx.message.author
-        color = self.getColor(user)
-        price = gold * 10000        
-        gemtrack = { "_id": user.id, "price": price }
-        await self.db.gemtracker.insert_one(gemtrack)      
-        await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
+		user = ctx.message.author
+		color = self.getColor(user)
+		price = gold * 10000        
+		gemtrack = { "_id": user.id, "price": price }
+		await self.db.gemtracker.insert_one(gemtrack)      
+		await self.bot.say("{0.mention}, you'll be notified when the price of 400 gems drops below {1}".format(user, self.gold_to_coins(price)))
 
 	@gem.command(pass_context=True, name="price")
 	async def gem_price(self, ctx, numberOfGems : int = 400):
@@ -2346,17 +2346,17 @@ class Guildwars2:
 
 	# tracks gemprices and notifies people
 	async def _gemprice_tracker(self):
-        while self is self.bot.get_cog("GuildWars2"):
-            gemCost = await self.getGemPrice()
-            if gemCost != 0:
-                cursor = self.db.gemtracker.find()
-                cursor = await cursor.to_list(1000)
-                for record in cursor:
-                    if gemCost < record['price']:
-                        user = await self.bot.get_user_info(record['_id'])
-                        await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(record["price"]), self.gold_to_coins(gemCost)))
-                        await self.db.gemtracker.delete_one({'_id': user.id})    
-            await asyncio.sleep(300)
+		while self is self.bot.get_cog("GuildWars2"):
+			gemCost = await self.getGemPrice()
+			if gemCost != 0:
+				cursor = self.db.gemtracker.find()
+				cursor = await cursor.to_list(1000)
+				for record in cursor:
+					if gemCost < record['price']:
+						user = await self.bot.get_user_info(record['_id'])
+						await self.bot.send_message(user, "Hey, {0.mention}! You asked to be notified when 400 gems were cheaper than {1}. Guess what? They're now only {2}!".format(user, self.gold_to_coins(record["price"]), self.gold_to_coins(gemCost)))
+						await self.db.gemtracker.delete_one({'_id': user.id})    
+			await asyncio.sleep(300)
 
 	def save_gemtrack(self):
 		dataIO.save_json("data/guildwars2/gemtrack.json", self.gemtrack)
@@ -2406,7 +2406,7 @@ class Guildwars2:
 			return None
 
 	async def daily_notifs(self):
-		while self is self.bot.get_cog("Guildwars2"):
+		while self is self.bot.get_cog("GuildWars2"):
 			try:
 				if self.check_day():
 					await self.send_daily_notifs()
@@ -2434,7 +2434,7 @@ class Guildwars2:
 		await self.bot.say(page[i+17:i+30])
 
 	async def arcdps_checker(self):
-		while self is self.bot.get_cog("Guildwars2"):
+		while self is self.bot.get_cog("GuildWars2"):
 			try:
 				context = ssl._create_unverified_context()
 				URL = "https://www.deltaconnected.com/arcdps/"
@@ -2892,7 +2892,7 @@ class Guildwars2:
 		return choice
 
 	async def _gamebuild_checker(self):
-		while self is self.bot.get_cog("Guildwars2"):
+		while self is self.bot.get_cog("GuildWars2"):
 			try:
 				if await self.update_build():
 					channels = await self.get_channels()
@@ -2921,7 +2921,7 @@ class Guildwars2:
 				continue
 
 	async def news_checker(self):
-		while self is self.bot.get_cog("Guildwars2"):
+		while self is self.bot.get_cog("GuildWars2"):
 			try:
 				to_post = await self.check_news()
 				if to_post:
@@ -3180,7 +3180,7 @@ def check_files():
 def setup(bot):
 	check_folders()
 	check_files()
-	n = Guildwars2(bot)
+	n = GuildWars2(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n._gemprice_tracker())
 	loop.create_task(n._gamebuild_checker())
