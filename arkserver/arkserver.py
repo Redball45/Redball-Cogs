@@ -385,7 +385,7 @@ class arkserver:
 						verbose = self.settings["Verbose"]
 						status = await self.runcommand("arkmanager checkupdate", self.adminchannel, verbose)
 						modstatus = await self.runcommand("arkmanager checkmodupdate", self.adminchannel, verbose)
-						await self.bot.send_message(adminchannel,"Update check completed at {0}".format(datetime.utcnow()))
+						print("Update check completed at {0}".format(datetime.utcnow()))
 					except Exception as e:
 						print("checkupdate commands encountered an exception {0}".format(e))
 						await asyncio.sleep(240)
@@ -431,7 +431,7 @@ class arkserver:
 									self.updating = False
 									await asyncio.sleep(240)
 							else:
-								await self.bot.send_message(adminchannel,"Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
+								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
 								await asyncio.sleep(1800)
 						else:
 							try:
@@ -456,7 +456,7 @@ class arkserver:
 					else:
 						await asyncio.sleep(3540)
 				else:
-					await self.bot.send_message(adminchannel,"Server is already updating or restarting, auto-update cancelled")
+					print("Server is already updating or restarting, auto-update cancelled")
 					await asyncio.sleep(3540)
 
 
