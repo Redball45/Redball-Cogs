@@ -1684,36 +1684,67 @@ class GuildWars2:
 		user = ctx.message.author
 		color = self.getColor(user)
 		choice = await self.itemname_to_id(item, user)
-		try:
-			commerce = 'commerce/prices/'
-			choiceid = str(choice["_id"])
-			endpoint = commerce + choiceid
-			results = await self.call_api(endpoint)
-		except APIKeyError as e:
-			await self.bot.say(e)
+		if choice:
+			try:
+				commerce = 'commerce/prices/'
+				choiceid = str(choice["_id"])
+				endpoint = commerce + choiceid
+				results = await self.call_api(endpoint)
+			except APIKeyError as e:
+				await self.bot.say(e)
+				return
+			except APINotFound as e:
+				await self.bot.say("{0.mention}, This item isn't on the TP."
+								   "{1}".format(user, e))
+				return
+			buyprice = results["buys"]["unit_price"]
+			sellprice = results ["sells"]["unit_price"]
+			try:
+				if str(choice["level"]) == "0":
+					level = ""
+				else:
+					level = " level " + str(choice["level"])
+			except:
+				level = ""
+			try:
+				rarity = str(choice["rarity"])
+			except:
+				rarity = ""
+			try:
+				itemtype = str(choice["type"])
+				if itemtype.lower() == 'craftingmaterial':
+					itemtype = 'crafting material'
+			except:
+				itemtype = ""
+			description = "A" + level.lower() + " " + rarity.lower() + " " + itemtype.lower()
+			try:
+				chatcode = str(choice["chat_link"])
+			except:
+				chatcode = ""
+			try:
+				icon = str(choice["icon"])
+			except:
+				icon = ""
+			itemname = choice["name"]
+			if buyprice != 0:
+				buyprice = self.gold_to_coins(buyprice)
+			if sellprice != 0:
+				sellprice = self.gold_to_coins(sellprice)
+			if buyprice == 0:
+				buyprice = 'No buy orders'
+			if sellprice == 0:
+				sellprice = 'No sell orders'				
+			data = discord.Embed(title=itemname, description=description, colour=color)
+			data.set_thumbnail(url=icon)
+			data.add_field(name="Buy price", value=buyprice)
+			data.add_field(name="Sell price", value=sellprice, inline=False)
+			data.set_footer(text=chatcode)
+			try:
+				await self.bot.say(embed=data)
+			except discord.HTTPException:
+				await self.bot.say("Issue embedding data into discord")
+		else:
 			return
-		except APINotFound as e:
-			await self.bot.say("{0.mention}, This item isn't on the TP."
-							   "{1}".format(user, e))
-			return
-		buyprice = results["buys"]["unit_price"]
-		sellprice = results ["sells"]["unit_price"]	
-		itemname = choice["name"]
-		if buyprice != 0:
-			buyprice = self.gold_to_coins(buyprice)
-		if sellprice != 0:
-			sellprice = self.gold_to_coins(sellprice)
-		if buyprice == 0:
-			buyprice = 'No buy orders'
-		if sellprice == 0:
-			sellprice = 'No sell orders'				
-		data = discord.Embed(title=itemname, colour=color)
-		data.add_field(name="Buy price", value=buyprice)
-		data.add_field(name="Sell price", value=sellprice)
-		try:
-			await self.bot.say(embed=data)
-		except discord.HTTPException:
-			await self.bot.say("Issue embedding data into discord")
 
 	@tp.command(pass_context=True, name="id")
 	async def tp_id(self, ctx, *, tpdataid: str):
