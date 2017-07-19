@@ -1860,7 +1860,11 @@ class GuildWars2:
 		base_URL = "commerce/prices?ids="
 		comma_IDs = ','.join([elem["id"] for elem in l_contents])
 		endpoint = base_URL + comma_IDs
-		data_prices = await self.call_api(endpoint)
+		try:
+			data_prices = await self.call_api(endpoint)
+		except APINotFound as e:
+			await self.bot.say("API may be down, the following error was returned {0}".format(e))
+			return
 		l_prices = {str(elem["id"]): elem for elem in data_prices}
 		l_tot = []
 		for elem in l_contents:
@@ -1971,7 +1975,11 @@ class GuildWars2:
 		# It's still safer to explicitely remove that ID
 		l_IDs.remove("19675")
 		endpoint = URL + ','.join(l_IDs)
-		prices_data = await self.call_api(endpoint)
+		try:
+			prices_data = await self.call_api(endpoint)
+		except APINotFound as e:
+			await self.bot.say("API may be down, the following error was returned {0}".format(e))
+			return
 		d_prices = {str(elem["id"]): int(0.85 * elem["sells"]["unit_price"])
 					for elem in prices_data}
 		d_prices[MC_ID] = MC_price
@@ -2370,7 +2378,9 @@ class GuildWars2:
 		except APIKeyError as e:
 			await self.bot.say(e)
 			return 0
-		
+		except APINotFound as e:
+			await self.bot.say("API may be down, the following error was returned {0}".format(e))
+			return 0	
 		gemCost = gemsresult['coins_per_gem']*numberOfGems
 		return gemCost
 
