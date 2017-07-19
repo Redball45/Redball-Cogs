@@ -1684,6 +1684,7 @@ class GuildWars2:
 		user = ctx.message.author
 		color = self.getColor(user)
 		choice = await self.itemname_to_id(item, user)
+		message = await self.bot.say("Searching...")
 		if choice:
 			try:
 				commerce = 'commerce/prices/'
@@ -1739,6 +1740,10 @@ class GuildWars2:
 			data.add_field(name="Buy price", value=buyprice)
 			data.add_field(name="Sell price", value=sellprice, inline=False)
 			data.set_footer(text=chatcode)
+			try:
+				await self.bot.delete_message(message)
+			except:
+				print('Missing delete message permissions')
 			try:
 				await self.bot.say(embed=data)
 			except discord.HTTPException:
@@ -2990,7 +2995,6 @@ class GuildWars2:
 			except:
 				pass
 		else:
-			message = await self.bot.say("Searching...")
 			choice = items[0]
 		return choice
 
