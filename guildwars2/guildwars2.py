@@ -1682,7 +1682,6 @@ class GuildWars2:
 		"""This finds the current buy and sell prices of an item
 		If multiple matches are found, displays the first"""
 		user = ctx.message.author
-		color = self.getColor(user)
 		choice = await self.itemname_to_id(item, user)
 		message = await self.bot.say("Searching...")
 		if choice:
@@ -1726,6 +1725,22 @@ class GuildWars2:
 				icon = str(choice["icon"])
 			except:
 				icon = ""
+			if rarity == 'Ascended':
+				color = discord.Color(0xe91e63)
+			elif rarity == 'Exotic':
+				color = discord.Color(0xe67e22)
+			elif rarity == 'Rare':
+				color = discord.Color(0xf1c40f)
+			elif rarity == 'Masterwork':
+				color = discord.Color(0x2ecc71)
+			elif rarity == 'Fine':
+				color = discord.Color(0x3498db)
+			elif rarity == 'Common':
+				color = discord.Color(0x95a5a6)
+			elif rarity == 'Legendary':
+				color = discord.Color(0x9b59b6)
+			else:
+				color = discord.Color(0x607d8b)
 			itemname = choice["name"]
 			if buyprice != 0:
 				buyprice = self.gold_to_coins(buyprice)
