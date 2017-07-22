@@ -52,7 +52,8 @@ class arkserver:
 		while True:
 			try:
 				output = q.get_nowait()
-			except:
+			except Empty:
+				pass
 			else: 
 				if output: 
 					if verbose == True:
