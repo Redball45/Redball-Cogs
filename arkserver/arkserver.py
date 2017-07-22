@@ -14,6 +14,13 @@ from subprocess import PIPE, Popen
 from threading import Thread
 import shlex
 
+try:
+	from Queue import Queue, Empty
+except ImportError:
+	from queue import Queue, Empty # python 3.x
+
+ON_POSIX = 'posix' in sys.builtin_module_names
+
 class HTTPException(Exception):
 	pass
 
