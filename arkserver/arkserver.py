@@ -79,7 +79,6 @@ class arkserver:
 							status = status + 'ModUpdate'
 						if 'The server is now running, and should be up within 10 minutes' in output:
 							status = status + 'Success'
-							break
 						if 'players are still connected' in output:
 							status = status + 'PlayersConnected'
 						if 'Players: 0' in output:
