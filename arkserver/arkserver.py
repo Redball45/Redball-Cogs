@@ -41,7 +41,7 @@ class arkserver:
 		out.close()
 
 	async def runcommand(self, command, channel, verbose):
-		"""This function runs a command in the terminal asynchronously and collects the response"""
+		"""This function runs a command in the terminal and uses a seperate thread to collect the response so it isn't blocking"""
 		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 		q = Queue()
 		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
@@ -96,7 +96,7 @@ class arkserver:
 				return status
 		return status
 
-	"""async def oldruncommand(self, command, channel, verbose):
+	async def oldruncommand(self, command, channel, verbose):
 		#This function runs a command in the terminal and collects the response
 		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
 		status = ""
@@ -144,7 +144,7 @@ class arkserver:
 			return status
 		if process.poll() is None:
 			process.kill()
-		return status"""
+		return status
 	
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
@@ -250,13 +250,13 @@ class arkserver:
 	async def checkupdate(self, ctx):
 		"""Checks for ark updates - does not actually start the update"""
 		channel = ctx.message.channel #gets channel from user message command
-		output = await self.runcommand("arkmanager checkupdate", channel, True)
+		output = await self.oldruncommand("arkmanager checkupdate", channel, True)
 
 	@ark.command(pass_context=True)
 	async def checkmodupdate(self, ctx):
 		"""Checks for ark mod updates - does not actually start the update"""
 		channel = ctx.message.channel
-		output = await self.runcommand("arkmanager checkmodupdate", channel, True)
+		output = await self.oldruncommand("arkmanager checkmodupdate", channel, True)
 
 	@ark.command(pass_context=True, name="stop")
 	@checks.is_owner()
@@ -394,7 +394,7 @@ class arkserver:
 	async def ark_save(self, ctx):
 		"""Saves the world state"""
 		channel = ctx.message.channel
-		output = await self.runcommand("arkmanager saveworld", channel, True)
+		output = await self.oldruncommand("arkmanager saveworld", channel, True)
 
 	@ark.command(pass_context=True, name="backup")
 	@checks.is_owner()
@@ -455,8 +455,8 @@ class arkserver:
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose = self.settings["Verbose"]
-						status = await self.runcommand("arkmanager checkupdate", self.adminchannel, verbose)
-						modstatus = await self.runcommand("arkmanager checkmodupdate", self.adminchannel, verbose)
+						status = await self.oldruncommand("arkmanager checkupdate", self.adminchannel, verbose)
+						modstatus = await self.oldruncommand("arkmanager checkmodupdate", self.adminchannel, verbose)
 						print("Update check completed at {0}".format(datetime.utcnow()))
 					except Exception as e:
 						print("checkupdate commands encountered an exception {0}".format(e))
