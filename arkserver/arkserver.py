@@ -19,7 +19,7 @@ try:
 except ImportError:
 	from queue import Queue, Empty # python 3.x
 
-ON_POSIX = 'posix' in sys.builtin_module_names
+#ON_POSIX = 'posix' in sys.builtin_module_names
 
 class HTTPException(Exception):
 	pass
@@ -42,7 +42,7 @@ class arkserver:
 
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal and uses a seperate thread to collect the response so it isn't blocking"""
-		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1)
 		q = Queue()
 		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
 		t.daemon = True
@@ -240,6 +240,13 @@ class arkserver:
 		"""Checks for ark updates - does not actually start the update"""
 		channel = ctx.message.channel #gets channel from user message command
 		output = await self.oldruncommand("arkmanager checkupdate", channel, True)
+
+	@ark.command(pass_context=True)
+	@checks.is_owner()
+	async def testcheckupdate(self, ctx):
+		"""Checks for ark updates - uses non-blocking function"""
+		channel = ctx.message.channel #gets channel from user message command
+		output = await self.runcommand("arkmanager checkupdate", channel, True)
 
 	@ark.command(pass_context=True)
 	async def checkmodupdate(self, ctx):
