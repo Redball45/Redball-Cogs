@@ -46,7 +46,7 @@ class arkserver:
 								sani = sani.replace(elem, "")
 							try:
 								await self.bot.send_message(channel,"{0}".format(sani))
-							except discord.HTTPException as e:
+							except as e:
 								print("Error posting to discord {0}, {1}".format(e, sani))
 					if 'Your server needs to be restarted in order to receive the latest update' in output:
 						status = status + 'Update'
@@ -61,8 +61,8 @@ class arkserver:
 						status = status + 'EmptyTrue'
 					if 'online:  Yes' in output:
 						status = status + 'NotUpdating'
-		except:
-			print("Something went wrong... you should check the status of the server with +ark status.")
+		except as e:
+			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
 			print("Updating and restarting options will be locked for 3 minutes for safety.")
 			self.updating = True
 			await asyncio.sleep(180)
@@ -424,7 +424,7 @@ class arkserver:
 									await asyncio.sleep(3540)
 								else:
 									try:
-										await self.bot.send_message(channel,"Something went wrong during automatic update \U0001F44F")
+										await self.bot.send_message(channel,"Something went wrong during automatic update")
 									except:
 										print('Exception while trying to post server update failed')
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
@@ -447,7 +447,7 @@ class arkserver:
 								self.updating = False
 							else:
 								try:
-									await self.bot.send_message(channel,"Something went wrong during automatic update \U0001F44F")
+									await self.bot.send_message(channel,"Something went wrong during automatic update")
 								except:
 									print('Exception while trying to post server failed the update in empty loop')
 								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
