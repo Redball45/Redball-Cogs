@@ -8,8 +8,9 @@ from datetime import datetime
 
 import json
 import os
+import sys
 import asyncio
-import subprocess
+from asyncio.subprocess import PIPE
 import shlex
 
 class HTTPException(Exception):
@@ -25,14 +26,27 @@ class arkserver:
 		self.channel = self.bot.get_channel("333605978560004097")
 		self.adminchannel = self.bot.get_channel("331076958425186305")
 
+	
+	async def read_stream_and_display(stream, display):
+		"""Read from stream line by line until EOF, display, and capture the lines."""
+		output = []
+		while True:
+			line = yield from stream.readline()
+			if not line:
+				break
+			output.append(line)
+			display(line) # assume it doesn't block
+		return b''.join(output)
+
 	async def runcommand(self, command, channel, verbose):
-		"""This function runs a command in the terminal and collects the response"""
-		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
+		"""This function runs a command in the terminal asynchronously and collects the response"""
+		process = yield from asyncio.create_subprocess_exec(command, stdout=PIPE, stderr=PIPE)
 		status = ""
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		try:
-			while True:
-				output = await process.stdout.readline().decode() #read each line of terminal output
+			output, stderr = yield from asyncio.gather(
+				read_stream_and_display(process.stdout, sys.stdout.buffer.write),
+				read_stream_and_display(process.stderr, sys.stderr.buffer.write))
 				if output == '' and process.poll() is not None:
 					break
 				if output: 
@@ -74,6 +88,56 @@ class arkserver:
 		if process.poll() is None:
 			process.kill()
 		return status
+
+	"""async def oldruncommand(self, command, channel, verbose):
+		#This function runs a command in the terminal and collects the response
+		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
+		status = ""
+		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
+		try:
+			while True:
+				output = process.stdout.readline().decode() #read each line of terminal output
+				if output == '' and process.poll() is not None:
+					break
+				if output: 
+					if verbose == True:
+						if len(output) > 1900:
+							print("The console returned a string for this line that exceeds the discord character limit.")
+						else:
+							sani = output
+							sani = sani.lstrip("7")
+							for elem in list_replacements:
+								sani = sani.replace(elem, "")
+							if 'Downloading ARK update' not in sani:
+								try:
+									await self.bot.send_message(channel,"{0}".format(sani))
+								except Exception as e:
+									print("Error posting to discord {0}, {1}".format(e, sani))
+					if 'Your server needs to be restarted in order to receive the latest update' in output:
+						status = status + 'Update'
+					if 'has been updated on the Steam workshop' in output:
+						status = status + 'ModUpdate'
+					if 'The server is now running, and should be up within 10 minutes' in output:
+						status = status + 'Success'
+						break
+					if 'players are still connected' in output:
+						status = status + 'PlayersConnected'
+					if 'Players: 0' in output:
+						status = status + 'EmptyTrue'
+					if 'online:  Yes' in output:
+						status = status + 'NotUpdating'
+		except Exception as e:
+			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
+			print("Updating and restarting options will be locked for 3 minutes for safety.")
+			self.updating = True
+			await asyncio.sleep(180)
+			self.updating = False
+			if process.poll() is None:
+				process.kill()
+			return status
+		if process.poll() is None:
+			process.kill()
+		return status"""
 	
 	@commands.group(pass_context=True)
 	@checks.mod_or_permissions(manage_webhooks=True)
