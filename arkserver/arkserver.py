@@ -32,7 +32,7 @@ class arkserver:
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		try:
 			while True:
-				await output = process.stdout.readline().decode() #read each line of terminal output
+				output = await process.stdout.readline().decode() #read each line of terminal output
 				if output == '' and process.poll() is not None:
 					break
 				if output: 
