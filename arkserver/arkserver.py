@@ -61,6 +61,7 @@ class arkserver:
 							print("The console returned a string for this line that exceeds the discord character limit.")
 						else:
 							sani = output
+							print('{0}'.format(sani))
 							sani = sani.lstrip("7")
 							for elem in list_replacements:
 								sani = sani.replace(elem, "")
