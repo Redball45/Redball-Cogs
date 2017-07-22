@@ -35,7 +35,7 @@ class arkserver:
 		self.adminchannel = self.bot.get_channel("331076958425186305")
 
 
-	async def enqueue_output(self, out, queue):
+	def enqueue_output(self, out, queue):
 		for line in iter(out.readline, b''):
 			queue.put(line)
 		out.close()
