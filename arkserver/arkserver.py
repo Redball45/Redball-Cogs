@@ -46,7 +46,7 @@ class arkserver:
 								sani = sani.replace(elem, "")
 							try:
 								await self.bot.send_message(channel,"{0}".format(sani))
-							except as e:
+							except Exception as e:
 								print("Error posting to discord {0}, {1}".format(e, sani))
 					if 'Your server needs to be restarted in order to receive the latest update' in output:
 						status = status + 'Update'
@@ -61,7 +61,7 @@ class arkserver:
 						status = status + 'EmptyTrue'
 					if 'online:  Yes' in output:
 						status = status + 'NotUpdating'
-		except as e:
+		except Exception as e:
 			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
 			print("Updating and restarting options will be locked for 3 minutes for safety.")
 			self.updating = True
