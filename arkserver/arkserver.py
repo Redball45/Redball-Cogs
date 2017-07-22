@@ -49,12 +49,15 @@ class arkserver:
 		t.start()
 		status = ""
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
-		while process.poll() is None:
+		while True:
 			try:
 				try:
 					output = q.get_nowait().decode()
 				except Empty:
-					pass
+					if process.poll() is not None:
+						break
+					else:
+						pass
 				else: 
 					if output: 
 						if verbose == True:
