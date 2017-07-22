@@ -42,7 +42,7 @@ class arkserver:
 
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal asynchronously and collects the response"""
-		process = Popen(command, stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 		q = Queue()
 		t = Thread(target = enqueue_output, args=(p.stdout, q))
 		t.daemon = True
