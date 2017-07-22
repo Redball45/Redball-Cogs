@@ -61,7 +61,7 @@ class arkserver:
 							sani = sani.replace(elem, "")
 						if 'Downloading ARK update' not in sani:
 							try:
-								await self.bot.send_message(channel,"{0}".format(sani))
+								self.bot.send_message(channel,"{0}".format(sani))
 							except Exception as e:
 								print("Error posting to discord {0}, {1}".format(e, sani))
 				if 'Your server needs to be restarted in order to receive the latest update' in output:
