@@ -47,35 +47,35 @@ class arkserver:
 			output, stderr = yield from asyncio.gather(
 				read_stream_and_display(process.stdout, sys.stdout.buffer.write),
 				read_stream_and_display(process.stderr, sys.stderr.buffer.write))
-				if output == '' and process.poll() is not None:
+			if output == '' and process.poll() is not None:
+				break
+			if output: 
+				if verbose == True:
+					if len(output) > 1900:
+						print("The console returned a string for this line that exceeds the discord character limit.")
+					else:
+						sani = output
+						sani = sani.lstrip("7")
+						for elem in list_replacements:
+							sani = sani.replace(elem, "")
+						if 'Downloading ARK update' not in sani:
+							try:
+								await self.bot.send_message(channel,"{0}".format(sani))
+							except Exception as e:
+								print("Error posting to discord {0}, {1}".format(e, sani))
+				if 'Your server needs to be restarted in order to receive the latest update' in output:
+					status = status + 'Update'
+				if 'has been updated on the Steam workshop' in output:
+					status = status + 'ModUpdate'
+				if 'The server is now running, and should be up within 10 minutes' in output:
+					status = status + 'Success'
 					break
-				if output: 
-					if verbose == True:
-						if len(output) > 1900:
-							print("The console returned a string for this line that exceeds the discord character limit.")
-						else:
-							sani = output
-							sani = sani.lstrip("7")
-							for elem in list_replacements:
-								sani = sani.replace(elem, "")
-							if 'Downloading ARK update' not in sani:
-								try:
-									await self.bot.send_message(channel,"{0}".format(sani))
-								except Exception as e:
-									print("Error posting to discord {0}, {1}".format(e, sani))
-					if 'Your server needs to be restarted in order to receive the latest update' in output:
-						status = status + 'Update'
-					if 'has been updated on the Steam workshop' in output:
-						status = status + 'ModUpdate'
-					if 'The server is now running, and should be up within 10 minutes' in output:
-						status = status + 'Success'
-						break
-					if 'players are still connected' in output:
-						status = status + 'PlayersConnected'
-					if 'Players: 0' in output:
-						status = status + 'EmptyTrue'
-					if 'online:  Yes' in output:
-						status = status + 'NotUpdating'
+				if 'players are still connected' in output:
+					status = status + 'PlayersConnected'
+				if 'Players: 0' in output:
+					status = status + 'EmptyTrue'
+				if 'online:  Yes' in output:
+					status = status + 'NotUpdating'
 		except Exception as e:
 			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
 			print("Updating and restarting options will be locked for 3 minutes for safety.")
