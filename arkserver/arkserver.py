@@ -49,51 +49,49 @@ class arkserver:
 		t.start()
 		status = ""
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
-		while True:
+		while process.poll() is None:
 			try:
-				output = q.get_nowait()
-				output = output.decode()
-			except Empty:
-				pass
-			else: 
-				if output: 
-					if verbose == True:
-						if len(output) > 1900:
-							print("The console returned a string for this line that exceeds the discord character limit.")
-						else:
-							sani = output
-							print('{0}'.format(sani))
-							sani = sani.lstrip("7")
-							for elem in list_replacements:
-								sani = sani.replace(elem, "")
-							try:
-								await self.bot.send_message(channel,"{0}".format(sani))
-							except Exception as e:
-								print("Error posting to discord {0}, {1}".format(e, sani))
-					if 'Your server needs to be restarted in order to receive the latest update' in output:
-						status = status + 'Update'
-					if 'has been updated on the Steam workshop' in output:
-						status = status + 'ModUpdate'
-					if 'The server is now running, and should be up within 10 minutes' in output:
-						status = status + 'Success'
-						break
-					if 'players are still connected' in output:
-						status = status + 'PlayersConnected'
-					if 'Players: 0' in output:
-						status = status + 'EmptyTrue'
-					if 'online:  Yes' in output:
-						status = status + 'NotUpdating'
-		"""except Exception as e:
-			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
-			print("Updating and restarting options will be locked for 3 minutes for safety.")
-			self.updating = True
-			await asyncio.sleep(180)
-			self.updating = False
-			if process.poll() is None:
-				process.kill()
-			return status"""
-		if process.poll() is None:
-			process.kill()
+				try:
+					output = q.get_nowait().decode()
+				except Empty:
+					pass
+				else: 
+					if output: 
+						if verbose == True:
+							if len(output) > 1900:
+								print("The console returned a string for this line that exceeds the discord character limit.")
+							else:
+								sani = output
+								print('{0}'.format(sani))
+								sani = sani.lstrip("7")
+								for elem in list_replacements:
+									sani = sani.replace(elem, "")
+								try:
+									await self.bot.send_message(channel,"{0}".format(sani))
+								except Exception as e:
+									print("Error posting to discord {0}, {1}".format(e, sani))
+						if 'Your server needs to be restarted in order to receive the latest update' in output:
+							status = status + 'Update'
+						if 'has been updated on the Steam workshop' in output:
+							status = status + 'ModUpdate'
+						if 'The server is now running, and should be up within 10 minutes' in output:
+							status = status + 'Success'
+							break
+						if 'players are still connected' in output:
+							status = status + 'PlayersConnected'
+						if 'Players: 0' in output:
+							status = status + 'EmptyTrue'
+						if 'online:  Yes' in output:
+							status = status + 'NotUpdating'
+			except Exception as e:
+				print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
+				print("Updating and restarting options will be locked for 3 minutes for safety.")
+				self.updating = True
+				await asyncio.sleep(180)
+				self.updating = False
+				if process.poll() is None:
+					process.kill()
+				return status
 		return status
 
 	"""async def oldruncommand(self, command, channel, verbose):
