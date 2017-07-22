@@ -10,7 +10,8 @@ import json
 import os
 import sys
 import asyncio
-from asyncio.subprocess import PIPE
+from subprocess import PIPE, Popen
+from threading import Thread
 import shlex
 
 class HTTPException(Exception):
@@ -26,57 +27,52 @@ class arkserver:
 		self.channel = self.bot.get_channel("333605978560004097")
 		self.adminchannel = self.bot.get_channel("331076958425186305")
 
-	@asyncio.coroutine
-	def read_stream_and_display(stream, display):
-		"""Read from stream line by line until EOF, display, and capture the lines."""
-		output = []
-		while True:
-			line = yield from stream.readline()
-			if not line:
-				break
-			output.append(line)
-			display(line) # assume it doesn't block
-		return b''.join(output)
 
-	@asyncio.coroutine
-	def runcommand(self, command, channel, verbose):
+	async def enqueue_output(out, queue):
+		for line in iter(out.readline, b''):
+			queue.put(line)
+		out.close()
+
+	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal asynchronously and collects the response"""
-		process = yield from asyncio.create_subprocess_exec(command, stdout=PIPE, stderr=PIPE)
+		process = Popen(command, stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+		q = Queue()
+		t = Thread(target = enqueue_output, args=(p.stdout, q))
+		t.daemon = True
+		t.start()
 		status = ""
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		try:
-			output, stderr = yield from asyncio.gather(
-				read_stream_and_display(process.stdout, sys.stdout.buffer.write),
-				read_stream_and_display(process.stderr, sys.stderr.buffer.write))
-			if output == '' and process.poll() is not None:
-				break
-			if output: 
-				if verbose == True:
-					if len(output) > 1900:
-						print("The console returned a string for this line that exceeds the discord character limit.")
-					else:
-						sani = output
-						sani = sani.lstrip("7")
-						for elem in list_replacements:
-							sani = sani.replace(elem, "")
-						if 'Downloading ARK update' not in sani:
+			while True:
+				output = q.get_nowait()
+				#if output == '' and process.poll() is not None:
+				#	break
+				if output: 
+					if verbose == True:
+						if len(output) > 1900:
+							print("The console returned a string for this line that exceeds the discord character limit.")
+						else:
+							sani = output
+							sani = sani.lstrip("7")
+							for elem in list_replacements:
+								sani = sani.replace(elem, "")
 							try:
 								self.bot.send_message(channel,"{0}".format(sani))
 							except Exception as e:
 								print("Error posting to discord {0}, {1}".format(e, sani))
-				if 'Your server needs to be restarted in order to receive the latest update' in output:
-					status = status + 'Update'
-				if 'has been updated on the Steam workshop' in output:
-					status = status + 'ModUpdate'
-				if 'The server is now running, and should be up within 10 minutes' in output:
-					status = status + 'Success'
-					break
-				if 'players are still connected' in output:
-					status = status + 'PlayersConnected'
-				if 'Players: 0' in output:
-					status = status + 'EmptyTrue'
-				if 'online:  Yes' in output:
-					status = status + 'NotUpdating'
+					if 'Your server needs to be restarted in order to receive the latest update' in output:
+						status = status + 'Update'
+					if 'has been updated on the Steam workshop' in output:
+						status = status + 'ModUpdate'
+					if 'The server is now running, and should be up within 10 minutes' in output:
+						status = status + 'Success'
+						break
+					if 'players are still connected' in output:
+						status = status + 'PlayersConnected'
+					if 'Players: 0' in output:
+						status = status + 'EmptyTrue'
+					if 'online:  Yes' in output:
+						status = status + 'NotUpdating'
 		except Exception as e:
 			print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
 			print("Updating and restarting options will be locked for 3 minutes for safety.")
