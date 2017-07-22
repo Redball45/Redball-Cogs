@@ -53,14 +53,13 @@ class arkserver:
 			try:
 				output = q.get_nowait()
 			except:
-				print('No output yet')
 			else: 
 				if output: 
 					if verbose == True:
 						if len(output) > 1900:
 							print("The console returned a string for this line that exceeds the discord character limit.")
 						else:
-							sani = output
+							sani = output.decode()
 							print('{0}'.format(sani))
 							sani = sani.lstrip("7")
 							for elem in list_replacements:
