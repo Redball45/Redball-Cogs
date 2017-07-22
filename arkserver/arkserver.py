@@ -68,10 +68,11 @@ class arkserver:
 								sani = sani.lstrip("7")
 								for elem in list_replacements:
 									sani = sani.replace(elem, "")
-								"""try:
+								try:
 									await self.bot.send_message(channel,"{0}".format(sani))
 								except Exception as e:
-									print("Error posting to discord {0}, {1}".format(e, sani))"""
+									#print("Error posting to discord {0}, {1}".format(e, sani))
+									pass
 						if 'Your server needs to be restarted in order to receive the latest update' in output:
 							status = status + 'Update'
 						if 'has been updated on the Steam workshop' in output:
