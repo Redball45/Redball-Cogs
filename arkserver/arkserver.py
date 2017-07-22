@@ -26,8 +26,8 @@ class arkserver:
 		self.channel = self.bot.get_channel("333605978560004097")
 		self.adminchannel = self.bot.get_channel("331076958425186305")
 
-	
-	async def read_stream_and_display(stream, display):
+	@asyncio.coroutine
+	def read_stream_and_display(stream, display):
 		"""Read from stream line by line until EOF, display, and capture the lines."""
 		output = []
 		while True:
@@ -38,7 +38,8 @@ class arkserver:
 			display(line) # assume it doesn't block
 		return b''.join(output)
 
-	async def runcommand(self, command, channel, verbose):
+	@asyncio.coroutine
+	def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal asynchronously and collects the response"""
 		process = yield from asyncio.create_subprocess_exec(command, stdout=PIPE, stderr=PIPE)
 		status = ""
