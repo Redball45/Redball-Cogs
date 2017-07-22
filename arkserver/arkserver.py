@@ -97,8 +97,9 @@ class arkserver:
 		return status
 
 	async def oldruncommand(self, command, channel, verbose):
-		#This function runs a command in the terminal and collects the response
-		process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False)
+		"""This function runs a command in the terminal and collects the response - this is blocking so should not be used for terminal commands that take a
+		long time between each output"""
+		process = Popen(shlex.split(command), stdout=PIPE, shell=False)
 		status = ""
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		try:
