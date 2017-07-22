@@ -44,7 +44,7 @@ class arkserver:
 		"""This function runs a command in the terminal asynchronously and collects the response"""
 		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 		q = Queue()
-		t = Thread(target=self.enqueue_output, args=(p.stdout, q))
+		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
 		t.daemon = True
 		t.start()
 		status = ""
