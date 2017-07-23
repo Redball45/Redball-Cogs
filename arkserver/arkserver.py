@@ -112,8 +112,6 @@ class arkserver:
 		channel = ctx.message.channel
 		self.updating = False
 		await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-		await self.bot.say("Status check confirmed an update is actually happening.")
-
 
 	@ark.command(pass_context=True, hidden=True)
 	@checks.is_owner()
