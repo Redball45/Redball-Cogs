@@ -275,8 +275,8 @@ class arkserver:
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager status", channel, True)
 
-	@ark.command(pass_context=True, name="status")
-	async def ark_status(self, ctx):
+	@ark.command(pass_context=True, name="cancel")
+	async def ark_cancel(self, ctx):
 		"""Cancels a pending restart"""
 		self.cancel = True
 		await self.bot.say("Restart cancelled.")
