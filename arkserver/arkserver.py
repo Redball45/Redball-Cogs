@@ -53,14 +53,9 @@ class arkserver:
 			try:
 				try:
 					output = q.get_nowait().decode()
-					if command == 'arkmanager checkupdate':
-						print('{0}'.format(output))
 				except Empty:
-					if process.poll() is not None:
-						if command == 'arkmanager checkupdate':
-							pass
-						else:
-							break
+					if t.isAlive() == False:
+						break
 					else:
 						pass
 				else: 
