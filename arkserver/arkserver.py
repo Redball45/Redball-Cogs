@@ -407,21 +407,21 @@ class arkserver:
 		"""Checks for updates automatically every hour"""
 		while self is self.bot.get_cog("arkserver"):
 			await asyncio.sleep(60)
-			adminchannel = self.adminchannel
+			adminchannel = await self.bot.get_channel("331076958425186305")
 			channel = self.channel
 			if self.settings["AutoUpdate"] == True: #proceed only if autoupdating is enabled
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose = self.settings["Verbose"]
-						status = await self.runcommand("arkmanager checkupdate", self.adminchannel, verbose)
-						modstatus = await self.runcommand("arkmanager checkmodupdate", self.adminchannel, verbose)
+						status = await self.runcommand("arkmanager checkupdate", adminchannel, verbose)
+						modstatus = await self.runcommand("arkmanager checkmodupdate", adminchannel, verbose)
 						print("Update check completed at {0}".format(datetime.utcnow()))
 					except Exception as e:
 						print("checkupdate commands encountered an exception {0}".format(e))
 						await asyncio.sleep(240)
 					if 'Update' in status or 'ModUpdate' in modstatus: #proceed with update if checkupdate tells us that an update is available
 						try:
-							empty = await self.runcommand("arkmanager status", self.adminchannel, False)
+							empty = await self.runcommand("arkmanager status", adminchannel, False)
 						except:
 							print("Empty check encountered an exception")
 						if 'EmptyTrue' not in empty:
@@ -441,7 +441,7 @@ class arkserver:
 								await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 								self.updating = True
 								try:
-									update = await self.runcommand("arkmanager update --update-mods --backup", self.adminchannel, True)
+									update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
 								except:
 									print('Updater encountered an exception in not empty loop')
 								if 'Success' in update:									
@@ -465,7 +465,7 @@ class arkserver:
 								await asyncio.sleep(1800)
 						else:
 							try:
-								update = await self.runcommand("arkmanager update --update-mods --backup", self.adminchannel, True)
+								update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
 							except:
 								print('Updater encountered an exception in empty loop')
 							if 'Success' in update:									
