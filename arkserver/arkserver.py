@@ -214,7 +214,11 @@ class arkserver:
 	async def checkmodupdate(self, ctx):
 		"""Checks for ark mod updates - does not actually start the update"""
 		channel = ctx.message.channel
-		output = await self.runcommand("arkmanager checkmodupdate", channel, True)
+		output = await self.runcommand("arkmanager checkmodupdate", channel, self.settings["Verbose"])
+		if 'ModUpdate' in output:
+			await self.bot.say("Updates to some mods are available.")
+		else:
+			await self.bot.say("No mod updates found.")
 
 	@ark.command(pass_context=True, name="stop")
 	@checks.is_owner()
@@ -380,20 +384,6 @@ class arkserver:
 			output = await self.runcommand("arkmanager update --validate", channel, True)
 		else: 
 			await self.bot.edit_message(message, "Okay, validation cancelled")
-			return
-
-	@ark.command(pass_context=True, name="vpsrestart")
-	@checks.is_owner()
-	async def ark_boxrestart(self, ctx):
-		"""Restarts the VPS"""
-		user = ctx.message.author
-		channel = ctx.message.channel
-		await self.bot.say("Please note this will restart the VPS and may take some time, please confirm you want to do this by replying Yes")
-		answer = await self.bot.wait_for_message(timeout=30, author=user)
-		if answer.content == "Yes":
-			output = await self.runcommand("reboot", channel, False)
-		else: 
-			await self.bot.edit_message(message, "Okay, restart cancelled")
 			return
 
 	@ark.command(pass_context=True, name="forceupdate")
