@@ -57,7 +57,10 @@ class arkserver:
 						print('{0}'.format(output))
 				except Empty:
 					if process.poll() is not None:
-						break
+						if command == 'arkmanager checkupdate'
+							pass
+						else:
+							break
 					else:
 						pass
 				else: 
