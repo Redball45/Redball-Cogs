@@ -19,7 +19,7 @@ try:
 except ImportError:
 	from queue import Queue, Empty # python 3.x
 
-#ON_POSIX = 'posix' in sys.builtin_module_names
+ON_POSIX = 'posix' in sys.builtin_module_names
 
 class HTTPException(Exception):
 	pass
@@ -42,7 +42,7 @@ class arkserver:
 
 	async def runcommand(self, command, channel, verbose):
 		"""This function runs a command in the terminal and uses a seperate thread to collect the response so it isn't blocking"""
-		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1)
+		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 		q = Queue()
 		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
 		t.daemon = True
@@ -85,6 +85,8 @@ class arkserver:
 							status = status + 'EmptyTrue'
 						if 'online:  Yes' in output:
 							status = status + 'NotUpdating'
+						if 'Your server is up to date!' in output:
+							status = status + 'UpToDate'
 			except Exception as e:
 				print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
 				print("Updating and restarting options will be locked for 3 minutes for safety.")
@@ -246,7 +248,13 @@ class arkserver:
 	async def testcheckupdate(self, ctx):
 		"""Checks for ark updates - uses non-blocking function"""
 		channel = ctx.message.channel #gets channel from user message command
-		output = await self.runcommand("arkmanager checkupdate", channel, True)
+		output = await self.runcommand("arkmanager checkupdate", channel, False)
+		if 'UpToDate' in output:
+			await self.bot.say("Your server is up to date!")
+		elif 'Update' in output:
+			await self.bot.say("Updates are available!")
+		else:
+			await self.bot.say("Something went wrong :(")
 
 	@ark.command(pass_context=True)
 	async def checkmodupdate(self, ctx):
