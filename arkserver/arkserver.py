@@ -54,7 +54,7 @@ class arkserver:
 				try:
 					output = q.get_nowait().decode()
 				except Empty:
-					if t.isAlive() == False:
+					if t.isAlive() == False and q.empty() == True:
 						break
 					else:
 						pass
