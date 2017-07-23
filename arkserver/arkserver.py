@@ -57,7 +57,7 @@ class arkserver:
 						print('{0}'.format(output))
 				except Empty:
 					if process.poll() is not None:
-						if command == 'arkmanager checkupdate'
+						if command == 'arkmanager checkupdate':
 							pass
 						else:
 							break
