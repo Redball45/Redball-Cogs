@@ -299,7 +299,7 @@ class arkserver:
 			await self.bot.say("Players are currently in the server, restart anyway?")
 			answer = await self.bot.wait_for_message(timeout=30, author=user)
 			try:	
-				if answer.content != "Yes":
+				if answer.content.lower() != "yes":
 					await self.bot.say("Okay, restart cancelled.")
 					return
 			except:
@@ -316,7 +316,7 @@ class arkserver:
 			await asyncio.sleep(delay)
 			if self.cancel != True:
 				output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
-				alert = await self.runcommand('arkmanager broadcast "Restart was cancelled by user request."')
+				alert = await self.runcommand('arkmanager broadcast "Restart was cancelled by user request."', channel, False)
 				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if 'Success' in output:
@@ -343,7 +343,7 @@ class arkserver:
 				await self.bot.say("Players are currently in the server, update anyway?")
 				answer = await self.bot.wait_for_message(timeout=30, author=user)
 				try:
-					if answer.content != "Yes":
+					if answer.content.lower() != "yes":
 						await self.bot.say("Okay, update cancelled.")
 						return
 				except:
