@@ -320,6 +320,8 @@ class arkserver:
 					await self.bot.say("Something went wrong \U0001F44F")
 			else:
 				self.cancel = False
+				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+				self.updating = False
 				#restart was cancelled
 
 	@ark.command(pass_context=True, name="update")
