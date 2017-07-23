@@ -282,10 +282,16 @@ class arkserver:
 	@ark.command(pass_context=True, name="restart")
 	async def ark_restart(self, ctx, delay : int = 300):
 		"""Restarts the ARK Server with a user specificed delay (in seconds)"""
+		try:
+			int(delay)
+		except ValueError:
+			try:
+				float(delay)
+			except ValueError:
+				await self.bot.say("Delay entered must be a number!")
+				return
 		if delay > 900:
 			delay = 900
-		if delay < 120:
-			delay = 120
 		user = ctx.message.author
 		channel = ctx.message.channel
 		empty = await self.runcommand("arkmanager status", channel, False)
@@ -305,11 +311,12 @@ class arkserver:
 			self.updating = True
 			await self.bot.say("Restarting in {0} seconds.".format(delay))
 			await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-			await asyncio.sleep(delay-60)
-			alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a user-requested restart in 60 seconds."', channel, False)
-			await asyncio.sleep(60)
+			command = 'arkmanager broadcast "Server will shutdown for a user-requested restart in ' + str(delay) + ' seconds."'
+			alert = await self.runcommand(command, channel, False)
+			await asyncio.sleep(delay)
 			if self.cancel != True:
 				output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
+				alert = await self.runcommand('arkmanager broadcast "Restart was cancelled by user request."')
 				await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if 'Success' in output:
