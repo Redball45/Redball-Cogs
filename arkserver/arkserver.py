@@ -53,6 +53,8 @@ class arkserver:
 			try:
 				try:
 					output = q.get_nowait().decode()
+					if command == 'arkmanager checkupdate':
+						print('{0}'.format(output))
 				except Empty:
 					if process.poll() is not None:
 						break
@@ -248,7 +250,7 @@ class arkserver:
 	async def testcheckupdate(self, ctx):
 		"""Checks for ark updates - uses non-blocking function"""
 		channel = ctx.message.channel #gets channel from user message command
-		output = await self.runcommand("arkmanager checkupdate --verbose", channel, False)
+		output = await self.runcommand("arkmanager checkupdate", channel, False)
 		if 'UpToDate' in output:
 			await self.bot.say("Your server is up to date!")
 		elif 'Update' in output:
