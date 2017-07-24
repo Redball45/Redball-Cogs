@@ -197,7 +197,7 @@ class arkserver:
 
 	@ark.command(pass_context=True)
 	async def checkupdate(self, ctx):
-		"""Checks for ark updates - uses non-blocking function"""
+		"""Just checks for ark updates - use +ark update to start update"""
 		channel = ctx.message.channel #gets channel from user message command
 		output = await self.runcommand("arkmanager checkupdate", channel, self.settings["Verbose"])
 		if 'UpToDate' in output:
@@ -209,7 +209,7 @@ class arkserver:
 
 	@ark.command(pass_context=True)
 	async def checkmodupdate(self, ctx):
-		"""Checks for ark mod updates - does not actually start the update"""
+		"""Just checks for mod updates - use +ark update to start update"""
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager checkmodupdate", channel, self.settings["Verbose"])
 		if 'ModUpdate' in output:
@@ -331,7 +331,7 @@ class arkserver:
 
 	@ark.command(pass_context=True, name="update")
 	async def ark_update(self, ctx):
-		"""Stops the ARK Server, installs updates, then reboots"""
+		"""Checks for updates and if any are found, downloads, then restarts the server"""
 		user = ctx.message.author
 		channel = ctx.message.channel
 		status = await self.runcommand("arkmanager checkupdate", channel, False)
@@ -384,7 +384,7 @@ class arkserver:
 	@ark.command(pass_context=True, name="updatenow")
 	@checks.is_owner()
 	async def ark_updatenow(self, ctx):
-		"""Updates without warning"""
+		"""Updates withn no delay or empty checks"""
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager update --update-mods --backup", channel, True)
 
