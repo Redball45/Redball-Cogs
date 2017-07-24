@@ -224,9 +224,9 @@ class arkserver:
 		channel = ctx.message.channel
 		output = await self.runcommand("arkmanager stop", channel, True)
 
-	@ark.command(pass_context=True, name="toggle")
+	@ark.command(pass_context=True, name="autoupdate")
 	@checks.is_owner()
-	async def ark_toggle(self, ctx, toggle : str = 'info'):
+	async def ark_autoupdate(self, ctx, toggle : str = 'info'):
 		"""Toggles autoupdating"""
 		togglestatus = self.settings["AutoUpdate"] #retrives current status of toggle from settings file
 		if toggle.lower() == 'off':
