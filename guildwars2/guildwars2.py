@@ -1602,8 +1602,13 @@ class GuildWars2:
 	@gamebuild.command(pass_context=True)
 	async def checkdelay(self, ctx, delay : int):
 		"""Sets delay between update checks"""
-		self.cache["CheckDelay"] == delay
-		dataIO.save_json('data/guildwars2/cache.json', self.cache)
+		try:
+			self.cache["CheckDelay"] == delay
+			dataIO.save_json('data/guildwars2/cache.json', self.cache)
+		except Exception as e:
+			await self.bot.say("Something went wrong {0}".format(e))
+			return
+		await self.bot.say("Delay updated.")
 
 	@commands.group(pass_context=True)
 	async def tp(self, ctx):
