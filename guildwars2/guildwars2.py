@@ -1408,43 +1408,44 @@ class GuildWars2:
 							   "`{1}`".format(user, e))
 			return
 		choice = await self.itemname_to_id(item, user)
-		output = ""
-		message = await self.bot.say("Searching far and wide...")
-		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
-		results["bank"] = sum(bankresults)
-		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
-		results["shared"] = sum(sharedresults)
-		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
-		results["material"] = sum(materialresults)
-		for character in characters:
-			results["characters"][character["name"]] = 0
-			bags = [bag for bag in character["bags"] if bag != None]
-			equipment = [piece for piece in character["equipment"] if piece != None]
-			for bag in bags:
-				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
-				results["characters"][character["name"]] += sum(inv)
-			try:
-				eqresults = [1 for piece in equipment if piece["id"] == choice["_id"]]
-				results["characters"][character["name"]] += sum(eqresults)
-			except:
-				pass
-		if results["bank"]:
-			output += "BANK: Found {0}\n".format(results["bank"])
-		if results["material"]:
-			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
-		if results["shared"]:
-			output += "SHARED: Found {0}\n".format(results["shared"])
-		if results["characters"]:
-			for char, value in results["characters"].items():
-				if value:
-					output += "{0}: Found {1}\n".format(char.upper(), value)
-		if not output:
-			await self.bot.edit_message(message, "Sorry, not found on your account. "
-												 "Make sure you've selected the "
-												 "correct item.")
-		else:
-			await self.bot.edit_message(message, "```" + output + "```")
+		if choice:
+			output = ""
+			message = await self.bot.say("Searching far and wide...")
+			results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
+			bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+			results["bank"] = sum(bankresults)
+			sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+			results["shared"] = sum(sharedresults)
+			materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+			results["material"] = sum(materialresults)
+			for character in characters:
+				results["characters"][character["name"]] = 0
+				bags = [bag for bag in character["bags"] if bag != None]
+				equipment = [piece for piece in character["equipment"] if piece != None]
+				for bag in bags:
+					inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+					results["characters"][character["name"]] += sum(inv)
+				try:
+					eqresults = [1 for piece in equipment if piece["id"] == choice["_id"]]
+					results["characters"][character["name"]] += sum(eqresults)
+				except:
+					pass
+			if results["bank"]:
+				output += "BANK: Found {0}\n".format(results["bank"])
+			if results["material"]:
+				output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+			if results["shared"]:
+				output += "SHARED: Found {0}\n".format(results["shared"])
+			if results["characters"]:
+				for char, value in results["characters"].items():
+					if value:
+						output += "{0}: Found {1}\n".format(char.upper(), value)
+			if not output:
+				await self.bot.edit_message(message, "Sorry, not found on your account. "
+												 	"Make sure you've selected the "
+												 	"correct item.")
+			else:
+				await self.bot.edit_message(message, "```" + output + "```")
 
 	@commands.cooldown(1, 5, BucketType.user)
 	@commands.command(pass_context=True)
