@@ -1598,6 +1598,13 @@ class GuildWars2:
 			await self.bot.say("I will not send "
 								"notifications about new builds")
 
+	@checks.mod_or_permissions(administrator=True)
+	@gamebuild.command(pass_context=True)
+	async def checkdelay(self, ctx, delay : int):
+		"""Sets delay between update checks"""
+		self.cache["CheckDelay"] == delay
+		dataIO.save_json('data/guildwars2/cache.json', self.cache)
+
 	@commands.group(pass_context=True)
 	async def tp(self, ctx):
 		"""Commands related to tradingpost
@@ -3016,6 +3023,7 @@ class GuildWars2:
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("GuildWars2"):
 			try:
+				checkdelay = self.cache["CheckDelay"]
 				if await self.update_build():
 					channels = await self.get_channels()
 					try:
@@ -3035,11 +3043,11 @@ class GuildWars2:
 						print(
 							"A new build was found, but no channels to notify were found. Maybe error?")
 					#await self.rebuild_database(    )
-				await asyncio.sleep(300)
+				await asyncio.sleep(checkdelay)
 			except Exception as e:
 				print(
 					"Update notifier has encountered an exception: {0}".format(e))
-				await asyncio.sleep(300)
+				await asyncio.sleep(checkdelay)
 				continue
 
 	async def news_checker(self):
