@@ -2996,7 +2996,7 @@ class GuildWars2:
 		cursor = self.db.items.find({"name": search})
 		number = await cursor.count()
 		if not number:
-			await self.bot.say("Your search gave me no results, sorry. Check for typos.")
+			await self.bot.say("I couldn't find that item in the database, check for typos.")
 			return
 		if number > 20:
 			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
