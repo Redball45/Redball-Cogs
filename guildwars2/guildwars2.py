@@ -1603,7 +1603,7 @@ class GuildWars2:
 	async def checkdelay(self, ctx, delay : int):
 		"""Sets delay between update checks"""
 		try:
-			self.cache["CheckDelay"] == delay
+			self.cache["CheckDelay"] = delay
 			dataIO.save_json('data/guildwars2/cache.json', self.cache)
 		except Exception as e:
 			await self.bot.say("Something went wrong {0}".format(e))
