@@ -237,6 +237,7 @@ class GuildWars2:
 		user = ctx.message.author
 		scopes = ["inventories", "characters"]
 		keydoc = await self.fetch_key(user)
+		await self.bot.say("LI in material storage are not currently found by this command.")
 		msg = await self.bot.say("Getting legendary insights, this might take a while...")
 		try:
 			await self._check_scopes_(user, scopes)

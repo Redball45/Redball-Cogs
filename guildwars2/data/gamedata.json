@@ -77,7 +77,8 @@
 	"cold" :  { "name" : "Super-Hot Saffron-Scented Poultry Soup -WP: [&BLwEAAA=]", "order" : 27 },
 	"cadeucus" :  { "name" : "Bowl of Bloodstone Bisque - At the end of LS3E4 Head of the Snake", "order" : 28 },
 	"ghost" :  { "name" : "Strawberry Ghost - Also need ghost effect on player - WP: [&BK8JAAA=]", "order" : 29 },
-	"sab" :  { "name" : "SAB World 2 Zone 2 - Bring piranha to cat on top of gong room", "order" : 30 }
+	"sab" :  { "name" : "SAB World 2 Zone 2 - Bring piranha to cat on top of gong room", "order" : 30 },
+	"celestial" : {"name" : "Shattered Observatory side room - [&AgF+NQEA][&AgHoHAEA][&AgEYwQAA][&AgGxHQEA]", "order" : 31}
 	},
 	"bosses" : {
 	"vale_guardian" : { "name" : "Vale Guardian", "order" : 0 },
