@@ -1267,7 +1267,11 @@ class GuildWars2:
 			listofcats = []
 			for cat in results:
 				id = cat["id"]
-				hint = cat["hint"]
+				try: #workaround for shattered observatory cat not having a hint on the api - anet please
+					hint = cat["hint"]
+				except:
+					if id == 35
+					hint = "celestial"
 				listofcats.append(hint)			
 			catslist = list(
 				set(list(self.gamedata["cats"])) ^ set(listofcats))
