@@ -237,16 +237,17 @@ class GuildWars2:
 		user = ctx.message.author
 		scopes = ["inventories", "characters"]
 		keydoc = await self.fetch_key(user)
-		await self.bot.say("LI in material storage are not currently found by this command.")
 		msg = await self.bot.say("Getting legendary insights, this might take a while...")
 		try:
 			await self._check_scopes_(user, scopes)
 			key = keydoc["key"]
 			headers = self.construct_headers(key)
 			endpoint_bank = "account/bank"
+			endpoint_material = "account/materials"
 			endpoint_shared = "account/inventory"
 			endpoint_char = "characters?page=0"
 			bank = await self.call_api(endpoint_bank, headers)
+			materials = await self.call_api(endpoint_material, headers)
 			shared = await self.call_api(endpoint_shared, headers)
 			characters = await self.call_api(endpoint_char, headers)
 		except APIKeyError as e:
@@ -279,6 +280,9 @@ class GuildWars2:
 		pre_filter = lambda a, b=__pre_filter: a is not None and a["id"] in b
 		inv_bank = list(filter(pre_filter, bank))
 		del bank # We don't need these anymore, free them.
+
+		inv_materials = list(filter(pre_filter, materials))
+		del materials
 
 		inv_shared = list(filter(pre_filter, shared))
 		del shared
@@ -313,6 +317,7 @@ class GuildWars2:
 		# Step 2: Filter out all items we don't care about
 		# Step 3: Extract the `count` field.
 		li_bank = map(itemgetter("count"), filter(li_scan, inv_bank))
+		li_materials = map(itemgetter("count"), filter(li_scan, inv_materials))
 		li_shared = map(itemgetter("count"), filter(li_scan, inv_shared))
 		li_bags = map(itemgetter("count"), filter(li_scan, inv_bags))
 
@@ -346,7 +351,7 @@ class GuildWars2:
 
 		# Now that we have all the items we are interested in, it's time to
 		# count them! Easy enough to just `sum` the `chain`.
-		sum_li = sum(chain(li_bank, li_bags, li_shared))
+		sum_li = sum(chain(li_bank, li_materials, li_bags, li_shared))
 		sum_prowess  = sum(chain(prowess_bank, prowess_shared, prowess_bags))
 		sum_insignia = sum(chain(insignia_bank, insignia_shared, insignia_bags))
 		# Armor is a little different. The ones in inventory have a count like
@@ -386,32 +391,32 @@ class GuildWars2:
 		# Quick breakdown. No detail on WHERE all those LI are. That's for $search.
 		embed.description = "{1} on hand, {2} used in crafting".format(total_li, sum_li, crafted_li)
 		# Save space by skipping empty sections
-		if li_perfect_armor > 25:
+		if sum_perfect_armor:
 			embed.add_field(
 				name="{0} Perfected Envoy Armor Pieces".format(sum_perfect_armor),
 				value="Representing {0} Legendary Insights".format(li_perfect_armor),
 				inline=False)
-		if li_refined_armor > 25:
+		if sum_refined_armor:
 			embed.add_field(
 				name="{0} Refined Envoy Armor Pieces".format(sum_refined_armor),
 				value="Representing {0} Legendary Insights".format(li_refined_armor),
 				inline=False)
-		if li_prowess > 25:
+		if sum_prowess:
 			embed.add_field(
 				name="{0} Gifts of Prowess".format(sum_prowess),
 				value="Representing {0} Legendary Insights".format(li_prowess),
 				inline=False)
-		if li_insignia > 25:
+		if sum_insignia:
 			embed.add_field(
 				name="{0} Envoy Insignia".format(sum_insignia),
 				value="Representing {0} Legendary Insights".format(li_insignia),
 				inline=False)
 		# Identify the bot
-		# embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+		embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
 		# Edit the embed into the initial message.
 		await self.bot.edit_message(msg, "{0.mention}, here are your Legendary Insights".format(user), embed=embed)
-
+	
 	@commands.group(pass_context=True)
 	async def character(self, ctx):
 		"""Character related commands
@@ -1447,8 +1452,8 @@ class GuildWars2:
 						output += "{0}: Found {1}\n".format(char.upper(), value)
 			if not output:
 				await self.bot.edit_message(message, "Sorry, not found on your account. "
-												 	"Make sure you've selected the "
-												 	"correct item.")
+													"Make sure you've selected the "
+													"correct item.")
 			else:
 				await self.bot.edit_message(message, "```" + output + "```")
 
