@@ -126,37 +126,39 @@
 		  {"name" : "Karka Queen",         "times" : [[2, 0], [6, 0], [10, 30], [15, 0], [18, 0], [23, 0]], "waypoint" : "[&BNUGAAA=]"}
 		]
 	  },
-	  "maps" : [
-		{"name": "Verdant Brink",
-		 "phases": [
-			{ "name": "",  "duration": 10, "color": "0x84C147" },
-			{ "name": "Night Bosses",  "duration": 20, "color": "0x6DAC2F" },
-			{ "name": "Daytime", "duration": 75,  "color": "0xC4E2A5" },
-			{ "name": "Night",  "duration": 15, "color": "0x84C147" }]},
-		{"name": "Auric Basin",
-		 "phases": [
-			{ "name": "Pillars",  "duration": 45, "color": "0xFFE37F" },
-			{ "name": "Challenges",  "duration": 15, "color": "0xFFD53D" },
-			{ "name": "Octovine",  "duration": 20, "color": "0xEAB700" },
-			{ "name": "Reset",  "duration": 10, "color": "0xFFF1C1" },
-			{ "name": "Pillars",  "duration": 30, "color": "0xFFE37F" }]},
-		{"name": "Tangled Depths",
-		 "phases": [
-			{ "name": "",  "duration": 25, "color": "0xFFD7D7" },
-			{ "name": "Prep",  "duration": 5, "color": "0xffbdbd" },
-			{ "name": "Chak Gerent",  "duration": 20, "color": "0xf99" },
-			{ "name": "Help the Outposts",  "duration": 70, "color": "0xFFD7D7" }]},
-		{"name": "Dragon's Stand",
-		 "phases": [
-			{ "name": "",  "duration": 90, "color": "0xDFDDF7" },
-			{ "name": "Start",  "duration": 30, "color": "0xc8c5e5"}]},
-		{"name": "Dry Top",
-		   "phases": [
-			{ "name": "Crash Site", "duration": 40,  "color": "0xFCFADC" },
-			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" },
-			{ "name": "Crash Site",  "duration": 40, "color": "0xFCFADC" },
-			{ "name": "Sandstorm",  "duration": 20, "color": "0xDED98A" }]}
-	  ]
+      "maps" : [
+        {"name": "Verdant Brink",
+         "phases": [
+            { "name": "Night", "duration" : 10,  "end": 10, "color": "0x84C147", "nextname" : "Night Bosses" },
+            { "name": "Night Bosses", "duration" : 20, "end": 30, "color": "0x6DAC2F" },
+            { "name": "Daytime", "duration" : 75, "end": 105,  "color": "0xC4E2A5" },
+            { "name": "Night", "duration": 15,  "end": 120, "color": "0x84C147" }]},
+        {"name": "Auric Basin",
+         "phases": [
+            { "name": "Activate the Pillars",  "duration": 45, "end": 45, "color": "0xFFE37F", "nextname" : "Challenges" },
+            { "name": "Challenges",  "duration": 15, "end": 60, "color": "0xFFD53D" },
+            { "name": "Octovine",  "duration": 20, "end": 80, "color": "0xEAB700" },
+            { "name": "Reset",  "duration": 10, "end": 90, "color": "0xFFF1C1" },
+            { "name": "Active the Pillars",  "duration": 30, "end": 120, "color": "0xFFE37F" }]},
+        {"name": "Tangled Depths",
+         "phases": [
+            { "name": "Help the Outposts",  "duration": 25, "end": 25, "color": "0xFFD7D7", "nextname": "Gerent Preparation" },
+            { "name": "Gerent Preparation",  "duration": 5, "end": 30, "color": "0xffbdbd" },
+            { "name": "Chak Gerent",  "duration": 20, "end": 50, "color": "0xf99" },
+            { "name": "Help the Outposts",  "duration": 70, "end": 120, "color": "0xFFD7D7" }]},
+
+        {"name": "Dragon's Stand",
+         "phases": [
+            { "name": "Assault Start",  "duration": 90, "end": 90, "color": "0xDFDDF7", "nextname": "Assault Start" },
+            { "name": "Assault Start",  "duration": 30, "end": 120, "color": "0xc8c5e5"}]},
+
+          {"name": "Dry Top",
+           "phases": [
+            { "name": "Crash Site", "duration": 40, "end": 40,  "color": "0xFCFADC", "nextname": "Crash Site" },
+            { "name": "Sandstorm",  "duration": 20, "end": 60,"color": "0xDED98A" },
+            { "name": "Crash Site",  "duration": 40, "end": 100, "color": "0xFCFADC" },
+            { "name": "Sandstorm",  "duration": 20, "end": 120, "color": "0xDED98A" }]}
+      ]
     },
     "insights": {
       "legendary_insight":  77302,
