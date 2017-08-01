@@ -2355,7 +2355,7 @@ class GuildWars2:
 							   "`{1}`".format(user, e))
 			return
 		output = await self.display_all_dailies(results)
-		await self.bot.say("```" + output + "```")
+		await self.bot.say("```markdown\n" + output + "```")
 
 	@checks.admin_or_permissions(manage_server=True)
 	@commands.cooldown(1, 5, BucketType.user)
@@ -2478,7 +2478,7 @@ class GuildWars2:
 			message = await self.display_all_dailies(results, True)
 			for channel in channels:
 				try:
-					await self.bot.send_message(self.bot.get_channel(channel), "```" + message + "```\nHave a nice day!")
+					await self.bot.send_message(self.bot.get_channel(channel), "```markdown\n" + message + "```\nHave a nice day!")
 				except:
 					pass
 		except Exception as e:
