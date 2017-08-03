@@ -134,17 +134,18 @@ class arkserver:
 		"""Swaps the server over to the desired map."""
 		user = ctx.message.author
 		channel = ctx.message.channel #gets channel from user message command
+		message = await self.bot.say("...")
 		output = await self.runcommand("arkmanager status", channel, False)
 		if minput == 'info':
-			await self.bot.say("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
+			await self.bot.edit_message(message, "This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
 			return
 		if 'EmptyTrue' not in output:
-			await self.bot.say("The map cannot be swapped while players are in the server.")
+			await self.bot.edit_message(message, "The map cannot be swapped while players are in the server.")
 			await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
 			return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
-			await self.bot.say("I'm already carrying out a restart or update! <:banned:284492719202631680>")
+			await self.bot.edit_message(message, "I'm already carrying out a restart or update! <:banned:284492719202631680>")
 			return
 		if minput.lower() == 'ragnarok':
 			desiredMap = 'Ragnarok'
@@ -153,13 +154,13 @@ class arkserver:
 		elif minput.lower() == 'scorched':
 			desiredMap = 'ScorchedEarth'
 		else:
-			await self.bot.say("I don't recognize that map, available options are Ragnarok, Island and Scorched.")
+			await self.bot.edit_message(message, "I don't recognize that map, available options are Ragnarok, Island and Scorched.")
 			return
 		if self.settings["Map"] == desiredMap:
-			await self.bot.say("The server is already running this map!") 
+			await self.bot.edit_message(message, "The server is already running this map!") 
 			await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
 			return
-		await self.bot.say("Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
+		await self.bot.edit_message(message, "Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		try:	
 			if answer.content != "Yes":
