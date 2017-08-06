@@ -2530,6 +2530,7 @@ class GuildWars2:
 		while self is self.bot.get_cog("GuildWars2"):
 			try:
 				if self.check_day():
+					await asyncio.sleep(120)
 					await self.send_daily_notifs()
 				await asyncio.sleep(60)
 			except Exception as e:
