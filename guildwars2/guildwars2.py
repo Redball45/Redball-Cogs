@@ -1265,8 +1265,7 @@ class GuildWars2:
 			await self.bot.say(e)
 			return
 		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error: "
-								"`{1}`".format(user, e))
+			await self.bot.say("{0.mention}, API has responded with the following error:".format(user))
 			return
 		else:
 			listofcats = []
@@ -2968,7 +2967,7 @@ class GuildWars2:
 		try:
 			result = await self.session.get(url, headers=headers)
 		except:
-			raise APIConnectionError("API appears to be down")
+			raise APIConnectionError("API appears to be down.")
 		async with self.session.get(url, headers=headers) as r:
 			if r.status != 200 and r.status != 206:
 				if r.status == 400:
