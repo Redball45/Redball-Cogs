@@ -2314,7 +2314,7 @@ class GuildWars2:
 			output = output + "\n"
 		await self.bot.say("```markdown\n" + output + "```")
 
-	@commands.group(pass_context=True)
+	@commands.group(pass_context=True, aliases=["d"])
 	async def daily(self, ctx):
 		"""Commands showing daily things"""
 		if ctx.invoked_subcommand is None:
@@ -2322,7 +2322,7 @@ class GuildWars2:
 
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="pve")
+	@daily.command(pass_context=True, name="pve", aliases=["e", "E", "PVE"])
 	async def daily_pve(self, ctx):
 		"""Show today's PvE dailies"""
 		try:
@@ -2334,7 +2334,7 @@ class GuildWars2:
 		await self.bot.say(output)
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="wvw")
+	@daily.command(pass_context=True, name="wvw", aliases=["w", "WVW", "W"])
 	async def daily_wvw(self, ctx):
 		"""Show today's WvW dailies"""
 		try:
@@ -2346,7 +2346,7 @@ class GuildWars2:
 		await self.bot.say(output)
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="pvp")
+	@daily.command(pass_context=True, name="pvp", aliases=["p", "P", "PVP"])
 	async def daily_pvp(self, ctx):
 		"""Show today's PvP dailies"""
 		try:
@@ -2358,7 +2358,7 @@ class GuildWars2:
 		await self.bot.say(output)
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="fractals")
+	@daily.command(pass_context=True, name="fractals", aliases=["f", "F", "Fractals"])
 	async def daily_fractals(self, ctx):
 		"""Show today's fractal dailie"""
 		try:
@@ -2379,7 +2379,7 @@ class GuildWars2:
 		return
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="all")
+	@daily.command(pass_context=True, name="all", aliases["A", "a"])
 	async def daily_all(self, ctx):
 		"""Show today's all dailies"""
 		try:
