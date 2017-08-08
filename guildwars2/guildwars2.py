@@ -1418,44 +1418,42 @@ class GuildWars2:
 							   "`{1}`".format(user, e))
 			return
 		choice = await self.itemname_to_id(item, user)
-		if choice:
-			output = ""
-			message = await self.bot.say("Searching far and wide...")
-			results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
-			bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
-			results["bank"] = sum(bankresults)
-			sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
-			results["shared"] = sum(sharedresults)
-			materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
-			results["material"] = sum(materialresults)
-			for character in characters:
-				results["characters"][character["name"]] = 0
-				bags = [bag for bag in character["bags"] if bag != None]
-				equipment = [piece for piece in character["equipment"] if piece != None]
-				for bag in bags:
-					inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
-					results["characters"][character["name"]] += sum(inv)
-				try:
-					eqresults = [1 for piece in equipment if piece["id"] == choice["_id"]]
-					results["characters"][character["name"]] += sum(eqresults)
-				except:
-					pass
-			if results["bank"]:
-				output += "BANK: Found {0}\n".format(results["bank"])
-			if results["material"]:
-				output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
-			if results["shared"]:
-				output += "SHARED: Found {0}\n".format(results["shared"])
-			if results["characters"]:
-				for char, value in results["characters"].items():
-					if value:
-						output += "{0}: Found {1}\n".format(char.upper(), value)
-			if not output:
-				await self.bot.edit_message(message, "Sorry, not found on your account. "
-													"Make sure you've selected the "
-													"correct item.")
-			else:
-				await self.bot.edit_message(message, "```" + output + "```")
+		output = ""
+		results = {"bank" : 0, "shared" : 0, "material" : 0, "characters" : {}}
+		bankresults = [item["count"] for item in bank if item != None and item["id"] == choice["_id"]]
+		results["bank"] = sum(bankresults)
+		sharedresults = [item["count"] for item in shared if item != None and item["id"] == choice["_id"]]
+		results["shared"] = sum(sharedresults)
+		materialresults = [item["count"] for item in material if item != None and item["id"] == choice["_id"]]
+		results["material"] = sum(materialresults)
+		for character in characters:
+			results["characters"][character["name"]] = 0
+			bags = [bag for bag in character["bags"] if bag != None]
+			equipment = [piece for piece in character["equipment"] if piece != None]
+			for bag in bags:
+				inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == choice["_id"]]
+				results["characters"][character["name"]] += sum(inv)
+			try:
+				eqresults = [1 for piece in equipment if piece["id"] == choice["_id"]]
+				results["characters"][character["name"]] += sum(eqresults)
+			except:
+				pass
+		if results["bank"]:
+			output += "BANK: Found {0}\n".format(results["bank"])
+		if results["material"]:
+			output += "MATERIAL STORAGE: Found {0}\n".format(results["material"])
+		if results["shared"]:
+			output += "SHARED: Found {0}\n".format(results["shared"])
+		if results["characters"]:
+			for char, value in results["characters"].items():
+				if value:
+					output += "{0}: Found {1}\n".format(char.upper(), value)
+		if not output:
+			await self.bot.say("Sorry, not found on your account. "
+												 "Make sure you've selected the "
+												 "correct item.")
+		else:
+			await self.bot.say("```" + output + "```")
 
 	@commands.cooldown(1, 5, BucketType.user)
 	@commands.command(pass_context=True)
@@ -1702,95 +1700,53 @@ class GuildWars2:
 
 	@tp.command(pass_context=True, name="price")
 	async def tp_price(self, ctx, *, item: str):
-		"""This finds the current buy and sell prices of an item
-		If multiple matches are found, displays the first"""
+				"""Checks price of an item"""
 		user = ctx.message.author
+		color = self.getColor(user)
 		choice = await self.itemname_to_id(item, user)
-		message = await self.bot.say("Searching...")
-		if choice:
-			try:
-				commerce = 'commerce/prices/'
-				choiceid = str(choice["_id"])
-				endpoint = commerce + choiceid
-				results = await self.call_api(endpoint)
-			except APIKeyError as e:
-				await self.bot.say(e)
-				return
-			except APINotFound as e:
-				await self.bot.say("{0.mention}, This item isn't on the TP."
-								   "{1}".format(user, e))
-				return
-			except APIError as e:
-				await self.bot.say("{0.mention}, API has responded with the following error: {1}".format(user, e))
-				return
-			buyprice = results["buys"]["unit_price"]
-			sellprice = results ["sells"]["unit_price"]
-			try:
-				if str(choice["level"]) == "0":
-					level = ""
-				else:
-					level = " level " + str(choice["level"])
-			except:
-				level = ""
-			try:
-				rarity = str(choice["rarity"])
-			except:
-				rarity = ""
-			try:
-				itemtype = str(choice["type"])
-				if itemtype.lower() == 'craftingmaterial':
-					itemtype = 'crafting material'
-			except:
-				itemtype = ""
-			description = "A" + level.lower() + " " + rarity.lower() + " " + itemtype.lower()
-			try:
-				chatcode = str(choice["chat_link"])
-			except:
-				chatcode = ""
-			try:
-				icon = str(choice["icon"])
-			except:
-				icon = ""
-			if rarity == 'Ascended':
-				color = discord.Color(0xe91e63)
-			elif rarity == 'Exotic':
-				color = discord.Color(0xe67e22)
-			elif rarity == 'Rare':
-				color = discord.Color(0xf1c40f)
-			elif rarity == 'Masterwork':
-				color = discord.Color(0x2ecc71)
-			elif rarity == 'Fine':
-				color = discord.Color(0x3498db)
-			elif rarity == 'Common':
-				color = discord.Color(0x95a5a6)
-			elif rarity == 'Legendary':
-				color = discord.Color(0x9b59b6)
-			else:
-				color = discord.Color(0x607d8b)
-			itemname = choice["name"]
-			if buyprice != 0:
-				buyprice = self.gold_to_coins(buyprice)
-			if sellprice != 0:
-				sellprice = self.gold_to_coins(sellprice)
-			if buyprice == 0:
-				buyprice = 'No buy orders'
-			if sellprice == 0:
-				sellprice = 'No sell orders'				
-			data = discord.Embed(title=itemname, description=description, colour=color)
-			data.set_thumbnail(url=icon)
-			data.add_field(name="Buy price", value=buyprice)
-			data.add_field(name="Sell price", value=sellprice, inline=False)
-			data.set_footer(text=chatcode)
-			try:
-				await self.bot.delete_message(message)
-			except:
-				print('Missing delete message permissions')
-			try:
-				await self.bot.say(embed=data)
-			except discord.HTTPException:
-				await self.bot.say("Issue embedding data into discord")
-		else:
+		if not choice:
 			return
+		try:
+			commerce = 'commerce/prices/'
+			choiceid = str(choice["_id"])
+			endpoint = commerce + choiceid
+			results = await self.call_api(endpoint)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APINotFound as e:
+			await self.bot.say("{0.mention}, This item isn't on the TP."
+							   "".format(user))
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+								"`{1}`".format(user, e))
+			return
+		buyprice = results["buys"]["unit_price"]
+		sellprice = results ["sells"]["unit_price"] 
+		itemname = choice["name"]
+		level = str(choice["level"])
+		rarity = choice["rarity"]
+		itemtype = self.gamedata["items"]["types"][choice["type"]].lower()
+		description = "A level {} {} {}".format(level, rarity.lower(), itemtype.lower())
+		if buyprice != 0:
+			buyprice = self.gold_to_coins(buyprice)
+		if sellprice != 0:
+			sellprice = self.gold_to_coins(sellprice)
+		if buyprice == 0:
+			buyprice = 'No buy orders'
+		if sellprice == 0:
+			sellprice = 'No sell orders'                
+		data = discord.Embed(title=itemname, description=description, colour=self.rarity_to_color(rarity))
+		if "icon" in choice:
+			data.set_thumbnail(url=choice["icon"])
+		data.add_field(name="Buy price", value=buyprice, inline=False)
+		data.add_field(name="Sell price", value=sellprice, inline=False)
+		data.set_footer(text=choice["chat_link"])
+		try:
+			await self.bot.say(embed=data)
+		except discord.HTTPException:
+			await self.bot.say("Issue embedding data into discord")
 
 	@tp.command(pass_context=True, name="id")
 	async def tp_id(self, ctx, *, tpdataid: str):
@@ -3050,10 +3006,10 @@ class GuildWars2:
 		number = await cursor.count()
 		if not number:
 			await self.bot.say("I couldn't find that item in the database, check for typos.")
-			return
+			return None
 		if number > 20:
 			await self.bot.say("Your search gave me {0} item results. Please be more specific".format(number))
-			return
+			return None
 		items = []
 		msg = "Which one of these interests you? Type its number```"
 		async for item in cursor:
@@ -3069,15 +3025,19 @@ class GuildWars2:
 				choice = items[num]
 			except: 
 				await self.bot.edit_message(message, "That's not a number in the list")
-				return
+				return None
 			try:
 				await self.bot.delete_message(message)
 				await self.bot.delete_message(answer)
 			except:
 				pass
 		else:
+			message = await self.bot.say("Searching...")
 			choice = items[0]
 		return choice
+
+	def rarity_to_color(self, rarity):
+		return int(self.gamedata["items"]["rarity_colors"][rarity], 0)
 
 	async def _gamebuild_checker(self):
 		while self is self.bot.get_cog("GuildWars2"):
