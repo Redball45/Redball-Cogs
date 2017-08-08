@@ -3023,7 +3023,7 @@ class GuildWars2:
 						raise APIConnectionError(str(r.status))
 				results = await r.json()
 			return results
-		except Exception as e:
+		except TimeoutError as e:
 			raise APIConnectionError("API appears to be down.")
 
 	async def call_shiniesapi(self, shiniesendpoint):
