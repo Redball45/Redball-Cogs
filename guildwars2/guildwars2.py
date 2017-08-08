@@ -1721,7 +1721,8 @@ class GuildWars2:
 								   "{1}".format(user, e))
 				return
 			except APIError as e:
-				await self.bot.say(e)
+				await self.bot.say("{0.mention}, API has responded with the following error: {1}".format(user, e))
+				return
 			buyprice = results["buys"]["unit_price"]
 			sellprice = results ["sells"]["unit_price"]
 			try:
