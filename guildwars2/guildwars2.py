@@ -2379,7 +2379,7 @@ class GuildWars2:
 		return
 
 	@commands.cooldown(1, 10, BucketType.user)
-	@daily.command(pass_context=True, name="all", aliases["A", "a"])
+	@daily.command(pass_context=True, name="all", aliases=["A", "a"])
 	async def daily_all(self, ctx):
 		"""Show today's all dailies"""
 		try:
