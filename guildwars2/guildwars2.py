@@ -1720,6 +1720,8 @@ class GuildWars2:
 				await self.bot.say("{0.mention}, This item isn't on the TP."
 								   "{1}".format(user, e))
 				return
+			except APIError as e:
+				await self.bot.say(e)
 			buyprice = results["buys"]["unit_price"]
 			sellprice = results ["sells"]["unit_price"]
 			try:
@@ -3007,24 +3009,25 @@ class GuildWars2:
 		apiserv = 'https://api.guildwars2.com/v2/'
 		url = apiserv + endpoint
 		try:
-			async with self.session.get(url, headers=headers) as r:
-				if r.status != 200 and r.status != 206:
-					if r.status == 400:
-						raise APIBadRequest("No ongoing transactions")
-					if r.status == 404:
-						raise APINotFound("Not found")
-					if r.status == 403:
-						raise APIForbidden("Access denied")
-					if r.status == 429:
-						print (time.strftime('%a %H:%M:%S'), "Api call limit reached")
-						raise APIConnectionError(
-							"Requests limit has been achieved. Try again later.")
-					else:
-						raise APIConnectionError(str(r.status))
-				results = await r.json()
-			return results
+			result = await self.session.get(url, headers=headers)
 		except:
-			raise APIConnectionError("API appears to be down.")
+			raise APIConnectionError("API appears to be down")
+		async with self.session.get(url, headers=headers) as r:
+			if r.status != 200 and r.status != 206:
+				if r.status == 400:
+					raise APIBadRequest("No ongoing transactions")
+				if r.status == 404:
+					raise APINotFound("Not found")
+				if r.status == 403:
+					raise APIForbidden("Access denied")
+				if r.status == 429:
+					print (time.strftime('%a %H:%M:%S'), "Api call limit reached")
+					raise APIConnectionError(
+						"Requests limit has been achieved. Try again later.")
+				else:
+					raise APIConnectionError(str(r.status))
+			results = await r.json()
+		return results
 
 	async def call_shiniesapi(self, shiniesendpoint):
 		shinyapiserv = 'https://www.gw2shinies.com/api/json/'
