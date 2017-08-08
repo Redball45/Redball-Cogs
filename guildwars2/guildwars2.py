@@ -1700,7 +1700,7 @@ class GuildWars2:
 
 	@tp.command(pass_context=True, name="price")
 	async def tp_price(self, ctx, *, item: str):
-				"""Checks price of an item"""
+		"""Checks price of an item"""
 		user = ctx.message.author
 		color = self.getColor(user)
 		choice = await self.itemname_to_id(item, user)
