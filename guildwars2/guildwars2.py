@@ -3024,7 +3024,7 @@ class GuildWars2:
 				results = await r.json()
 			return results
 		except Exception as e:
-			raise APIConnectionError(e)
+			raise APIConnectionError("API appears to be down.")
 
 	async def call_shiniesapi(self, shiniesendpoint):
 		shinyapiserv = 'https://www.gw2shinies.com/api/json/'
