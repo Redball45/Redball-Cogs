@@ -1265,7 +1265,7 @@ class GuildWars2:
 			await self.bot.say(e)
 			return
 		except APIError as e:
-			await self.bot.say("{0.mention}, API has responded with the following error:".format(user))
+			await self.bot.say("{0.mention}, API has responded with the following error: {1}".format(user, e))
 			return
 		else:
 			listofcats = []
