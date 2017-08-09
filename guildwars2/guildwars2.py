@@ -2964,10 +2964,10 @@ class GuildWars2:
 	async def call_api(self, endpoint, headers=DEFAULT_HEADERS):
 		apiserv = 'https://api.guildwars2.com/v2/'
 		url = apiserv + endpoint
-		try:
+		"""try:
 			result = await self.session.get(url, headers=headers)
 		except:
-			raise APIConnectionError("API appears to be down.")
+			raise APIConnectionError("API appears to be down.")"""
 		async with self.session.get(url, headers=headers) as r:
 			if r.status != 200 and r.status != 206:
 				if r.status == 400:
