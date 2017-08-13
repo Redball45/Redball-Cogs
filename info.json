@@ -1,7 +1,7 @@
 {
-    "AUTHOR" : "Redball45",
+    "AUTHOR" : "Redball45, Maselkov",
     "INSTALL_MSG" : "Redball-Cogs repo installed",
     "NAME" : "Redball-Cogs",
-    "SHORT" : "Some custom cogs developed by Redball45",
-    "DESCRIPTION" : "Some custom cogs (mostly for GW2) developed by Redball45"
+    "SHORT" : "Cogs by Redball45",
+    "DESCRIPTION" : "Some custom cogs developed by Redball45, - Guild Wars 2 cog based on original by Maselkov"
 }
