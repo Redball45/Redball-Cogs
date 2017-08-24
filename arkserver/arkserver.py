@@ -187,9 +187,10 @@ class arkserver:
 			os.rename("/etc/arkmanager/scorched.cfg", "/etc/arkmanager/arkmanager.cfg")
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		await self.bot.say("Server will be restarted in 60 seconds.")
-		alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a restart in 60 seconds."', channel, False)
-		await asyncio.sleep(60)
+		if 'NotUpdating' in output:
+			await self.bot.say("Server will be restarted in 60 seconds.")
+			alert = await self.runcommand('arkmanager broadcast "Server will shutdown for a restart in 60 seconds."', channel, False)
+			await asyncio.sleep(60)
 		output = await self.runcommand("arkmanager restart", channel, self.settings["Verbose"])
 		if 'Success' in output:
 			await self.bot.say("Map changed and server has been restarted.")
