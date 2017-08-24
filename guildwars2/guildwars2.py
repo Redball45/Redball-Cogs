@@ -56,7 +56,7 @@ class APINotFound(APIError):
 	pass
 
 class GuildWars2:
-	"""This cog finds tp prices"""
+	"""GW2 API related commands."""
 
 	def __init__(self, bot):
 		self.bot = bot
