@@ -163,7 +163,7 @@ class arkserver:
 		await self.bot.edit_message(message, "Map will be swapped to {0}, the server will need to be restarted to complete the change, please confirm by typing Yes.".format(desiredMap))
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
 		try:	
-			if answer.content != "Yes":
+			if answer.content.lower() != "yes":
 				await self.bot.say("Okay, change cancelled.")
 				return
 		except:
@@ -397,7 +397,7 @@ class arkserver:
 		channel = ctx.message.channel
 		await self.bot.say("Please note this can take a significant amount of time, please confirm you want to do this by replying Yes")
 		answer = await self.bot.wait_for_message(timeout=30, author=user)
-		if answer.content == "Yes":
+		if answer.content.lower() == "yes":
 			output = await self.runcommand("arkmanager update --validate", channel, True)
 		else: 
 			await self.bot.edit_message(message, "Okay, validation cancelled")

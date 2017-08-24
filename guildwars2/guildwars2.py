@@ -21,6 +21,7 @@ from itertools import chain
 from operator import itemgetter
 from motor.motor_asyncio import AsyncIOMotorClient
 from urllib.request import urlopen
+from dateutil import parser
 
 try: # check if BeautifulSoup4 is installed
 	from bs4 import BeautifulSoup
@@ -486,6 +487,55 @@ class GuildWars2:
 			await self.bot.say(embed=data)
 		except discord.HTTPException:
 			await self.bot.say("Need permission to embed links")
+
+	@character.command(name="birthdays", pass_context=True)
+	async def character_birthdays(self, ctx):
+		"""Lists days until the next birthday for each of your characters.
+		"""
+		user = ctx.message.author
+		scopes = ["characters"]
+		time = datetime.datetime.utcnow()
+		endpoint = "characters?page=0"
+		keydoc = await self.fetch_key(user)
+		try:
+			await self._check_scopes_(user, scopes)
+			key = keydoc["key"]
+			headers = self.construct_headers(key)
+			results = await self.call_api(endpoint, headers)
+		except APIKeyError as e:
+			await self.bot.say(e)
+			return
+		except APIError as e:
+			await self.bot.say("{0.mention}, API has responded with the following error: "
+							   "`{1}`".format(user, e))
+			return
+		charlist = []
+		for character in results:
+			created = character["created"].split("T", 1)[0]
+			dt = parser.parse(created)
+			age = time.date() - dt.date()
+			days = age.days
+			years = days / 365
+			floor = int(days / 365)
+			daystill = 365 - (days - (365 * floor)) #finds days till next birthday
+			charlist.append(character["name"] + " " + str(floor + 1) + " " + str(daystill))
+		sortedlist = sorted(charlist, key=lambda v: int(v.rsplit(' ', 1)[1]))
+		output = "{0.mention}, days until each of your characters birthdays: ```"
+		for character in sortedlist:
+			name = character.rsplit(' ', 2)[0]
+			days = character.rsplit(' ', 1)[1]
+			years = character.rsplit(' ', 2)[1]
+			if years == "1":
+				suffix = 'st'
+			elif years == "2":
+				suffix = 'nd'
+			elif years == "3":
+				suffix = 'rd'
+			else:
+				suffix = 'th'
+			output += "\n" + name + " " + days + " days until " + years + suffix + " birthday."
+		output += "```"
+		await self.bot.say(output.format(user))
 
 	@character.command(name="list", pass_context=True)
 	async def _list_(self, ctx):
