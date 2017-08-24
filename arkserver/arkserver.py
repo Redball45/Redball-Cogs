@@ -82,6 +82,8 @@ class arkserver:
 							status = status + 'PlayersConnected'
 						if 'Players: 0' in output:
 							status = status + 'EmptyTrue'
+						if 'listening:   No' in output:
+							status = status + 'NotRunning'
 						if 'online:  Yes' in output:
 							status = status + 'NotUpdating'
 						if 'Your server is up to date!' in output:
@@ -140,9 +142,12 @@ class arkserver:
 			await self.bot.edit_message(message, "This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok' 'Island' and 'Scorched'. (e.g +ark map ragnarok)")
 			return
 		if 'EmptyTrue' not in output:
-			await self.bot.edit_message(message, "The map cannot be swapped while players are in the server.")
-			await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
-			return
+			if 'NotRunning' in output:
+				pass
+			else:
+				await self.bot.edit_message(message, "The map cannot be swapped while players are in the server.")
+				await self.bot.add_reaction(ctx.message, ':youtried:336180558956593152')
+				return
 		await asyncio.sleep(5) #just to make sure previous arkmanager command has time to finish
 		if self.updating == True: #don't change the map if the server is restarting or updating
 			await self.bot.edit_message(message, "I'm already carrying out a restart or update! <:banned:284492719202631680>")
