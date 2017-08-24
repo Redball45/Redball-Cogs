@@ -185,6 +185,7 @@ class arkserver:
 			os.rename("/etc/arkmanager/island.cfg", "/etc/arkmanager/arkmanager.cfg")
 		elif desiredMap == 'ScorchedEarth':
 			os.rename("/etc/arkmanager/scorched.cfg", "/etc/arkmanager/arkmanager.cfg")
+		self.settings["Map"] = desiredMap
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		if 'NotUpdating' in output:
