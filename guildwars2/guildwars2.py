@@ -1264,8 +1264,8 @@ class GuildWars2:
 				output += "```"
 				await self.bot.say(output.format(user))
 
-	@commands.command(pass_context=True)
-	async def sab(self, ctx, *, charactername : str):
+	@character.command(name="sab", pass_context=True)
+	async def character_sab(self, ctx, *, charactername : str):
 		"""This displays unlocked SAB items for the character specified
 		Requires an API key with characters and progression"""
 		user = ctx.message.author
