@@ -174,17 +174,17 @@ class arkserver:
 			return
 		self.updating = True #prevents the bot from restarting or updating while this is happening
 		if self.settings["Map"] == 'Ragnarok':
-			os.rename('/etc/arkmanager/arkmanager.cfg', '/etc/arkmanager/rag.cfg')
+			os.rename('/etc/arkmanager/instances/main.cfg', '/etc/arkmanager/instances/rag.cfg')
 		elif self.settings["Map"] == 'TheIsland':
-			os.rename("/etc/arkmanager/arkmanager.cfg", "/etc/arkmanager/island.cfg")
+			os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/island.cfg")
 		elif self.settings["Map"] == 'ScorchedEarth':
-			os.rename("/etc/arkmanager/arkmanager.cfg", "/etc/arkmanager/scorched.cfg")
+			os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/scorched.cfg")
 		if desiredMap == 'Ragnarok':
-			os.rename("/etc/arkmanager/rag.cfg", "/etc/arkmanager/arkmanager.cfg")
+			os.rename("/etc/arkmanager/instances/rag.cfg", "/etc/arkmanager/instances/main.cfg")
 		elif desiredMap == 'TheIsland':
-			os.rename("/etc/arkmanager/island.cfg", "/etc/arkmanager/arkmanager.cfg")
+			os.rename("/etc/arkmanager/instances/island.cfg", "/etc/arkmanager/instances/main.cfg")
 		elif desiredMap == 'ScorchedEarth':
-			os.rename("/etc/arkmanager/scorched.cfg", "/etc/arkmanager/arkmanager.cfg")
+			os.rename("/etc/arkmanager/instances/scorched.cfg", "/etc/arkmanager/instances/main.cfg")
 		self.settings["Map"] = desiredMap
 		dataIO.save_json('data/arkserver/settings.json', self.settings)
 		await self.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
