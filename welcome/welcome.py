@@ -6,8 +6,6 @@ import asyncio
 import os
 
 default_greeting = "Welcome {0.name} to {1.name}!"
-default_settings = {"GREETING": [default_greeting], "ON": False,
-					"CHANNEL": None, "WHISPER": False}
 
 class Welcome:
 	"""Welcomes members to the server. Taken from irdumbs welcome cog https://github.com/irdumbs/Dumb-Cogs/blob/master/welcome/welcome.py, rewritten for Red-DiscordBot V3"""
@@ -160,5 +158,5 @@ class Welcome:
 		else:
 			channel = self.bot.get_channel(295213438962106389)
 			await channel.send("@here, {0.name} just introduced themselves in <#296657796110483457>!".format(message.author))
-			await self.settings.user(message.author).WELCOMED.set(True):
+			await self.settings.user(message.author).WELCOMED.set(True)
 
