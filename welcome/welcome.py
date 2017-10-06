@@ -178,7 +178,7 @@ class Welcome:
 		#specific to introductions channel in TKT, once a user introduces themselves alert leadership chat
 		if not await self.settings.guild(message.guild).ON():
 			return
-		welcomechannel = await self.settings.guild(message.guild).CHANNEL():
+		welcomechannel = await self.settings.guild(message.guild).CHANNEL()
 		if message.channel.id != welcomechannel:
 			return
 		if await self.settings.user(message.author).WELCOMED():
@@ -188,7 +188,8 @@ class Welcome:
 		else:
 			channel = self.bot.get_channel(295213438962106389)
 			if await self.settings.guild(message.guild).ROLETOGGLE():
-				rolename = await self.settings.guild(message.guild).ROLE():
+				#this section gives a role if it's toggled on
+				rolename = await self.settings.guild(message.guild).ROLE()
 				try:
 					role = discord.utils.get(message.guild.roles, name=rolename)
 					await self.bot.add_roles(member, role)
