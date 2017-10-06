@@ -168,7 +168,7 @@ class Welcome:
 			await ctx.send(username)
 		else:
 			await ctx.send("You haven't set a username, use !tktregister (account name) to do so.")
-		if await self.verify_gw2:
+		if await self.verify_gw2(ctx.message):
 			await ctx.send("This user is in the guild.")
 		else:
 			await ctx.send("This user is no longer in the guild.")
@@ -190,12 +190,13 @@ class Welcome:
 
 	@welcomeguild.command()
 	async def leader(self, ctx, user: discord.Member):
+		"""Sets the discord user of a guild leader, required for verification functionality"""
 		await self.settings.guild(ctx.guild).GUILDMASTER.set(user.id)
 		await ctx.send("Guild Master set to UID {0}".format(user.id))
 
 	@welcomeguild.command()
 	async def guildname(self, ctx, *, guild_name: str):
-		"""Sets the guild name - MUST MATCH INGAME"""
+		"""Sets the guild name, required for verification functionality, and must exactly match ingame"""
 		await self.settings.guild(ctx.guild).GUILDNAME.set(guild_name)
 		await ctx.send("Guild Name set to {0}".format(guild_name))
 
