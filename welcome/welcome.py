@@ -5,7 +5,6 @@ from redbot.core import Config
 import asyncio
 import os
 
-default_greeting = "Welcome {0.name} to {1.name}!"
 
 class Welcome:
 	"""Welcomes members to the server. Taken from irdumbs welcome cog https://github.com/irdumbs/Dumb-Cogs/blob/master/welcome/welcome.py, rewritten for Red-DiscordBot V3"""
@@ -14,7 +13,7 @@ class Welcome:
 		self.bot = bot
 		self.settings = Config.get_conf(self, 21931)
 		default_guild = {
-			"GREETING": [default_greeting],
+			"GREETING": "Welcome {0.name} to {1.name}!",
 			"ON": False,
 			"CHANNEL": None,
 			"WHISPER": False
@@ -35,6 +34,7 @@ class Welcome:
 		"""Sets welcome module settings"""
 		if ctx.invoked_subcommand is None:
 			await self.bot.send_cmd_help(ctx)
+			#send current settings to user
 			greeting = await self.settings.guild(ctx.guild).GREETING()
 			channel = await self.get_welcome_channel(ctx.guild)
 			toggle = await self.settings.guild(ctx.guild).ON()
@@ -49,7 +49,7 @@ class Welcome:
 
 	@welcomeset.command()
 	async def testwelcome(self, ctx):
-		"""Sends a test welcome message"""
+		"""Sends a test welcome message, user that used the command is the one welcomed"""
 		user = ctx.author
 		try:
 			await self.on_join(user)
@@ -67,7 +67,7 @@ class Welcome:
 
 	@welcomeset.command()
 	async def whisper(self, ctx, on_off: bool):
-		"""Turns on/off welcoming new users to the server"""
+		"""Turns on/off welcoming new users to the server via whisper"""
 		await self.settings.guild(ctx.guild).WHISPER.set(on_off)
 		if await self.settings.guild(ctx.guild).WHISPER():
 			await ctx.send("I will now whisper the greeting message to users.")
@@ -151,7 +151,8 @@ class Welcome:
 		await channel.send(msg.format(member, server))
 
 	async def on_intro(self, message):
-		if message.channel != 344634206170644480:
+		#specific to introductions channel in TKT, once a user introduces themselves alert leadership chat
+		if message.channel.id != 344634206170644480:
 			return
 		if await self.settings.user(message.author).WELCOMED():
 			return
