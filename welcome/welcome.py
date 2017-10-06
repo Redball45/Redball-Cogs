@@ -159,6 +159,6 @@ class Welcome:
 			return
 		else:
 			channel = self.bot.get_channel(295213438962106389)
-			await channel.send("@here, {0.name} just introduced themselves in <#296657796110483457>!")
+			await channel.send("@here, {0.name} just introduced themselves in <#296657796110483457>!".format(message.author))
 			await self.settings.user(message.author).WELCOMED.set(True):
 
