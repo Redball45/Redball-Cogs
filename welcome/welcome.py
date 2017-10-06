@@ -21,7 +21,11 @@ class Welcome:
 			"CHANNEL": None,
 			"WHISPER": False
 			}
+		default_user = {
+			"WELCOMED": False
+		}
 		self.settings.register_guild(**default_guild)
+		self.settings.register_user(**default_user)
 
 	def permcheck(ctx):
 		return ctx.message.author.id == 77910702664200192 or ctx.message.author.id == 158543628648710144 and ctx.message.guild.id == 171970841100288000
@@ -147,3 +151,14 @@ class Welcome:
 				  "{0.name}'s #{1.name} channel".format(server, channel))
 			return
 		await channel.send(msg.format(member, server))
+
+	async def on_intro(self, message):
+		if message.channel != 344634206170644480:
+			return
+		if await self.settings.user(message.author).WELCOMED():
+			return
+		else:
+			channel = self.bot.get_channel(295213438962106389)
+			await channel.send("@here, {0.name} just introduced themselves in <#296657796110483457>!")
+			await self.settings.user(message.author).WELCOMED.set(True):
+
