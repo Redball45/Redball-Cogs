@@ -192,7 +192,7 @@ class Welcome:
 				rolename = await self.settings.guild(message.guild).ROLE()
 				try:
 					role = discord.utils.get(message.guild.roles, name=rolename)
-					await self.bot.add_roles(member, role)
+					await message.author.add_roles(role, reason="Agreed to the rules")
 					await channel.send("{0.name} just agreed to the rules and has been given the {1.name} role.".format(message.author, role))
 				except:
 					await channel.send("{0.name} just agreed to the rules but something went wrong when I tried to give them the {1.name} role :(".format(message.author, role))
