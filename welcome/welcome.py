@@ -102,7 +102,7 @@ class Welcome:
 			await self.bot.send_cmd_help(ctx)
 			return
 		await self.settings.guild(ctx.guild).ROLE.set(role.name)
-		await ctx.send("Users that join this server will be given the {0.name} role once they agree to the rules.".format(role))
+		await ctx.send("Users that join this server will be given the {0.name} role once they link their GW2 account.".format(role))
 
 	@welcomeset.command()
 	async def channel(self, ctx, channel : discord.TextChannel):
@@ -152,7 +152,7 @@ class Welcome:
 
 	@commands.command()
 	async def tktregister(self, ctx, *, message):
-		if await self.verify_gw2(message):
+		if await self.verify_gw2(ctx):
 			await ctx.send("Verified!")
 		else:
 			await ctx.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
@@ -162,7 +162,14 @@ class Welcome:
 	@commands.has_any_role('Knight Templar', 'Inquisitor', 'Admin')
 	async def tktcheck(self, ctx, user: discord.Member):
 		username = await self.settings.user(user).IGN()
-		await ctx.send(username)
+		if username:
+			await ctx.send(username)
+		else:
+			await ctx.send("You haven't set a username, use !tktregister (account name) to do so.")
+		if await self.verify_gw2:
+			await ctx.send("This user is in the guild.")
+		else:
+			await ctx.send("This user is no longer in the guild.")
 
 	@commands.group()
 	@commands.guild_only()
