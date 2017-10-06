@@ -6,7 +6,7 @@ import asyncio
 import os
 
 class Welcome:
-	"""Welcomes members to the server. Taken from irdumbs welcome cog https://github.com/irdumbs/Dumb-Cogs/blob/master/welcome/welcome.py, rewritten for Red-DiscordBot V3"""
+	"""Welcomes members to the server. Based on irdumbs welcome cog https://github.com/irdumbs/Dumb-Cogs/blob/master/welcome/welcome.py, heavily rewritten for Red-DiscordBot V3 to be used TKT discord server"""
 
 	def __init__(self, bot):
 		self.bot = bot
