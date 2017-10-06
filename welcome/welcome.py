@@ -168,6 +168,7 @@ class Welcome:
 			await ctx.send(username)
 		else:
 			await ctx.send("You haven't set a username, use !tktregister (account name) to do so.")
+		ctx.message.content = username
 		if await self.verify_gw2(ctx.message):
 			await ctx.send("This user is in the guild.")
 		else:
