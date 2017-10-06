@@ -16,7 +16,9 @@ class Welcome:
 			"GREETING": "Welcome {0.name} to {1.name}!",
 			"ON": False,
 			"CHANNEL": None,
-			"WHISPER": False
+			"WHISPER": False,
+			"ROLE": None,
+			"ROLETOGGLE": False
 			}
 		default_user = {
 			"WELCOMED": False
@@ -39,11 +41,15 @@ class Welcome:
 			channel = await self.get_welcome_channel(ctx.guild)
 			toggle = await self.settings.guild(ctx.guild).ON()
 			whisper = await self.settings.guild(ctx.guild).WHISPER()
+			role = await self.settings.guild(ctx.guild).ROLE()
+			roletoggle = await self.settings.guild(ctx.guild).ROLETOGGLE()
 			msg = "```"
 			msg += "GREETING: {}\n".format(greeting)
 			msg += "CHANNEL: #{}\n".format(channel)
 			msg += "ON: {}\n".format(toggle)
 			msg += "WHISPER: {}\n".format(whisper)
+			msg += "ROLE: {}\n".format(role)
+			msg += "ROLETOGGLE: {}\n".format(roletoggle)
 			msg += "```"
 			await ctx.send(msg)
 
@@ -73,6 +79,24 @@ class Welcome:
 			await ctx.send("I will now whisper the greeting message to users.")
 		else:
 			await ctx.send("I will send an introduction message to the specified channel instead of whispering.")
+
+	@welcomeset.command()
+	async def roletoggle(self, ctx, on_off: bool):
+		"""Turns on/off giving new users a role once they confirm their agreement to the rules"""
+		await self.settings.guild(ctx.guild).ROLETOGGLE.set(on_off)
+		if await self.settings.guild(ctx.guild).ROLETOGGLE():
+			await ctx.send("I will now grant the specificed role to new users.")
+		else:
+			await ctx.send("I won't grant any roles to new users.")
+
+	@welcomeset.command()
+	async def role(self, ctx, role: discord.Role=None):
+		"""Sets the role to give new users"""
+		if role == None:
+			await self.bot.send_cmd_help(ctx)
+			return
+		await self.settings.guild(ctx.guild).ROLE.set(role.name)
+		await ctx.send("Users that join this server will be given the {} role once they agree to the rules.")
 
 	@welcomeset.command()
 	async def channel(self, ctx, channel : discord.TextChannel):
@@ -152,12 +176,26 @@ class Welcome:
 
 	async def on_intro(self, message):
 		#specific to introductions channel in TKT, once a user introduces themselves alert leadership chat
-		if message.channel.id != 344634206170644480:
+		if not await self.settings.guild(message.guild).ON():
+			return
+		welcomechannel = await self.settings.guild(message.guild).CHANNEL():
+		if message.channel.id != welcomechannel:
 			return
 		if await self.settings.user(message.author).WELCOMED():
 			return
+		if 'i agree' not in message.content.lower():
+			return
 		else:
 			channel = self.bot.get_channel(295213438962106389)
-			await channel.send("@here, {0.name} just introduced themselves in <#296657796110483457>!".format(message.author))
+			if await self.settings.guild(message.guild).ROLETOGGLE():
+				rolename = await self.settings.guild(message.guild).ROLE():
+				try:
+					role = discord.utils.get(message.guild.roles, name=rolename)
+					await self.bot.add_roles(member, role)
+					await channel.send("{0.name} just agreed to the rules and has been given the {1.name} role.".format(message.author, role))
+				except:
+					await channel.send("{0.name} just agreed to the rules but something went wrong when I tried to give them the {1.name} role :(".format(message.author, role))
+			else:
+				await channel.send("{0.name} just agreed to the rules in <#344634206170644480>!".format(message.author))
 			await self.settings.user(message.author).WELCOMED.set(True)
 
