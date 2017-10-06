@@ -64,6 +64,15 @@ class Welcome:
 			await ctx.send("I will no longer welcome new users.")
 
 	@welcomeset.command()
+	async def whisper(self, ctx, on_off: bool):
+		"""Turns on/off welcoming new users to the server"""
+		await self.settings.guild(ctx.guild).WHISPER.set(on_off)
+		if await self.settings.guild(ctx.guild).WHISPER():
+			await ctx.send("I will now whisper the greeting message to users.")
+		else:
+			await ctx.send("I will send an introduction message to the specified channel instead of whispering.")
+
+	@welcomeset.command()
 	async def channel(self, ctx, channel : discord.TextChannel):
 		"""Sets the channel to send the welcome message"""
 		server = ctx.message.guild
