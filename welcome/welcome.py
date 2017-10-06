@@ -152,7 +152,8 @@ class Welcome:
 
 	@commands.command()
 	async def tktregister(self, ctx, *, message):
-		if await self.verify_gw2(ctx):
+		"""Ties your GW2 account name to your discord account, e.g !tktregister Redball.7236"""
+		if await self.verify_gw2(ctx.message):
 			await ctx.send("Verified!")
 		else:
 			await ctx.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
@@ -161,6 +162,7 @@ class Welcome:
 	@commands.guild_only()
 	@commands.has_any_role('Knight Templar', 'Inquisitor', 'Admin')
 	async def tktcheck(self, ctx, user: discord.Member):
+		"""Checks the account name of the specified, you can mention them or use their discriminator"""
 		username = await self.settings.user(user).IGN()
 		if username:
 			await ctx.send(username)
