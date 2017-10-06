@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Redball45",
+    "INSTALL_MSG" : "Misc Cog",
+    "NAME" : "misc",
+    "SHORT" : "Misc",
+    "DESCRIPTION" : "Misc cogs from Redball45",
+    "TAGS" : ["misc"],
+    "HIDDEN" : true
+}
