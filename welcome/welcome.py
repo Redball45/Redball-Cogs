@@ -5,7 +5,6 @@ from redbot.core import Config
 import asyncio
 import os
 
-
 class Welcome:
 	"""Welcomes members to the server. Taken from irdumbs welcome cog https://github.com/irdumbs/Dumb-Cogs/blob/master/welcome/welcome.py, rewritten for Red-DiscordBot V3"""
 
@@ -18,10 +17,13 @@ class Welcome:
 			"CHANNEL": None,
 			"WHISPER": False,
 			"ROLE": None,
-			"ROLETOGGLE": False
+			"LOGCHANNEL": None,
+			"GUILDMASTER": None,
+			"GUILDNAME": None
 			}
 		default_user = {
-			"WELCOMED": False
+			"WELCOMED": False,
+			"IGN": None
 		}
 		self.settings.register_guild(**default_guild)
 		self.settings.register_user(**default_user)
@@ -42,18 +44,19 @@ class Welcome:
 			toggle = await self.settings.guild(ctx.guild).ON()
 			whisper = await self.settings.guild(ctx.guild).WHISPER()
 			role = await self.settings.guild(ctx.guild).ROLE()
-			roletoggle = await self.settings.guild(ctx.guild).ROLETOGGLE()
+			logchannel = await self.settings.guild(ctx.guild).LOGCHANNEL()
 			msg = "```"
 			msg += "GREETING: {}\n".format(greeting)
 			msg += "CHANNEL: #{}\n".format(channel)
 			msg += "ON: {}\n".format(toggle)
 			msg += "WHISPER: {}\n".format(whisper)
 			msg += "ROLE: {}\n".format(role)
-			msg += "ROLETOGGLE: {}\n".format(roletoggle)
+			msg += "LOGCHANNEL: {}\n".format(logchannel)
 			msg += "```"
 			await ctx.send(msg)
 
 	@welcomeset.command()
+	@commands.is_owner()
 	async def testwelcome(self, ctx):
 		"""Sends a test welcome message, user that used the command is the one welcomed"""
 		user = ctx.author
@@ -61,6 +64,17 @@ class Welcome:
 			await self.on_join(user)
 		except Exception as e:
 			await ctx.send(e)
+
+	@welcomeset.command()
+	@commands.is_owner()
+	async def resetwelcome(self, ctx):
+		"""Resets WELCOMED, useful for testing"""
+		msg = await self.settings.user(ctx.author).WELCOMED()
+		await ctx.send(msg)
+		await self.settings.user(ctx.author).WELCOMED.set(False)
+		msg = await self.settings.user(ctx.author).WELCOMED()
+		await ctx.send(msg)
+		
 
 	@welcomeset.command()
 	async def toggle(self, ctx, on_off: bool):
@@ -80,23 +94,15 @@ class Welcome:
 		else:
 			await ctx.send("I will send an introduction message to the specified channel instead of whispering.")
 
-	@welcomeset.command()
-	async def roletoggle(self, ctx, on_off: bool):
-		"""Turns on/off giving new users a role once they confirm their agreement to the rules"""
-		await self.settings.guild(ctx.guild).ROLETOGGLE.set(on_off)
-		if await self.settings.guild(ctx.guild).ROLETOGGLE():
-			await ctx.send("I will now grant the specificed role to new users.")
-		else:
-			await ctx.send("I won't grant any roles to new users.")
 
 	@welcomeset.command()
 	async def role(self, ctx, role: discord.Role=None):
-		"""Sets the role to give new users"""
+		"""Sets the role to give users once they link their GW2 account"""
 		if role == None:
 			await self.bot.send_cmd_help(ctx)
 			return
 		await self.settings.guild(ctx.guild).ROLE.set(role.name)
-		await ctx.send("Users that join this server will be given the {} role once they agree to the rules.")
+		await ctx.send("Users that join this server will be given the {0.name} role once they agree to the rules.".format(role))
 
 	@welcomeset.command()
 	async def channel(self, ctx, channel : discord.TextChannel):
@@ -114,6 +120,20 @@ class Welcome:
 		await ctx.send("I will now send welcome "
 									"messages to {0.mention}".format(channel))
 
+	@welcomeset.command()
+	async def logchannel(self, ctx, channel : discord.TextChannel):
+		"""Sets the channel to send the logs of new users"""
+		server = ctx.message.guild
+		if channel is None:
+			await self.bot.send_cmd_help(ctx)
+		if not server.get_member(self.bot.user.id
+								 ).permissions_in(channel).send_messages:
+			await ctx.send("I do not have permissions to send "
+							   "messages to {0.mention}".format(channel))
+			return
+		await self.settings.guild(ctx.guild).LOGCHANNEL.set(channel.id)
+		await ctx.send("I will now send welcome "
+									"messages to {0.mention}".format(channel))
 
 	@welcomeset.command()
 	async def message(self, ctx, *, format_msg):
@@ -129,6 +149,46 @@ class Welcome:
 		server = ctx.message.guild
 		await self.settings.guild(ctx.guild).GREETING.set(format_msg)
 		await ctx.send("Welcome message set for the server.")
+
+	@commands.command()
+	async def tktregister(self, ctx, *, message):
+		if await self.verify_gw2(message):
+			await ctx.send("Verified!")
+		else:
+			await ctx.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
+
+	@commands.group()
+	@commands.guild_only()
+	@commands.has_any_role('Knight Templar', 'Inquisitor', 'Admin')
+	async def tktcheck(self, ctx, user: discord.Member):
+		username = await self.settings.user(user).IGN()
+		await ctx.send(username)
+
+	@commands.group()
+	@commands.guild_only()
+	@commands.check(permcheck)
+	async def welcomeguild(self, ctx):
+		"""Sets welcome module settings"""
+		if ctx.invoked_subcommand is None:
+			await self.bot.send_cmd_help(ctx)
+			name = await self.settings.guild(ctx.guild).GUILDNAME()
+			leader = await self.settings.guild(ctx.guild).GUILDMASTER()
+			msg = '```'
+			msg += "NAME: {}\n".format(name)
+			msg += "LEADER: #{}\n".format(leader)
+			msg += "```"
+			await ctx.send(msg)
+
+	@welcomeguild.command()
+	async def leader(self, ctx, user: discord.Member):
+		await self.settings.guild(ctx.guild).GUILDMASTER.set(user.id)
+		await ctx.send("Guild Master set to UID {0}".format(user.id))
+
+	@welcomeguild.command()
+	async def guildname(self, ctx, *, guild_name: str):
+		"""Sets the guild name - MUST MATCH INGAME"""
+		await self.settings.guild(ctx.guild).GUILDNAME.set(guild_name)
+		await ctx.send("Guild Name set to {0}".format(guild_name))
 
 	async def get_welcome_channel(self, server):
 		try:
@@ -174,29 +234,81 @@ class Welcome:
 			return
 		await channel.send(msg.format(member, server))
 
+	async def getmembers(self, guild):
+		scopes = ["guilds"]
+		guild_name = await self.settings.guild(guild).GUILDNAME()
+		try:
+			GW2 = self.bot.get_cog("GuildWars2")
+		except Exception as e:
+			print('GW2 cog might not be loaded?')
+			print(e)
+		endpoint_id = "guild/search?name=" + guild_name.replace(' ', '%20')
+		try:
+			guild_id = await GW2.call_api(endpoint_id)
+			guild_id = guild_id[0]
+			endpoint = "guild/{}/members".format(guild_id)
+			gmid = await self.settings.guild(guild).GUILDMASTER()
+			gm = await self.bot.get_user_info(gmid)
+			results = await GW2.call_api(endpoint, gm, scopes)
+			return results
+		except Exception as e:
+			print(e)
+			return None     	
+
+	async def verify_gw2(self, message):
+		memberlist = await self.getmembers(message.guild)
+		if memberlist == None:
+			return False
+		for member in memberlist:
+			if member["name"] in message.content:
+				await self.settings.user(message.author).IGN.set(member["name"])
+				return True
+		return False
+
 	async def on_intro(self, message):
-		#specific to introductions channel in TKT, once a user introduces themselves alert leadership chat
+		if message.guild == None:
+			return
+		if message.author.bot == True:
+			return
 		if not await self.settings.guild(message.guild).ON():
 			return
-		welcomechannel = await self.settings.guild(message.guild).CHANNEL()
+		welcomechannel = await self.settings.guild(message.guild).CHANNEL()		
 		if message.channel.id != welcomechannel:
 			return
 		if await self.settings.user(message.author).WELCOMED():
 			return
-		if 'i agree' not in message.content.lower():
+		gmid = await self.settings.guild(message.guild).GUILDMASTER()
+		guild_name = await self.settings.guild(message.guild).GUILDNAME()
+		if gmid == None or guild_name == None:
+			print('Please setup the Guild Master and Guild Name to use welcome functions')
 			return
-		else:
-			channel = self.bot.get_channel(295213438962106389)
-			if await self.settings.guild(message.guild).ROLETOGGLE():
-				#this section gives a role if it's toggled on
-				rolename = await self.settings.guild(message.guild).ROLE()
-				try:
-					role = discord.utils.get(message.guild.roles, name=rolename)
-					await message.author.add_roles(role, reason="Agreed to the rules")
-					await channel.send("{0.name} just agreed to the rules and has been given the {1.name} role.".format(message.author, role))
-				except:
-					await channel.send("{0.name} just agreed to the rules but something went wrong when I tried to give them the {1.name} role :(".format(message.author, role))
-			else:
-				await channel.send("{0.name} just agreed to the rules in <#344634206170644480>!".format(message.author))
-			await self.settings.user(message.author).WELCOMED.set(True)
+		welcomechan = self.bot.get_channel(welcomechannel)
+		chid = await self.settings.guild(message.guild).LOGCHANNEL()
+		channel = self.bot.get_channel(chid)
+		if not await self.verify_gw2(message):
+			reply = await welcomechan.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
+			await asyncio.sleep(30)
+			try:
+				await reply.delete()
+			except:
+				pass
+			return
+		rolename = await self.settings.guild(message.guild).ROLE()
+		try:
+			role = discord.utils.get(message.guild.roles, name=rolename)
+			await message.author.add_roles(role, reason="Welcome cog check passed")
+			if channel != None:
+				await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
+		except:
+			if channel != None:
+				await channel.send("Something went wrong when I tried to give {0.name} the {1.name} role :(".format(message.author, role))
+		await self.settings.user(message.author).WELCOMED.set(True)
+		reply = await welcomechan.send("Verified!")
+		await asyncio.sleep(30)
+		try:
+			await reply.delete()
+			await message.delete()
+		except:
+			pass
+		return
 
