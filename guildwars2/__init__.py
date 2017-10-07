@@ -6,6 +6,7 @@ import os
 
 import aiohttp
 from .account import AccountMixin
+from .achievements import AchievementsMixin
 from .api import ApiMixin
 from .characters import CharactersMixin
 from .commerce import CommerceMixin
@@ -30,7 +31,7 @@ with open("cogs/CogManager/cogs/guildwars2/dbconfig.json", encoding="utf-8", mod
     DB_CREDENTIALS = data["DATABASE"]["credentials"]
 
 
-class GuildWars2(AccountMixin, ApiMixin, CharactersMixin, CommerceMixin,
+class GuildWars2(AccountMixin, AchievementsMixin, ApiMixin, CharactersMixin, CommerceMixin,
                  DailyMixin, DatabaseMixin, EventsMixin, GuildMixin, KeyMixin,
                  MiscMixin, NotiifiersMixin, PvpMixin, WalletMixin, WvwMixin, ExtrasMixin):
     """Guild Wars 2 commands"""
@@ -77,9 +78,9 @@ class GuildWars2(AccountMixin, ApiMixin, CharactersMixin, CommerceMixin,
 def setup_logging():
     if not os.path.exists("logs"):
         os.makedirs("logs")
-    if not os.path.isfile("logs/toothy.log"):
-        with open("logs/toothy.log", 'a'):
-            os.utime("logs/toothy.log", None)
+    if not os.path.isfile("logs/guildwars2.log"):
+        with open("logs/guildwars2.log", 'a'):
+            os.utime("logs/guildwars2.log", None)
     formatter = logging.Formatter(
         '%(asctime)s:%(levelname)s:%(name)s: %(message)s')
     logging.getLogger("discord").setLevel(logging.INFO)
@@ -87,7 +88,7 @@ def setup_logging():
     logger = logging.getLogger("")
     logger.setLevel(logging.INFO)
     file_hdlr = logging.handlers.RotatingFileHandler(
-        filename="logs/toothy.log",
+        filename="logs/guildwars2.log",
         maxBytes=10 * 1024 * 1024,
         encoding="utf-8",
         backupCount=5)
