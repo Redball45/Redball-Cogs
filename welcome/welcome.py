@@ -271,7 +271,7 @@ class Welcome:
 		if memberlist == None:
 			return False
 		for member in memberlist:
-			if member["name"] in message.content:
+			if member["name"].lower() in message.content.lower():
 				await self.settings.user(message.author).IGN.set(member["name"])
 				return True
 		return False
