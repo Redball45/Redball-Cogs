@@ -50,7 +50,7 @@ class ExtrasMixin:
             return
     
     @container.command(hidden=True, name="add")
-    @commands.is_owner()
+    @commands.has_any_role('Bot Dev', 'Server Admin')
     async def containeradd(self, ctx, *, input_data: str):
         """Add a container data. Format is !container add name;data (data in JSON format)"""
         try:
@@ -67,7 +67,7 @@ class ExtrasMixin:
         await ctx.send("Data added")
     
     @container.command(hidden=True, name="del")
-    @commands.is_owner()
+    @commands.has_any_role('Bot Dev', 'Server Admin')
     async def containerdelete(self, ctx, *, input_data: str):
         """Remove a container data. Format is !container del name"""
         try:
@@ -79,7 +79,7 @@ class ExtrasMixin:
         await ctx.send("Data removed")
     
     @container.command(hidden=True, name="list")
-    @commands.is_owner()
+    @commands.has_any_role('Bot Dev', 'Server Admin')
     async def containerlist(self, ctx, *, input_data: str=""):
         """List container data.
         List either all container names (without argument) or a specific container (with the name as argument)"""

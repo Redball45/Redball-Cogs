@@ -307,9 +307,10 @@ class Welcome:
 		rolename = await self.settings.guild(message.guild).ROLE()
 		try:
 			role = discord.utils.get(message.guild.roles, name=rolename)
-			await message.author.add_roles(role, reason="Welcome cog check passed")
-			if channel != None:
-				await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
+			if role not in message.author.roles:
+				await message.author.add_roles(role, reason="Welcome cog check passed")
+				if channel != None:
+					await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
 		except:
 			if channel != None:
 				await channel.send("Something went wrong when I tried to give {0.name} the {1.name} role :(".format(message.author, role))
