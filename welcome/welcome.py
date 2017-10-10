@@ -156,12 +156,16 @@ class Welcome:
 		await ctx.send("Welcome message set for the server.")
 
 	@commands.command()
-	async def tktregister(self, ctx, *, message):
+	@commands.guild_only()
+	@commands.has_any_role('Knight Templar', 'Inquisitor', 'Admin')
+	async def tktregister(self, ctx, user: discord.Member, *, accountname):
 		"""Ties your GW2 account name to your discord account, e.g !tktregister Redball.7236"""
+		ctx.message.author = user
+		ctx.message.content = accountname
 		if await self.verify_gw2(ctx.message):
-			await ctx.send("Verified!")
+			await ctx.send("{0} has been connected to {1}!".format(user, accountname))
 		else:
-			await ctx.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
+			await ctx.send("Sorry, I couldn't match this user to the roster, the correct format is '!tktregister Redball#9401 Redball.7236'")
 
 	@commands.group()
 	@commands.guild_only()
