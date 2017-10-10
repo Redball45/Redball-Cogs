@@ -194,7 +194,7 @@ class Welcome:
 		for member in memberlist:
 			IGN = await self.settings.user(member).IGN()
 			if IGN is None:
-				msg += member.display_name
+				msg += member.display_name + "\n"
 		msg += "```"
 		await ctx.send(msg)
 
