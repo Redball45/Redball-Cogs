@@ -328,7 +328,14 @@ class Welcome:
 		try:
 			role = discord.utils.get(message.guild.roles, name=rolename)
 			if role not in message.author.roles:
-				await message.author.add_roles(role, reason="Welcome cog check passed")
+				for otherrole in message.author.roles:
+					if otherrole > role:
+						higherrank = True
+						break
+				if higherrank: #user already has a higher rank
+					pass
+				else:
+					await message.author.add_roles(role, reason="Welcome cog check passed")
 				if channel != None:
 					await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
 		except:
