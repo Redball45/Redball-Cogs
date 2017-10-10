@@ -186,6 +186,20 @@ class Welcome:
 
 	@commands.group()
 	@commands.guild_only()
+	@commands.has_any_role('Knight Templar', 'Inquisitor', 'Admin')
+	async def tktlist(self, ctx):
+		"""Returns a list of members of the discord that are not currently registered."""
+		memberlist = ctx.guild.members
+		msg = "```"
+		for member in memberlist
+			IGN = await self.settings.user(member).IGN()
+			if IGN is None:
+				msg += member.display_name
+		msg += "```"
+		await ctx.send(msg)
+
+	@commands.group()
+	@commands.guild_only()
 	@commands.check(permcheck)
 	async def welcomeguild(self, ctx):
 		"""Sets welcome module settings"""
