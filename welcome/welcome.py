@@ -25,6 +25,11 @@ class Welcome:
 			"WELCOMED": False,
 			"IGN": None
 		}
+		try:
+			self.GW2 = self.bot.get_cog("GuildWars2")
+		except Exception as e:
+			print('GW2 cog might not be loaded?')
+			print(e)
 		self.settings.register_guild(**default_guild)
 		self.settings.register_user(**default_user)
 
@@ -167,7 +172,8 @@ class Welcome:
 		if username:
 			await ctx.send(username)
 		else:
-			await ctx.send("You haven't set a username, use !tktregister (account name) to do so.")
+			await ctx.send("This user doesn't have a guild wars account attached, use !tktregister (account name) to do so.")
+			return
 		ctx.message.content = username
 		if await self.verify_gw2(ctx.message):
 			await ctx.send("This user is in the guild.")
@@ -248,19 +254,15 @@ class Welcome:
 	async def getmembers(self, guild):
 		scopes = ["guilds"]
 		guild_name = await self.settings.guild(guild).GUILDNAME()
-		try:
-			GW2 = self.bot.get_cog("GuildWars2")
-		except Exception as e:
-			print('GW2 cog might not be loaded?')
-			print(e)
+		
 		endpoint_id = "guild/search?name=" + guild_name.replace(' ', '%20')
 		try:
-			guild_id = await GW2.call_api(endpoint_id)
+			guild_id = await self.GW2.call_api(endpoint_id)
 			guild_id = guild_id[0]
 			endpoint = "guild/{}/members".format(guild_id)
 			gmid = await self.settings.guild(guild).GUILDMASTER()
 			gm = await self.bot.get_user_info(gmid)
-			results = await GW2.call_api(endpoint, gm, scopes)
+			results = await self.GW2.call_api(endpoint, gm, scopes)
 			return results
 		except Exception as e:
 			print(e)
