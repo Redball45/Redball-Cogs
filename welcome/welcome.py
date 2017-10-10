@@ -336,8 +336,8 @@ class Welcome:
 					pass
 				else:
 					await message.author.add_roles(role, reason="Welcome cog check passed")
-				if channel != None:
-					await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
+					if channel != None:
+						await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
 		except:
 			if channel != None:
 				await channel.send("Something went wrong when I tried to give {0.name} the {1.name} role :(".format(message.author, role))
