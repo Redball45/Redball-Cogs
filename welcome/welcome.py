@@ -176,7 +176,7 @@ class Welcome:
 		if username:
 			await ctx.send(username)
 		else:
-			await ctx.send("This user doesn't have a guild wars account attached, use !tktregister (account name) to do so.")
+			await ctx.send("This user doesn't have a guild wars account attached, use !tktregister (discord discriminator) (account name) to do so.")
 			return
 		ctx.message.content = username
 		if await self.verify_gw2(ctx.message):
