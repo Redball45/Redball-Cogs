@@ -191,7 +191,7 @@ class Welcome:
 		"""Returns a list of members of the discord that are not currently registered."""
 		memberlist = ctx.guild.members
 		msg = "```"
-		for member in memberlist
+		for member in memberlist:
 			IGN = await self.settings.user(member).IGN()
 			if IGN is None:
 				msg += member.display_name
