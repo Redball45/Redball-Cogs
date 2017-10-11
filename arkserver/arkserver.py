@@ -621,6 +621,8 @@ class arkserver:
 		for line in output:
 			if 'The server is now running, and should be up within 10 minutes' in line:
 				return True
+			if 'Update to' in line and 'complete' in line:
+				return True
 		return False
 
 	def sanitizeoutput(self, output):
