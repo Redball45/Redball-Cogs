@@ -338,9 +338,9 @@ class Welcome:
 					await message.author.add_roles(role, reason="Welcome cog check passed")
 					if channel != None:
 						await channel.send("{0.name} has been given the {1.name} role.".format(message.author, role))
-		except:
+		except Exception as e:
 			if channel != None:
-				await channel.send("Something went wrong when I tried to give {0.name} the {1.name} role :(".format(message.author, role))
+				await channel.send("Error: {2} when I tried to give {0.name} the {1.name} role :(".format(message.author, role, e))
 		await self.settings.user(message.author).WELCOMED.set(True)
 		reply = await welcomechan.send("Verified!")
 		await asyncio.sleep(30)
