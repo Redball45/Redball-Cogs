@@ -110,6 +110,7 @@ def setup(bot):
                 "day": datetime.datetime.utcnow().weekday(),
                 "news": [],
                 "build": 0,
+                "dailies": {},
                 "arcdps": 0
             }
         }))
@@ -117,5 +118,7 @@ def setup(bot):
     loop.create_task(cog.daily_checker())
     loop.create_task(cog.news_checker())
     loop.create_task(cog.gem_tracker())
+    loop.create_task(cog.world_population_checker())
+    loop.create_task(cog.guild_synchronizer())
     loop.create_task(cog.arcdps_checker())
     bot.add_cog(cog)
