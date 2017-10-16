@@ -682,7 +682,7 @@ class ExtrasMixin:
             current_arc = current
         if current != current_arc:
             await self.bot.database.set_cog_config(self,
-                                                   {"cache.arcdps": current_arc})
+                                                   {"cache.arcdps": current})
             return True
         else:
             return False
