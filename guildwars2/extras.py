@@ -710,7 +710,7 @@ class ExtrasMixin:
             }, self)
             async for doc in cursor:
                 try:
-                    guild = doc["cogs"][name]["updates"]
+                    guild = doc["cogs"][name]["arcdps"]
                     channels.append(guild["channel"])
                 except:
                     pass

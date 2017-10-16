@@ -296,6 +296,7 @@ class DatabaseMixin:
         print("Done")
         self.log.info(
             "Database done! Time elapsed: {} seconds".format(end - start))
+        await self.bot.change_presence(game=discord.Game(name="!help"),status=discord.Status.online)
 
     async def itemname_to_id(self, ctx, item, user, *, flags=[], filters={}):
         def check(m):
@@ -309,7 +310,8 @@ class DatabaseMixin:
         number = await cursor.count()
         if not number:
             await ctx.send(
-                "Your search gave me no results, sorry. Check for typos.")
+                "Your search gave me no results, sorry. Check for "
+                "typos.\nAlways use singular forms, e.g. Legendary Insight")
             return None
         if number > 20:
             await ctx.send("Your search gave me {} item results. Please be "
