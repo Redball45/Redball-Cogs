@@ -325,6 +325,7 @@ class Welcome:
 				pass
 			return
 		rolename = await self.settings.guild(message.guild).ROLE()
+		higherrank = False
 		try:
 			role = discord.utils.get(message.guild.roles, name=rolename)
 			if role not in message.author.roles:
