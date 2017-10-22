@@ -38,10 +38,7 @@ class arkserver:
 		self.settings.register_global(
 			Verbose=True,
 			AutoUpdate=False,
-			Map=None,
-			Cache__map=None,
-			Cache__players=None,
-			Cache__version=None
+			Map=None
 		)
 		self.settings.register_user(**default_user)
 
@@ -639,16 +636,10 @@ class arkserver:
 		"""Reports server status using discord status"""
 		while self is self.bot.get_cog("arkserver"):
 			if self.updating == False:
-				difference = False
 				currentmap = await self.settings.Map()
-				if currentmap != await self.settings.Cache.map():
-					difference = True
-					await self.settings.Cache.map.set(currentmap)
 				output = await self.runcommand("arkmanager status")
 				if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
 					await self.bot.change_presence(game=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
-					if await self.settings.Cache.map() != 'Offline':
-						await self.settings.Cache.map.set('Offline')
 					await asyncio.sleep(30)
 				else:
 					for line in output:
@@ -656,17 +647,14 @@ class arkserver:
 							players = line
 						if 'Server Name' in line:
 							version = '(' + line.split('(')[1]
-					if players != await self.settings.Cache.players():
-						difference = True
-						await self.settings.Cache.players.set(players)
-					if version != await self.settings.Cache.version():
-						difference = True
-						await self.settings.Cache.version.set(version)
-					if difference:
+					try:
 						message = currentmap + ' ' + players + version
 						await self.bot.change_presence(game=discord.Game(name=message), status=discord.Status.online)
+					except:
+						pass
 					await asyncio.sleep(30)
-			await asyncio.sleep(15)
+			else:
+				await asyncio.sleep(15)
 
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
