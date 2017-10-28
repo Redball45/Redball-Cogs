@@ -56,9 +56,9 @@ class GuildWars2(AccountMixin, AchievementsMixin, ApiMixin, CharactersMixin, Com
         self.tasks = []
 
     def __unload(self):
-    	for task in self.tasks:
-    		task.cancel()
-    	self.tasks = []
+        for task in self.tasks:
+            task.cancel()
+        self.tasks = []
         self.session.close()
 
     async def error_handler(self, ctx, exc):
