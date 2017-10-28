@@ -184,10 +184,11 @@ class DatabaseMixin:
 
     async def fetch_key(self, user, scopes=None):
         doc = await self.bot.database.get_user(user, self)
-        if not doc or not doc["key"]:
+        if not doc or "key" not in doc or not doc["key"]:
             raise APIKeyError(
                 "No API key associated with {.mention}. "
-                "Add your key using `$key add` command.".format(user))
+                "Add your key using `$key add` command. If you don't know "
+                "how, the command includes a tutorial.".format(user))
         if scopes:
             missing = []
             for scope in scopes:
@@ -231,6 +232,17 @@ class DatabaseMixin:
                                                    {"cache.dailies": doc})
         except Exception as e:
             self.log.exception("Exception caching dailies: ", exc_info=e)
+
+    async def cache_raids(self):
+        raids = []
+        raids_index = await self.call_api("raids")
+        for raid in raids_index:
+            raids.append(await self.call_api("raids/" + raid))
+        await self.bot.database.set_cog_config(self, {"cache.raids": raids})
+
+    async def get_raids(self):
+        config = await self.bot.database.get_cog_config(self)
+        return config["cache"].get("raids")
 
     async def cache_endpoint(self, endpoint, all=False):
         await self.db[endpoint].drop()
@@ -291,12 +303,12 @@ class DatabaseMixin:
         await self.db.currencies.create_index("name")
         await self.db.skills.create_index("name")
         await self.db.worlds.create_index("name")
+        await self.cache_raids()
         end = time.time()
         self.bot.available = True
         print("Done")
         self.log.info(
             "Database done! Time elapsed: {} seconds".format(end - start))
-        await self.bot.change_presence(game=discord.Game(name="!help"),status=discord.Status.online)
 
     async def itemname_to_id(self, ctx, item, user, *, flags=[], filters={}):
         def check(m):
@@ -318,14 +330,23 @@ class DatabaseMixin:
                            "more specific".format(number))
             return None
         items = []
-        msg = "Which one of these interests you? Type its number```"
         async for item in cursor:
             items.append(item)
+        items.sort(key=lambda i: i["name"])
+        longest = len(max([item["name"] for item in items], key=len))
+        msg = [
+            "Which one of these interests you? Simply type it's number "
+            "into the chat now:```ml", "INDEX    NAME {}RARITY".format(
+                " " * (longest)), "-----|------{}|-------".format(
+                    "-" * (longest))
+        ]
         if number != 1:
-            for c, m in enumerate(items):
-                msg += "\n{}: {} ({})".format(c, m["name"], m["rarity"])
-            msg += "```"
-            message = await ctx.send(msg)
+            for c, m in enumerate(items, 1):
+                msg.append("  {} {}| {} {}| {}".format(c, " " * (
+                    2 - len(str(c))), m["name"].upper(), " " * (
+                        4 + longest - len(m["name"])), m["rarity"]))
+            msg.append("```")
+            message = await ctx.send("\n".join(msg))
             try:
                 answer = await self.bot.wait_for(
                     "message", timeout=120, check=check)
@@ -333,7 +354,7 @@ class DatabaseMixin:
                 message.edit(content="No response in time")
                 return None
             try:
-                num = int(answer.content)
+                num = int(answer.content) - 1
                 choice = items[num]
             except:
                 await message.edit(content="That's not a number in the list")

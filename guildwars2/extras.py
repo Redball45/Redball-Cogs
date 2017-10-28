@@ -155,7 +155,7 @@ class ExtrasMixin:
             await ctx.send("Need permission to embed links")    
 
     @commands.command()
-    async def play(self, ctx):
+    async def playlist(self, ctx):
         await ctx.send("{0.mention}, Sorry, I can't play audio currently, for the time being you'll need to use the other bot via +play.".format(ctx.author))
 
     @commands.command()

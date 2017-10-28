@@ -301,61 +301,6 @@ class NotiifiersMixin:
             msg = ("Boss notifier disabled")
         await ctx.send(msg)
 
-    @commands.group()
-    @commands.guild_only()
-    @commands.has_permissions(manage_guild=True)
-    async def bossnotifier(self, ctx):
-        """Sends the next two bosses every 15 minutes to a channel
-        """
-        if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
-
-    @commands.cooldown(1, 5, BucketType.guild)
-    @bossnotifier.command(name="channel")
-    async def bossnotifier_channel(self, ctx, channel: discord.TextChannel):
-        """Sets the channel to send the bosses to"""
-        guild = ctx.guild
-        if not guild.me.permissions_in(channel).send_messages:
-            return await ctx.send("I do not have permissions to send "
-                                  "messages to {.mention}".format(channel))
-        await self.bot.database.set_guild(
-            guild, {"bossnotifs.channel": channel.id}, self)
-        doc = await self.bot.database.get_guild(guild, self)
-        enabled = doc["bossnotifs"].get("on", False)
-        if enabled:
-            msg = ("I will now send upcoming bosses to {.mention}."
-                   "\nLast message will be automatically deleted.".format(
-                       channel))
-        else:
-            msg = ("Channel set to {.mention}. In order to receive "
-                   "upcoming bosses, you still need to enable it using "
-                   "`bossnotifier toggle on`.".format(channel))
-        await channel.send(msg)
-
-    @commands.cooldown(1, 5, BucketType.guild)
-    @bossnotifier.command(name="toggle")
-    async def bossnotifier_toggle(self, ctx, on_off: bool):
-        """Toggles posting upcoming bosses"""
-        guild = ctx.guild
-        await self.bot.database.set_guild(guild, {"bossnotifs.on": on_off},
-                                          self)
-        if on_off:
-            doc = await self.bot.database.get_guild(guild, self)
-            channel = doc["bossnotifs"].get("channel")
-            if channel:
-                channel = guild.get_channel(channel)
-                if channel:
-                    msg = ("I will now send upcoming bosses to {.mention}."
-                           "\nLast message will be automatically deleted.".
-                           format(channel))
-            else:
-                msg = ("Boss notifier toggled on. In order to receive "
-                       "bosses, you still need to set a channel using "
-                       "`bossnotifier channel <channel>`.".format(channel))
-        else:
-            msg = ("Boss notifier disabled")
-        await ctx.send(msg)
-
     async def get_patchnotes(self):
         base_url = "https://en-forum.guildwars2.com"
         url_updates = base_url + "/categories/game-release-notes"
@@ -585,6 +530,8 @@ class NotiifiersMixin:
                     await self.cache_dailies()
                     await self.send_daily_notifs()
                 await asyncio.sleep(60)
+            except asyncio.CancelledError:
+                self.log.info("Daily checker terminated")
             except Exception as e:
                 self.log.exception(e)
                 await asyncio.sleep(60)
@@ -600,6 +547,8 @@ class NotiifiersMixin:
                         embeds.append(self.news_embed(item))
                     await self.send_news(embeds)
                 await asyncio.sleep(300)
+            except asyncio.CancelledError:
+                self.log.info("News checker terminated")
             except Exception as e:
                 self.log.exception(e)
                 await asyncio.sleep(300)
@@ -612,6 +561,8 @@ class NotiifiersMixin:
                     await self.send_update_notifs()
                     await self.rebuild_database()
                 await asyncio.sleep(60)
+            except asyncio.CancelledError:
+                self.log.info("Update checker temrinated")
             except Exception as e:
                 self.log.exception(e)
                 await asyncio.sleep(60)
@@ -656,6 +607,8 @@ class NotiifiersMixin:
                     except:
                         pass
                 await asyncio.sleep(150)
+            except asyncio.CancelledError:
+                self.log.info("Gem tracker terminated")
             except Exception as e:
                 self.log.exception("Exception during gemtracker: ", exc_info=e)
                 await asyncio.sleep(150)
@@ -698,6 +651,8 @@ class NotiifiersMixin:
                             await to_delete.delete()
                     except:
                         pass
+            except asyncio.CancelledError:
+                self.log.info("Boss notifier terminated")
             except Exception as e:
                 self.log.exception(e)
                 await asyncio.sleep(300)
@@ -709,6 +664,8 @@ class NotiifiersMixin:
                 await self.send_population_notifs()
                 await asyncio.sleep(300)
                 await self.cache_endpoint("worlds", True)
+            except asyncio.CancelledError:
+                self.log.info("Worldtracker terminated")
             except Exception as e:
                 self.log.exception("Exception during popnotifs: ", exc_info=e)
                 await asyncio.sleep(300)
@@ -741,6 +698,8 @@ class NotiifiersMixin:
             try:
                 await self.set_account_names()
                 await asyncio.sleep(300)
+            except asyncio.CancelledError:
+                self.log.info("FAC terminated")
             except Exception as e:
                 self.log.exception(
                     "Exception during forced names: ", exc_info=e)
