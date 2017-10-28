@@ -697,6 +697,8 @@ class ExtrasMixin:
                 self.log.exception(e)
                 await asyncio.sleep(60)
                 continue
+            except asyncio.CancelledError:
+                self.log.info("ARC Check terminated")
 
     async def arcdps_send(self):
         try:
