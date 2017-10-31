@@ -88,6 +88,18 @@ class misc:
 			await ctx.send('Done')
 			return
 		await self.bot.send_cmd_help(ctx)
+	
+	@commands.command()
+	@commands.check(tktcheck)
+	    async def praise(self, ctx):
+		"""PRAISE THE ONE AND ONLY LICH QUEEN GENETTA! MAY SHE BLESS YOUR POOR SOUL!"""
+		praises = []
+		praises.append("ALL HAIL THE TRUE LICH QUEEN GENETTA!!")
+		praises.append("We all are nothing but humble servants to you Lich Queen!!")
+		praises.append("All praise the Lich Queen!")
+		praises.append("PRAISE LICH QUEEN GENETTA! MAY SHE BLESS YOUR POOR SOUL!")
+		praises.append("ALL PRAISE THE LICH QUEEN GENETTA!")
+		await ctx.send(random.choice(praises))
 
 	@commands.command(no_pm=True)
 	async def poll(self, ctx, *text):
