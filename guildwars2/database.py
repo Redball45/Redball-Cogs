@@ -187,7 +187,7 @@ class DatabaseMixin:
         if not doc or "key" not in doc or not doc["key"]:
             raise APIKeyError(
                 "No API key associated with {.mention}. "
-                "Add your key using `$key add` command. If you don't know "
+                "Add your key using `!key add` command. If you don't know "
                 "how, the command includes a tutorial.".format(user))
         if scopes:
             missing = []
@@ -309,6 +309,7 @@ class DatabaseMixin:
         print("Done")
         self.log.info(
             "Database done! Time elapsed: {} seconds".format(end - start))
+        await self.bot.change_presence(game=discord.Game(name="!help!"), status=discord.Status.online)
 
     async def itemname_to_id(self, ctx, item, user, *, flags=[], filters={}):
         def check(m):

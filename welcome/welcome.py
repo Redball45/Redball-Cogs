@@ -289,11 +289,28 @@ class Welcome:
 	async def verify_gw2(self, message):
 		memberlist = await self.getmembers(message.guild)
 		if memberlist == None:
+			channel = message.channel
+			reply = await channel.send("Sorry, API is down, notified a moderator for you.")
+			await self.settings.user(message.author).WELCOMED.set(True)
+			chid = await self.settings.guild(message.guild).LOGCHANNEL()
+			adminchannel = self.bot.get_channel(chid)
+			await adminchannel.send("API is down {0} requires manual verification.".format(message.author))
+			await asyncio.sleep(30)
+			try:
+				await reply.delete()
+			except:
+				pass
 			return False
 		for member in memberlist:
 			if member["name"].lower() in message.content.lower():
 				await self.settings.user(message.author).IGN.set(member["name"])
 				return True
+		reply = await welcomechan.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
+		await asyncio.sleep(30)
+		try:
+			await reply.delete()
+		except:
+			pass
 		return False
 
 	async def on_intro(self, message):
@@ -306,6 +323,8 @@ class Welcome:
 		welcomechannel = await self.settings.guild(message.guild).CHANNEL()		
 		if message.channel.id != welcomechannel:
 			return
+		if '.' not in message.content:
+			return
 		if await self.settings.user(message.author).WELCOMED():
 			return
 		gmid = await self.settings.guild(message.guild).GUILDMASTER()
@@ -317,12 +336,6 @@ class Welcome:
 		chid = await self.settings.guild(message.guild).LOGCHANNEL()
 		channel = self.bot.get_channel(chid)
 		if not await self.verify_gw2(message):
-			reply = await welcomechan.send("Sorry, I couldn't match you to the roster, please check the account name you entered e.g Redball.7236 and try again")
-			await asyncio.sleep(30)
-			try:
-				await reply.delete()
-			except:
-				pass
 			return
 		rolename = await self.settings.guild(message.guild).ROLE()
 		higherrank = False
