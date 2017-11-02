@@ -8,8 +8,6 @@ class misc:
 	def __init__(self, bot):
 		self.bot = bot
 
-	def __unload(self):
-
 	def _role_from_string(self, server, rolename, roles=None):
 		if roles is None:
 			roles = server.roles
