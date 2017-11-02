@@ -38,7 +38,7 @@ class misc:
 	
 	@commands.command()
 	@commands.check(tktcheck)
-	    async def praise(self, ctx):
+	async def praise(self, ctx):
 		"""PRAISE THE ONE AND ONLY LICH QUEEN GENETTA! MAY SHE BLESS YOUR POOR SOUL!"""
 		praises = []
 		praises.append("ALL HAIL THE TRUE LICH QUEEN GENETTA!!")
