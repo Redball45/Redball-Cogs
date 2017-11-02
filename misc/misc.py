@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+import random
+
 
 class misc:
 	"""Misc commands. Some of these commands are only meant to be used with specific discord servers."""
