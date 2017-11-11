@@ -28,6 +28,7 @@ class misc:
 		return ctx.guild.id == 171970841100288000
 
 	@commands.command()
+	@commands.guild_only()
 	@commands.check(tktcheck)
 	async def nsfw(self, ctx):
 		"""Gives access to the TKT nsfw channel"""
@@ -39,6 +40,7 @@ class misc:
 		await self.bot.send_cmd_help(ctx)
 	
 	@commands.command()
+	@commands.guild_only()
 	@commands.check(tktcheck)
 	async def praise(self, ctx):
 		"""PRAISE THE ONE AND ONLY LICH QUEEN GENETTA! MAY SHE BLESS YOUR POOR SOUL!"""
@@ -48,5 +50,8 @@ class misc:
 		praises.append("All praise the Lich Queen!")
 		praises.append("PRAISE LICH QUEEN GENETTA! MAY SHE BLESS YOUR POOR SOUL!")
 		praises.append("ALL PRAISE THE LICH QUEEN GENETTA!")
+		if ctx.author.id == 180693006515568641:
+			await ctx.send("Praising yourself huh? That's pretty lame.")
+			return
 		await ctx.send(random.choice(praises))
 

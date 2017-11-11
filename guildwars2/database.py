@@ -119,6 +119,7 @@ class DatabaseMixin:
         """Create a new database
         """
         await self.rebuild_database()
+        await ctx.send("Done.")
 
     @database.command(name="statistics")
     async def db_stats(self, ctx):
@@ -197,8 +198,10 @@ class DatabaseMixin:
             if missing:
                 missing = ", ".join(missing)
                 raise APIKeyError(
-                    "{.mention}, missing the following scopes to use this "
-                    "command: `{}`".format(user, missing))
+                    "{.mention}, your API key is missing the following "
+                    "permissions to use this command: `{}`\nConsider adding "
+                    "a new key with those permissions "
+                    "checked".format(user, missing))
         return doc["key"]
 
     async def cache_dailies(self):
@@ -309,27 +312,63 @@ class DatabaseMixin:
         print("Done")
         self.log.info(
             "Database done! Time elapsed: {} seconds".format(end - start))
-        await self.bot.change_presence(game=discord.Game(name="!help!"), status=discord.Status.online)
+        await self.bot.change_presence(game=discord.Game(name="!help"),status=discord.Status.online)
 
-    async def itemname_to_id(self, ctx, item, user, *, flags=[], filters={}):
+    async def itemname_to_id(self,
+                             destination,
+                             item,
+                             user,
+                             *,
+                             flags=[],
+                             filters={},
+                             database="items"):  # TODO cleanup
         def check(m):
-            return m.channel == ctx.channel and m.author == user
+            if isinstance(destination, (discord.abc.User,
+                                        discord.abc.PrivateChannel)):
+                chan = isinstance(m.channel, discord.abc.PrivateChannel)
+            else:
+                chan = m.channel == destination.channel
+            return m.author == user and chan
 
         item_sanitized = re.escape(item)
         search = re.compile(item_sanitized + ".*", re.IGNORECASE)
-        cursor = self.db.items.find({"name": search,
-                                     "flags": {"$nin": flags},
-                                     **filters})
+        cursor = self.db[database].find({"name": search,
+                                         "flags": {"$nin": flags},
+                                         **filters})
         number = await cursor.count()
         if not number:
-            await ctx.send(
+            await destination.send(
                 "Your search gave me no results, sorry. Check for "
                 "typos.\nAlways use singular forms, e.g. Legendary Insight")
             return None
-        if number > 20:
-            await ctx.send("Your search gave me {} item results. Please be "
-                           "more specific".format(number))
-            return None
+        if number > 25:
+            await destination.send("Your search gave me {} item results. "
+                                   "Try exact match "
+                                   "search? `Y/N`".format(number))
+            try:
+                answer = await self.bot.wait_for(
+                    "message", timeout=120, check=check)
+            except asyncio.TimeoutError:
+                return None
+            if answer.content.lower() != "y":
+                return
+            exact_match = "^" + item_sanitized + "$"
+            search = re.compile(exact_match, re.IGNORECASE)
+            cursor = self.db[database].find({"name": search,
+                                             "flags": {"$nin": flags},
+                                             **filters})
+            number = await cursor.count()
+            if not number:
+                await destination.send(
+                    "Your search gave me no results, sorry. Check for "
+                    "typos.\nAlways use singular forms, e.g. Legendary Insight"
+                )
+                return None
+            if number > 25:
+                await destination.send(
+                    "Your search gave me {} item results. "
+                    "Please be more specific".format(number))
+                return None
         items = []
         async for item in cursor:
             items.append(item)
@@ -347,12 +386,12 @@ class DatabaseMixin:
                     2 - len(str(c))), m["name"].upper(), " " * (
                         4 + longest - len(m["name"])), m["rarity"]))
             msg.append("```")
-            message = await ctx.send("\n".join(msg))
+            message = await destination.send("\n".join(msg))
             try:
                 answer = await self.bot.wait_for(
                     "message", timeout=120, check=check)
             except asyncio.TimeoutError:
-                message.edit(content="No response in time")
+                await message.edit(content="No response in time")
                 return None
             try:
                 num = int(answer.content) - 1

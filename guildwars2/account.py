@@ -296,7 +296,7 @@ class AccountMixin:
     @commands.command()
     @commands.cooldown(1, 10, BucketType.user)
     async def bosses(self, ctx):
-        """Lists all the bosses you haven't killed this week
+        """Shows your raid progression for the week
 
         Required permissions: progression
         """
@@ -319,7 +319,7 @@ class AccountMixin:
             await ctx.send("Need permission to embed links")
 
     @commands.command()
-    @commands.cooldown(1, 7, BucketType.user)
+    @commands.cooldown(1, 5, BucketType.user)
     async def search(self, ctx, *, item):
         """Find items on your account
 
@@ -329,6 +329,7 @@ class AccountMixin:
         scopes = ["inventories", "characters"]
         choice = await self.itemname_to_id(ctx, item, user)
         if not choice:
+            ctx.command.reset_cooldown(ctx)
             return
         await ctx.trigger_typing()
         try:
@@ -439,7 +440,11 @@ class AccountMixin:
             return "+" if boss["id"] in results else "-"
 
         def readable_id(_id):
-            return _id.replace("_", " ").title()
+            _id = _id.split("_")
+            dont_capitalize = ("of", "the")
+            return " ".join([
+                x.capitalize() if x not in dont_capitalize else x for x in _id
+            ])
 
         not_completed = []
         embed = discord.Embed(title="Bosses", color=self.embed_color)
