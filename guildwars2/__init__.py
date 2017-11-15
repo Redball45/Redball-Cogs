@@ -55,6 +55,7 @@ class GuildWars2(AccountMixin, AchievementsMixin, ApiMixin, CharactersMixin, Com
         self.log = logging.getLogger(__name__)
         self.tasks = []
         self.waiting_for = []
+        self.bot.available = True
 
     def __unload(self):
         for task in self.tasks:
