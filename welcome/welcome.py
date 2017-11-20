@@ -25,11 +25,6 @@ class Welcome:
 			"WELCOMED": False,
 			"IGN": None
 		}
-		try:
-			self.GW2 = self.bot.get_cog("GuildWars2")
-		except Exception as e:
-			print('GW2 cog might not be loaded?')
-			print(e)
 		self.settings.register_guild(**default_guild)
 		self.settings.register_user(**default_user)
 
@@ -275,12 +270,13 @@ class Welcome:
 		
 		endpoint_id = "guild/search?name=" + guild_name.replace(' ', '%20')
 		try:
-			guild_id = await self.GW2.call_api(endpoint_id)
+			GW2 = self.bot.get_cog("GuildWars2")
+			guild_id = await GW2.call_api(endpoint_id)
 			guild_id = guild_id[0]
 			endpoint = "guild/{}/members".format(guild_id)
 			gmid = await self.settings.guild(guild).GUILDMASTER()
 			gm = await self.bot.get_user_info(gmid)
-			results = await self.GW2.call_api(endpoint, gm, scopes)
+			results = await GW2.call_api(endpoint, gm, scopes)
 			return results
 		except Exception as e:
 			print(e)
