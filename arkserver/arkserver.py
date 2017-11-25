@@ -485,7 +485,7 @@ class arkserver:
 				await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if self.successcheck(output):
-					message = await channel.send("Server is restarting...")
+					message = await ctx.send("Server is restarting...")
 					status = ''
 					while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 						await asyncio.sleep(15)
