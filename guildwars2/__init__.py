@@ -82,6 +82,11 @@ class GuildWars2(AccountMixin, AchievementsMixin, ApiMixin, CharactersMixin, Com
                 "`{}`".format(user, exc))
             return
 
+    def can_embed_links(self, ctx):
+        if not isinstance(ctx.channel, discord.abc.GuildChannel):
+            return True
+        return ctx.channel.permissions_for(ctx.me).embed_links
+
 def setup_logging():
     if not os.path.exists("logs"):
         os.makedirs("logs")

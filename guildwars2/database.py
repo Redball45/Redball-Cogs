@@ -119,7 +119,6 @@ class DatabaseMixin:
         """Create a new database
         """
         await self.rebuild_database()
-        await ctx.send("Done.")
 
     @database.command(name="statistics")
     async def db_stats(self, ctx):
@@ -221,6 +220,8 @@ class DatabaseMixin:
                         "_id":
                         daily["id"]
                     })
+                    if not daily_doc:
+                        continue
                     name = daily_doc["name"]
                     if category == "fractals":
                         if name.startswith(
@@ -312,7 +313,6 @@ class DatabaseMixin:
         print("Done")
         self.log.info(
             "Database done! Time elapsed: {} seconds".format(end - start))
-        await self.bot.change_presence(game=discord.Game(name="!help"),status=discord.Status.online)
 
     async def itemname_to_id(self,
                              destination,

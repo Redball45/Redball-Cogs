@@ -22,7 +22,7 @@ class KeyMixin:
 
         To generate an API key, head to https://account.arena.net, and log in.
         In the "Applications" tab, generate a new key, with all permissions.
-        Then input it using $key add <key>
+        Then input it using !key add <key>
 
         Required permissions: account
         """
@@ -232,7 +232,7 @@ class KeyMixin:
 
         Can be used with no parameter to display a list of all your
         keys to select from, or with a number to immediately swap to a selected
-        key e.g $key switch 3"""
+        key e.g !key switch 3"""
         if ctx.author.id in self.waiting_for:
             return await ctx.send(
                 "I'm already waiting for a response from you "
