@@ -3,6 +3,7 @@ import json
 import logging
 import logging.handlers
 import os
+import discord
 
 import aiohttp
 from .account import AccountMixin
