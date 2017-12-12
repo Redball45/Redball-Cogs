@@ -10,7 +10,7 @@ class WalletMixin:
     async def wallet(self, ctx):
         """Wallet related commands"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
 
     @wallet.command(name="currencies")
     @commands.cooldown(1, 10, BucketType.user)

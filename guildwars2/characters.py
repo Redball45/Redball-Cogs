@@ -13,7 +13,7 @@ class CharactersMixin:
     async def character(self, ctx):
         """Character related commands"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
 
     @character.command(name="info")
     @commands.cooldown(1, 5, BucketType.user)

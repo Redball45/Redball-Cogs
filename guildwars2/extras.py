@@ -46,7 +46,7 @@ class ExtrasMixin:
     async def container(self, ctx):
         """Command used to find out what's the most expensive item inside a container"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
             return
     
     @container.command(hidden=True, name="add")
@@ -613,7 +613,7 @@ class ExtrasMixin:
     async def arcdps(self, ctx):
         """Commands for setting up arcdps update feed"""
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help()
 
     @arcdps.command(name="check")
     async def arc_check(self, ctx):
