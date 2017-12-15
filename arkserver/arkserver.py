@@ -296,7 +296,7 @@ class arkserver:
 			elif await self.settings.Map() == 'TheCenter':
 				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/center.cfg")
 			elif await self.settings.Map() == 'Aberration':
-				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/aberratiom.cfg")
+				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/aberration.cfg")
 		except FileNotFoundError as e:
 			await ctx.send("An error occured {0} when trying to rename the current main.cfg")
 			self.updating = False
@@ -319,6 +319,7 @@ class arkserver:
 		await self.settings.Map.set(desiredMap)
 		if await self.offlinecheck():
 			await ctx.send("Server isn't running currently, I've swapped the map but the server still needs to be started.")
+			return
 		else:
 			output = await self.runcommand("arkmanager restart", ctx.channel, self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
