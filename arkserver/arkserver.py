@@ -488,11 +488,11 @@ class arkserver:
 			alert = await self.runcommand(command, ctx.channel, False)
 			await asyncio.sleep(delay)
 			if self.cancel != True:
+				message = await ctx.send("Server is restarting...")
 				output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
 				await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 				self.updating = False
 				if self.successcheck(output):
-					message = await ctx.send("Server is restarting...")
 					status = ''
 					while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 						await asyncio.sleep(15)
@@ -694,9 +694,9 @@ class arkserver:
 							if self.updating == False:
 								await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 								self.updating = True
+								message = await channel.send("Server is updating...")
 								update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
-								if self.successcheck(update):									
-									message = await channel.send("Server is updating...")
+								if self.successcheck(update):
 									status = ''
 									while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 										await asyncio.sleep(15)
@@ -711,9 +711,9 @@ class arkserver:
 							else:
 								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
 						else:
+							message = await channel.send("Server is updating...")
 							update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
 							if self.successcheck(update):									
-								message = await channel.send("Server is updating...")
 								status = ''
 								while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 									await asyncio.sleep(15)
