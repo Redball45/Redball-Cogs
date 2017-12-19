@@ -98,7 +98,7 @@ class arkserver:
 	async def ark(self, ctx):
 		"""Commands related to Ark Server Management"""
 		if ctx.invoked_subcommand is None:
-			await self.bot.send_cmd_help(ctx)
+			return await ctx.send_help()
 
 	@ark.command()
 	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
@@ -116,7 +116,7 @@ class arkserver:
 	async def arkchar(self, ctx):
 		"""Commands related to Ark Character Management"""
 		if ctx.invoked_subcommand is None:
-			await self.bot.send_cmd_help(ctx)
+			return await ctx.send_help()
 
 	@arkchar.command()
 	@commands.is_owner()
@@ -133,7 +133,10 @@ class arkserver:
 	async def showid(self, ctx, userobject: discord.Member):
 		"""Shows the steam id of the mentioned user"""
 		steamid = await self.settings.user(userobject).steamid()
-		await ctx.send(steamid)
+		if steamid:
+			await ctx.send(steamid)
+		else:
+			await ctx.send("No steamid attached to this user.")
 
 	@arkchar.command()
 	async def list(self, ctx):
@@ -518,6 +521,7 @@ class arkserver:
 		if status == True or modstatus == True:
 			await ctx.send("Updates are available.")
 			empty = await self.runcommand("arkmanager status", ctx.channel, False)
+			offline = await self.offlinecheck()
 			if await self.emptycheck():
 				await ctx.send("Players are currently in the server, update anyway?")
 				answer = await self.bot.wait_for('message', check=waitcheck)
@@ -536,9 +540,13 @@ class arkserver:
 				await ctx.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 				alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', ctx.channel, False)
 				await asyncio.sleep(60)
+				message = await ctx.send("Server is updating...")
 				output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, await self.settings.Verbose())
 				if self.successcheck(output):
-					message = await channel.send("Server is updating...")
+					if offline:
+						await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+						self.updating = False
+						return await message.edit(content="Server has been updated and is now online.")
 					status = ''
 					while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 						await asyncio.sleep(15)
