@@ -100,6 +100,13 @@ class arkserver:
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
+	@commands.group()
+	@commands.is_owner()
+	async def arkadmin(self, ctx):
+		"""Commands related to Ark Server Management"""
+		if ctx.invoked_subcommand is None:
+			return await ctx.send_help()
+
 	@ark.command()
 	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
 	async def resetstatus(self, ctx):
@@ -224,8 +231,7 @@ class arkserver:
 		await ctx.send("Character {0} is now active.".format(savename))
 		
 
-	@ark.command()
-	@commands.is_owner()
+	@arkadmin.command()
 	async def forcemap(self, ctx, minput : str = 'info'):
 		"""Swaps the settings save file to a specific map."""
 		if minput.lower() == 'ragnarok':
@@ -383,14 +389,12 @@ class arkserver:
 		players += "```"
 		await ctx.send(players)
 
-	@ark.command(name="dinowipe")
-	@commands.is_owner()
+	@arkadmin.command(name="dinowipe")
 	async def ark_dinowipe(self, ctx):
 		"""Runs DestroyWildDinos."""
 		output = await self.runcommand('arkmanager rconcmd "destroywilddinos"', ctx.channel, True)
 
-	@ark.command(name="autoupdate")
-	@commands.is_owner()
+	@arkadmin.command(name="autoupdate")
 	async def ark_autoupdate(self, ctx, toggle : str = 'info'):
 		"""Toggles autoupdating"""
 		togglestatus = await self.settings.AutoUpdate() #retrives current status of toggle from settings file
@@ -406,8 +410,7 @@ class arkserver:
 			elif togglestatus == False:
 				await ctx.send("Automatic updating is currently disabled.")
 
-	@ark.command(name="verbose")
-	@commands.is_owner()
+	@arkadmin.command(name="verbose")
 	async def ark_verbose(self, ctx, toggle : str = 'info'):
 		"""Toggles command verbosity"""
 		togglestatus = await self.settings.Verbose() #retrives current status of toggle from settings file
@@ -564,32 +567,27 @@ class arkserver:
 		else:
 			await ctx.send("No updates found.")
 
-	@ark.command(name="save")
-	@commands.is_owner()
+	@arkadmin.command(name="save")
 	async def ark_save(self, ctx):
 		"""Saves the world state"""
 		output = await self.runcommand("arkmanager saveworld", ctx.channel, True)
 
-	@ark.command(name="backup")
-	@commands.is_owner()
+	@arkadmin.command(name="backup")
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config"""
 		output = await self.runcommand("arkmanager backup", ctx.channel, True)
 
-	@ark.command(name="updatenow")
-	@commands.is_owner()
+	@arkadmin.command(name="updatenow")
 	async def ark_updatenow(self, ctx):
 		"""Updates withn no delay or checks"""
 		output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, True)
 
-	@ark.command(name="validate")
-	@commands.is_owner()
+	@arkadmin.command(name="validate")
 	async def ark_validate(self, ctx):
 		"""Validates files with steamcmd"""
 		output = await self.runcommand("arkmanager update --validate", ctx.channel, True)
 
-	@ark.command(name="forceupdate")
-	@commands.is_owner()
+	@arkadmin.command(name="forceupdate")
 	async def ark_forceupdate(self, ctx):
 		"""Updates with the -force parameter"""
 		output = self.runcommand("arkmanager update --update-mods --backup --force", ctx.channel, True)
