@@ -386,7 +386,7 @@ class arkserver:
 	@ark.command(name="dinowipe")
 	@commands.is_owner()
 	async def ark_dinowipe(self, ctx):
-		"""Runs DestroyWildDinos, useful for getting newly released creatures to spawn."""
+		"""Runs DestroyWildDinos."""
 		output = await self.runcommand('arkmanager rconcmd "destroywilddinos"', ctx.channel, True)
 
 	@ark.command(name="autoupdate")
@@ -450,7 +450,7 @@ class arkserver:
 
 	@ark.command(name="restart")
 	async def ark_restart(self, ctx, delay : int = 60):
-		"""Restarts the ARK Server with a user specificed delay (in seconds)"""
+		"""Restarts the ARK Server with a specificed delay (in seconds)"""
 		def waitcheck(m):
 			return m.author == ctx.author and m.channel == ctx.channel
 		try:
@@ -513,7 +513,7 @@ class arkserver:
 
 	@ark.command(name="update")
 	async def ark_update(self, ctx):
-		"""Checks for updates and if any are found, downloads, then restarts the server"""
+		"""Checks for updates, if found, downloads, then restarts the server"""
 		def waitcheck(m):
 			return m.author == ctx.author and m.channel == ctx.channel
 		status = await self.updatechecker(ctx.channel, self.settings.Verbose())
@@ -573,25 +573,25 @@ class arkserver:
 	@ark.command(name="backup")
 	@commands.is_owner()
 	async def ark_backup(self, ctx):
-		"""Creates a backup of the save and config files"""
+		"""Creates a backup of the save and config"""
 		output = await self.runcommand("arkmanager backup", ctx.channel, True)
 
 	@ark.command(name="updatenow")
 	@commands.is_owner()
 	async def ark_updatenow(self, ctx):
-		"""Updates withn no delay or empty checks"""
+		"""Updates withn no delay or checks"""
 		output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, True)
 
 	@ark.command(name="validate")
 	@commands.is_owner()
 	async def ark_validate(self, ctx):
-		"""Validates the server files with steamcmd"""
+		"""Validates files with steamcmd"""
 		output = await self.runcommand("arkmanager update --validate", ctx.channel, True)
 
 	@ark.command(name="forceupdate")
 	@commands.is_owner()
 	async def ark_forceupdate(self, ctx):
-		"""Updates without warning with the -force parameter"""
+		"""Updates with the -force parameter"""
 		output = self.runcommand("arkmanager update --update-mods --backup --force", ctx.channel, True)
 
 	async def checkmods(self, channel=None, verbose=False):
