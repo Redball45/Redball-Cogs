@@ -103,14 +103,14 @@ class arkserver:
 	@commands.group()
 	@commands.is_owner()
 	async def arkadmin(self, ctx):
-		"""Commands related to Ark Server Management"""
+		"""Commands related to Ark Server Administration"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
 	@ark.command()
 	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
 	async def resetstatus(self, ctx):
-		"""Resets bot and self.updating status."""
+		"""Resets bot and the update lock"""
 		self.updating = False
 		currentmap = await self.settings.Cache.map()
 		version = await self.settings.Cache.version()
@@ -579,7 +579,7 @@ class arkserver:
 
 	@arkadmin.command(name="updatenow")
 	async def ark_updatenow(self, ctx):
-		"""Updates withn no delay or checks"""
+		"""Updates with no delay or checks"""
 		output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, True)
 
 	@arkadmin.command(name="validate")
