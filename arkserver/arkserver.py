@@ -330,26 +330,7 @@ class arkserver:
 			await ctx.send("Server isn't running currently, I've swapped the map but the server still needs to be started.")
 			return
 		else:
-			output = await self.runcommand("arkmanager restart", ctx.channel, self.settings.Verbose())
-		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		if self.successcheck(output):
-			await message.edit(content="Server is restarting...")
-		else:
-			try:
-				await message.edit(content="Something went wrong \U0001F44F. {0}".format(output))
-				self.updating = False
-				return
-			except:
-				await message.edit(content="Something went wrong \U0001F44F")
-				self.updating = False
-				return
-		status = ''
-		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
-			await asyncio.sleep(15)
-			status = await self.runcommand("arkmanager status")
-		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
-		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-		self.updating = False
+			await self.safestart(ctx, desiredMap)
 
 	@ark.command()
 	async def checkupdate(self, ctx):
@@ -638,6 +619,58 @@ class arkserver:
 			message += elem
 		message += "```"
 		return message
+
+	async def safestart(self, ctx, desiredMap):
+		if desiredMap == 'Aberration' or 'ScorchedEarth':
+			desiredMap = desiredMap + "_P"
+		target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + ".ark"
+		destination = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + "discordBackup" + ".bak"
+		try:
+			shutil.copy(target, destination)
+			currentsize = os.path.getsize(target)
+		except Exception as e:
+			await ctx.send(e)
+			return
+		currentsize = currentsize - 1000000
+		output = await self.runcommand("arkmanager restart", ctx.channel, self.settings.Verbose())
+		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+		if self.successcheck(output):
+			await message.edit(content="Server is restarting...")
+		else:
+			try:
+				await message.edit(content="Something went wrong \U0001F44F. {0}".format(output))
+				self.updating = False
+				return
+			except:
+				await message.edit(content="Something went wrong \U0001F44F")
+				self.updating = False
+				return
+		status = ''
+		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
+			await asyncio.sleep(15)
+			status = await self.runcommand("arkmanager status")
+		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
+		await ctx.send("Performing additional checks...")
+		try:
+			newsize = os.path.getsize(target)
+		except OSError as e:
+			await ctx.send("Save file was wiped by the server - thanks WC. Attempting automatic recovery...")
+			output = await self.runcommand("arkmanager stop", ctx.channel, self.settings.Verbose())
+			try:
+				shutil.copy(destination, target)
+			except OSError as e:
+				await ctx.send("Something went wrong, manual intervention required. {0}".format(e))
+				return
+			try:
+				newsize = os.path.getsize(target)
+				if newsize == currentsize:
+					await ctx.send("Backup retrieval completed. Starting server...")
+			except OSError as e:
+				await ctx.send("Something went wrong, manual intervention required. {0}".format(e))
+				return
+			output = await self.runcommand("arkmanager start", ctx.channel, self.settings.Verbose())
+		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		self.updating = False
 
 	async def presence_manager(self):
 		"""Reports server status using discord status"""
