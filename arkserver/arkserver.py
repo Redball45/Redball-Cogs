@@ -651,10 +651,15 @@ class arkserver:
 			await asyncio.sleep(15)
 			status = await self.runcommand("arkmanager status")
 		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
-		await ctx.send("Performing additional checks...")
+		message2 = await ctx.send("Performing additional checks...")
+		recovery = False
 		try:
 			newsize = os.path.getsize(target)
 		except OSError as e:
+			recovery = True
+		if newsize < currentsize:
+			recovery = True
+		if recovery:
 			await ctx.send("Save file was wiped by the server - thanks WC. Attempting automatic recovery...")
 			output = await self.runcommand("arkmanager stop", ctx.channel, self.settings.Verbose())
 			try:
@@ -671,6 +676,7 @@ class arkserver:
 				return
 			output = await self.runcommand("arkmanager start", ctx.channel, self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		await message2.edit(content="Performing additional checks...all is good.")
 		self.updating = False
 
 	async def presence_manager(self):
