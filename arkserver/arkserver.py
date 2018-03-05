@@ -7,6 +7,7 @@ import os
 import sys
 import asyncio
 import glob
+import shutil
 from subprocess import PIPE, Popen
 from threading import Thread
 import shlex
