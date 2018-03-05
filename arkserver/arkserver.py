@@ -622,7 +622,7 @@ class arkserver:
 		return message
 
 	async def safestart(self, ctx, desiredMap):
-		if desiredMap == 'Aberration' or 'ScorchedEarth':
+		if desiredMap == 'Aberration' or desiredMap == 'ScorchedEarth':
 			desiredMap = desiredMap + "_P"
 		target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + ".ark"
 		destination = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + "discordBackup" + ".bak"
