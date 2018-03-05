@@ -636,14 +636,14 @@ class arkserver:
 		output = await self.runcommand("arkmanager restart", ctx.channel, self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		if self.successcheck(output):
-			await message.edit(content="Server is restarting...")
+			message = await ctx.send("Server is restarting...")
 		else:
 			try:
-				await message.edit(content="Something went wrong \U0001F44F. {0}".format(output))
+				await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
 				self.updating = False
 				return
 			except:
-				await message.edit(content="Something went wrong \U0001F44F")
+				await ctx.send("Something went wrong \U0001F44F")
 				self.updating = False
 				return
 		status = ''
