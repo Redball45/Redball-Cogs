@@ -574,6 +574,18 @@ class arkserver:
 		"""Updates with the -force parameter"""
 		output = self.runcommand("arkmanager update --update-mods --backup --force", ctx.channel, True)
 
+	@arkadmin.command(name="checksize")
+	async def ark_checksize(self, ctx):
+		"""Prints the size of the world save files"""
+		listsaves = ["Aberration_P", "ScorchedEarth_P", "TheCenter", "TheIsland", "Ragnarok"]
+		for savefile in listsaves:
+			try:
+				target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + savefile + ".ark"
+				filesize = os.path.getsize(target)
+				await ctx.send("{0} file size is {1}.".format(savefile, filesize))
+			except OSError as e:
+				await ctx.send("{0} error occured when attempting to retrieve file size for {1}.".format(e, savefile))
+
 	async def checkmods(self, channel=None, verbose=False):
 		output = await self.runcommand("arkmanager checkmodupdate", channel, verbose)
 		for line in output:
