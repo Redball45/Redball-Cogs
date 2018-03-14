@@ -699,7 +699,7 @@ class arkserver:
 					await asyncio.sleep(120)
 				except OSError as e:
 					owner = await bot.get_user_info(77910702664200192)
-					await ctx.send("{0.mention}, {1} error occured when attempting to retrieve file size for {2}.".format(owner, e, savefile))
+					await owner.send("{0} error occured when attempting to retrieve file size for {1}.".format(e, savefile))
 					await asyncio.sleep(36000)
 
 
