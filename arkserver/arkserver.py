@@ -336,7 +336,7 @@ class arkserver:
 	@ark.command()
 	async def checkupdate(self, ctx):
 		"""Just checks for ark updates - use +ark update to start update"""
-		if await self.updatechecker(ctx.channel, self.settings.Verbose()):
+		if await self.updatechecker(ctx.channel, await self.settings.Verbose()):
 			await ctx.send("Updates are available!")
 		else:
 			await ctx.send("Your server is up to date!")
@@ -344,7 +344,7 @@ class arkserver:
 	@ark.command()
 	async def checkmodupdate(self, ctx):
 		"""Just checks for mod updates - use +ark update to start update"""
-		if await self.checkmods(ctx.channel, self.settings.Verbose()):
+		if await self.checkmods(ctx.channel, await self.settings.Verbose()):
 			await ctx.send("Updates to some mods are available.")
 		else:
 			await ctx.send("No mod updates found.")		
@@ -354,7 +354,7 @@ class arkserver:
 	async def ark_stop(self, ctx):
 		"""Stops the Ark Server"""
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager stop", ctx.channel, self.settings.Verbose())
+		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
@@ -413,7 +413,7 @@ class arkserver:
 	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager start", ctx.channel, self.settings.Verbose())
+		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
@@ -422,7 +422,7 @@ class arkserver:
 	async def ark_status(self, ctx):
 		"""Checks the server status"""
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager status", ctx.channel, self.settings.Verbose())
+		output = await self.runcommand("arkmanager status", ctx.channel, await self.settings.Verbose())
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
@@ -501,8 +501,8 @@ class arkserver:
 		"""Checks for updates, if found, downloads, then restarts the server"""
 		def waitcheck(m):
 			return m.author == ctx.author and m.channel == ctx.channel
-		status = await self.updatechecker(ctx.channel, self.settings.Verbose())
-		modstatus = await self.checkmods(ctx.channel, self.settings.Verbose())
+		status = await self.updatechecker(ctx.channel, await self.settings.Verbose())
+		modstatus = await self.checkmods(ctx.channel, await self.settings.Verbose())
 		if status == True or modstatus == True:
 			await ctx.send("Updates are available.")
 			empty = await self.runcommand("arkmanager status", ctx.channel, False)
@@ -645,7 +645,7 @@ class arkserver:
 			await ctx.send(e)
 			return
 		currentsize = currentsize - 1000000
-		output = await self.runcommand("arkmanager restart", ctx.channel, self.settings.Verbose())
+		output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		if self.successcheck(output):
 			message = await ctx.send("Server is restarting...")
@@ -671,7 +671,7 @@ class arkserver:
 			recovery = True
 		if recovery:
 			await ctx.send("Save file was wiped by the server - thanks WC. Attempting automatic recovery...")
-			output = await self.runcommand("arkmanager stop", ctx.channel, self.settings.Verbose())
+			output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
 			try:
 				shutil.copy(destination, target)
 			except OSError as e:
@@ -684,7 +684,7 @@ class arkserver:
 			except OSError as e:
 				await ctx.send("Something went wrong, manual intervention required. {0}".format(e))
 				return
-			output = await self.runcommand("arkmanager start", ctx.channel, self.settings.Verbose())
+			output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		await message2.edit(content="Performing additional checks...all is good.")
 
