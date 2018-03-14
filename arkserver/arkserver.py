@@ -329,9 +329,9 @@ class arkserver:
 		await self.settings.Map.set(desiredMap)
 		if await self.offlinecheck():
 			await ctx.send("Server isn't running currently, I've swapped the map but the server still needs to be started.")
-			return
 		else:
 			await self.safestart(ctx, desiredMap)
+		self.updating = False
 
 	@ark.command()
 	async def checkupdate(self, ctx):
@@ -652,11 +652,9 @@ class arkserver:
 		else:
 			try:
 				await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
-				self.updating = False
 				return
 			except:
 				await ctx.send("Something went wrong \U0001F44F")
-				self.updating = False
 				return
 		status = ''
 		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
@@ -689,7 +687,20 @@ class arkserver:
 			output = await self.runcommand("arkmanager start", ctx.channel, self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		await message2.edit(content="Performing additional checks...all is good.")
-		self.updating = False
+
+
+	async def integrity_checker(self):
+		while self is self.bot.get_cog("arkserver"):
+			listsaves = ["Aberration_P", "ScorchedEarth_P", "TheCenter", "TheIsland", "Ragnarok"]
+			for savefile in listsaves:
+				try:
+					target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + savefile + ".ark"
+					filesize = os.path.getsize(target)
+				except OSError as e:
+					owner = await bot.get_user_info(77910702664200192)
+					await ctx.send("{0.mention}, {1} error occured when attempting to retrieve file size for {2}.".format(owner, e, savefile))
+			await asyncio.sleep(120)
+
 
 	async def presence_manager(self):
 		"""Reports server status using discord status"""
