@@ -696,10 +696,11 @@ class arkserver:
 				try:
 					target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + savefile + ".ark"
 					filesize = os.path.getsize(target)
+					await asyncio.sleep(120)
 				except OSError as e:
 					owner = await bot.get_user_info(77910702664200192)
 					await ctx.send("{0.mention}, {1} error occured when attempting to retrieve file size for {2}.".format(owner, e, savefile))
-			await asyncio.sleep(120)
+					await asyncio.sleep(36000)
 
 
 	async def presence_manager(self):
