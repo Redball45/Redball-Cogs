@@ -108,16 +108,11 @@ class arkserver:
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
-	@ark.command()
-	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
+	@arkadmin.command()
 	async def resetstatus(self, ctx):
 		"""Resets bot and the update lock"""
 		self.updating = False
-		currentmap = await self.settings.Cache.map()
-		version = await self.settings.Cache.version()
-		players = await self.settings.Cache.players()
-		game = currentmap + ' ' + players + version
-		await ctx.bot.change_presence(game=discord.Game(name=game),status=discord.Status.online)
+
 
 	@commands.group()
 	@commands.has_role('ARK')
@@ -295,6 +290,7 @@ class arkserver:
 			return
 		await message.clear_reactions()
 		await ctx.channel.trigger_typing()
+		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
 		activeSaveLocation = '/home/ark/ARK/ShooterGame/Saved/SavedArks/'
 		inactiveLocation = 'InactiveArks/'
 		configLocation = '/etc/arkmanager/instances/'
@@ -348,10 +344,7 @@ class arkserver:
 			self.updating = False
 			return
 		await self.settings.Map.set(desiredMap)
-		if await self.offlinecheck():
-			await ctx.send("Server isn't running currently, I've swapped the map but the server still needs to be started.")
-			return
-		output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
+		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		if self.successcheck(output):
 			message = await ctx.send("Server is restarting...")
