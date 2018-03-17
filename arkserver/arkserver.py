@@ -240,11 +240,11 @@ class arkserver:
 		elif minput.lower() == 'island':
 			desiredMap = 'TheIsland'
 		elif minput.lower() == 'scorched':
-			desiredMap = 'ScorchedEarth'
+			desiredMap = 'ScorchedEarth_P'
 		elif minput.lower() == 'center':
 			desiredMap = 'TheCenter'
 		elif minput.lower() == 'aberration':
-			desiredMap = 'Aberration'
+			desiredMap = 'Aberration_P'
 		else:
 			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, Aberration and Scorched")
 			return
@@ -267,11 +267,11 @@ class arkserver:
 		elif minput.lower() == 'island':
 			desiredMap = 'TheIsland'
 		elif minput.lower() == 'scorched':
-			desiredMap = 'ScorchedEarth'
+			desiredMap = 'ScorchedEarth_P'
 		elif minput.lower() == 'center':
 			desiredMap = 'TheCenter'
 		elif minput.lower() == 'aberration':
-			desiredMap = 'Aberration'
+			desiredMap = 'Aberration_P'
 		else:
 			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center and Scorched.")
 			return
@@ -295,42 +295,79 @@ class arkserver:
 			return
 		await message.clear_reactions()
 		await ctx.channel.trigger_typing()
+		activeSaveLocation = '/home/ark/ARK/ShooterGame/Saved/SavedArks/'
+		inactiveLocation = 'InactiveArks/'
+		configLocation = '/etc/arkmanager/instances/'
 		self.updating = True #prevents the bot from restarting or updating while this is happening
 		try:
+			confTarget = configLocation + 'main.cfg'
+			confDestination = configLocation + await self.settings.Map() + '.cfg'
+			target = activeSaveLocation + await self.settings.Map() + '.ark'
+			destination = activeSaveLocation + 'InactiveArks/' + await self.settings.Map() + '.ark'
 			if await self.settings.Map() == 'Ragnarok':
-				os.rename('/etc/arkmanager/instances/main.cfg', '/etc/arkmanager/instances/rag.cfg')
+				os.rename(confTarget, confDestination)
+				os.rename(target, destination)
 			elif await self.settings.Map() == 'TheIsland':
-				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/island.cfg")
-			elif await self.settings.Map() == 'ScorchedEarth':
-				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/scorched.cfg")
+				os.rename(confTarget, confDestination)
+				os.rename(target, destination)
+			elif await self.settings.Map() == 'ScorchedEarth_P':
+				os.rename(confTarget, confDestination)
+				os.rename(target, destination)
 			elif await self.settings.Map() == 'TheCenter':
-				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/center.cfg")
-			elif await self.settings.Map() == 'Aberration':
-				os.rename("/etc/arkmanager/instances/main.cfg", "/etc/arkmanager/instances/aberration.cfg")
+				os.rename(confTarget, confDestination)
+				os.rename(target, destination)
+			elif await self.settings.Map() == 'Aberration_P':
+				os.rename(confTarget, confDestination)
+				os.rename(target, destination)
 		except FileNotFoundError as e:
-			await ctx.send("An error occured {0} when trying to rename the current main.cfg")
+			await ctx.send("An error occured {0} when trying to rename files. Manual intervention required.".format(e))
 			self.updating = False
 			return
 		try:
+			rConfTarget = configLocation + desiredMap + '.cfg'
+			rConfDestination = configLocation + 'main.cfg'
+			rTarget = activeSaveLocation + 'InactiveArks/' + desiredMap + '.ark'
+			rDestination = activeSaveLocation + desiredMap + '.ark'
 			if desiredMap == 'Ragnarok':
-				os.rename("/etc/arkmanager/instances/rag.cfg", "/etc/arkmanager/instances/main.cfg")
+				os.rename(rConfTarget, rConfDestination)
+				os.rename(rTarget, rDestination)
 			elif desiredMap == 'TheIsland':
-				os.rename("/etc/arkmanager/instances/island.cfg", "/etc/arkmanager/instances/main.cfg")
-			elif desiredMap == 'ScorchedEarth':
-				os.rename("/etc/arkmanager/instances/scorched.cfg", "/etc/arkmanager/instances/main.cfg")
+				os.rename(rConfTarget, rConfDestination)
+				os.rename(rTarget, rDestination)
+			elif desiredMap == 'ScorchedEarth_P':
+				os.rename(rConfTarget, rConfDestination)
+				os.rename(rTarget, rDestination)
 			elif desiredMap == 'TheCenter':
-				os.rename("/etc/arkmanager/instances/center.cfg", "/etc/arkmanager/instances/main.cfg")
-			elif desiredMap == 'Aberration':
-				os.rename("/etc/arkmanager/instances/aberration.cfg", "/etc/arkmanager/instances/main.cfg")
+				os.rename(rConfTarget, rConfDestination)
+				os.rename(rTarget, rDestination)
+			elif desiredMap == 'Aberration_P':
+				os.rename(rConfTarget, rConfDestination)
+				os.rename(rTarget, rDestination)
 		except FileNotFoundError as e:
-			await ctx.send("An error occured {0} when trying to rename {1}.cfg to main.cfg".format(e, desiredMap))
+			await ctx.send("An error occured {0} when trying to rename files.".format(e))
 			self.updating = False
 			return
 		await self.settings.Map.set(desiredMap)
 		if await self.offlinecheck():
 			await ctx.send("Server isn't running currently, I've swapped the map but the server still needs to be started.")
+			return
+		output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
+		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+		if self.successcheck(output):
+			message = await ctx.send("Server is restarting...")
 		else:
-			await self.safestart(ctx, desiredMap)
+			try:
+				await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
+				return
+			except:
+				await ctx.send("Something went wrong \U0001F44F")
+				return
+		status = ''
+		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
+			await asyncio.sleep(15)
+			status = await self.runcommand("arkmanager status")
+		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
+		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
 
 	@ark.command()
@@ -632,76 +669,6 @@ class arkserver:
 			message += elem
 		message += "```"
 		return message
-
-	async def safestart(self, ctx, desiredMap):
-		if desiredMap == 'Aberration' or desiredMap == 'ScorchedEarth':
-			desiredMap = desiredMap + "_P"
-		target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + ".ark"
-		destination = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + desiredMap + "discordBackup" + ".bak"
-		try:
-			shutil.copy(target, destination)
-			currentsize = os.path.getsize(target)
-		except Exception as e:
-			await ctx.send(e)
-			return
-		currentsize = currentsize - 1000000
-		output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
-		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		if self.successcheck(output):
-			message = await ctx.send("Server is restarting...")
-		else:
-			try:
-				await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
-				return
-			except:
-				await ctx.send("Something went wrong \U0001F44F")
-				return
-		status = ''
-		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
-			await asyncio.sleep(15)
-			status = await self.runcommand("arkmanager status")
-		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
-		message2 = await ctx.send("Performing additional checks...")
-		recovery = False
-		try:
-			newsize = os.path.getsize(target)
-		except OSError as e:
-			recovery = True
-		if newsize < currentsize:
-			recovery = True
-		if recovery:
-			await ctx.send("Save file was wiped by the server - thanks WC. Attempting automatic recovery...")
-			output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
-			try:
-				shutil.copy(destination, target)
-			except OSError as e:
-				await ctx.send("Something went wrong, manual intervention required. {0}".format(e))
-				return
-			try:
-				newsize = os.path.getsize(target)
-				if newsize == currentsize:
-					await ctx.send("Backup retrieval completed. Starting server...")
-			except OSError as e:
-				await ctx.send("Something went wrong, manual intervention required. {0}".format(e))
-				return
-			output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
-		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
-		await message2.edit(content="Performing additional checks...all is good.")
-
-
-	async def integrity_checker(self):
-		while self is self.bot.get_cog("arkserver"):
-			listsaves = ["Aberration_P", "ScorchedEarth_P", "TheCenter", "TheIsland", "Ragnarok"]
-			for savefile in listsaves:
-				try:
-					target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + savefile + ".ark"
-					filesize = os.path.getsize(target)
-					await asyncio.sleep(120)
-				except OSError as e:
-					owner = await bot.get_user_info(77910702664200192)
-					await owner.send("{0} error occured when attempting to retrieve file size for {1}.".format(e, savefile))
-					await asyncio.sleep(36000)
-
 
 	async def presence_manager(self):
 		"""Reports server status using discord status"""
