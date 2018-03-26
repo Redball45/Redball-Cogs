@@ -128,7 +128,10 @@ class arkserver:
 		await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
 
 	async def setupCheck(ctx):
-		return await self.settings.SetupDone()
+		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
+		from redbot.core import Config
+		settings = Config.get_conf('arkserver', 3931293439)
+		return await settings.SetupDone()
 
 	@commands.command()
 	@commands.is_owner()
