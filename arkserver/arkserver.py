@@ -201,7 +201,7 @@ class arkserver:
 		"""Lists characters currently in storage"""
 		steamid = await self.settings.user(ctx.author).steamid()
 		if steamid == None:
-			await ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
+			await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		output = '```\nAvailable characters in storage:'
 		directory = await self.settings.ARKStorageDirectory()
@@ -225,7 +225,7 @@ class arkserver:
 			return		
 		steamid = await self.settings.user(ctx.author).steamid()
 		if steamid == None:
-			ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
+			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		source = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
 		destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
@@ -260,7 +260,7 @@ class arkserver:
 			return		
 		steamid = await self.settings.user(ctx.author).steamid()
 		if steamid == None:
-			ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
+			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		source = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
 		destination = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
@@ -310,7 +310,7 @@ class arkserver:
 			await ctx.send("Current map is {0}".format(await self.settings.Map()))
 			return
 		if self.updating == True: #don't change the map if the server is restarting or updating
-			await ctx.send("I'm already carrying out a restart or update! <:banned:284492719202631680>")
+			await ctx.send("I'm already carrying out a restart or update!")
 			return
 		if minput.lower() == 'ragnarok':
 			desiredMap = 'Ragnarok'
@@ -327,16 +327,14 @@ class arkserver:
 			return
 		if await self.settings.Map() == desiredMap:
 			await ctx.send("The server is already running this map!") 
-			await ctx.message.add_reaction(':youtried:336180558956593152')
 			return
 		if await self.emptycheck():
 			await ctx.send("The map cannot be swapped while players are in the server.")
-			await ctx.message.add_reaction(':youtried:336180558956593152')
 			return
 		message = await ctx.send("Map will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredMap))
-		await message.add_reaction(':Agree:243888050441027585')
+		await message.add_reaction('✔')
 		def waitcheck(react, user):
-			return react.emoji == self.bot.get_emoji(243888050441027585) and user == ctx.author  
+			return react.emoji == self.bot.get_emoji('✔') and user == ctx.author  
 		try:
 			react, user = await self.bot.wait_for('reaction_add', check=waitcheck, timeout=30.0)
 		except asyncio.TimeoutError:
@@ -560,7 +558,7 @@ class arkserver:
 				await ctx.send("Okay, restart cancelled.")
 				return
 		if self.updating == True:
-			await ctx.send("I'm already carrying out a restart or update! <:banned:284492719202631680>")
+			await ctx.send("I'm already carrying out a restart or update!")
 		else:
 			self.updating = True
 			self.cancel = False
@@ -619,7 +617,7 @@ class arkserver:
 					return
 			await ctx.send("Server will be restarted in 60 seconds.")
 			if self.updating == True:
-				await ctx.send("I'm already carrying out a restart or update! <:banned:284492719202631680>")
+				await ctx.send("I'm already carrying out a restart or update!")
 			else:
 				self.updating = True
 				await ctx.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
