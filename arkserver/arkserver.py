@@ -121,7 +121,7 @@ class arkserver:
 			await ctx.send("{0} as the additional storage location.")
 			await ctx.send("Reply 'Yes' to confirm these settings and complete setup.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
-			if answer.content.lower() != 'yes'
+			if answer.content.lower() != 'yes':
 				return await ctx.send("Okay, setup cancelled.")
 		except asyncio.TimeoutError:
 			return await ctx.send("You didn't reply in time, setup cancelled.")
