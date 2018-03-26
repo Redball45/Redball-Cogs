@@ -334,7 +334,7 @@ class arkserver:
 		message = await ctx.send("Map will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredMap))
 		await message.add_reaction('✔')
 		def waitcheck(react, user):
-			return react.emoji == self.bot.get_emoji('✔') and user == ctx.author  
+			return react.emoji == '✔' and user == ctx.author  
 		try:
 			react, user = await self.bot.wait_for('reaction_add', check=waitcheck, timeout=30.0)
 		except asyncio.TimeoutError:
