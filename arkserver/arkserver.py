@@ -466,19 +466,17 @@ class arkserver:
 	@arkadmin.command(name="channel")
 	async def arkadmin_channel(self, ctx, channel: discord.TextChannel):
 		if not ctx.guild.me.permissions_in(channel).send_messages:
-            return await ctx.send("I do not have permissions to send "
-                                  "messages to {.mention}".format(channel))
-        await self.settings.Channel.set(channel.id)
-        await ctx.send("Channel set to {.mention}".format(channel))
-        await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for diagnostics.".format(ctx.prefix))
+			return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
+		await self.settings.Channel.set(channel.id)
+		await ctx.send("Channel set to {.mention}".format(channel))
+		await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for diagnostics.".format(ctx.prefix))
 
 	@arkadmin.command(name="adminchannel")
 	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
 		if not ctx.guild.me.permissions_in(channel).send_messages:
-            return await ctx.send("I do not have permissions to send "
-                                  "messages to {.mention}".format(channel))
-        await self.settings.AdminChannel.set(channel.id)
-        await ctx.send("Channel set to {.mention}".format(channel))
+			return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
+		await self.settings.AdminChannel.set(channel.id)
+		await ctx.send("Channel set to {.mention}".format(channel))
 
 	@arkadmin.command(name="verbose")
 	async def ark_verbose(self, ctx, toggle : str = 'info'):
