@@ -7,7 +7,6 @@ import os
 import sys
 import asyncio
 import glob
-import shutil
 from subprocess import PIPE, Popen
 from threading import Thread
 import shlex
@@ -138,9 +137,13 @@ class arkserver:
 	async def arksettings(self, ctx):
 		"""Displays the current data settings and whether setup is complete"""
 		ARKDedi = await self.settings.ARKDataDirectory()
-		ARKManager = await self.settings.ARKManagerDirectory()
+		ARKManager = await self.settings.ARKManagerConfigDirectory()
 		ARKStorage = await self.settings.ARKStorageDirectory()
-		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the additional storage location.".format(ARKDedi, ARKManager, ARKStorage))
+		ARKChannel = await self.settings.Channel()
+		ARKAdminChannel = await self.settings.AdminChannel()
+		SetupDone = await self.settings.SetupDone()
+		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the "
+			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel))
 
 
 	@commands.group()
