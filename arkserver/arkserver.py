@@ -130,7 +130,7 @@ class arkserver:
 	async def setupCheck(ctx):
 		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
 		from redbot.core import Config
-		settings = Config.get_conf('arkserver', 3931293439)
+		settings = Config.get_conf(None, 3931293439, False, 'arkserver')
 		return await settings.SetupDone()
 
 	@commands.command()
@@ -167,6 +167,7 @@ class arkserver:
 
 	@commands.group()
 	@commands.has_role('ARK')
+	@commands.check(setupCheck)
 	async def arkchar(self, ctx):
 		"""Commands related to Ark Character Management"""
 		if ctx.invoked_subcommand is None:
