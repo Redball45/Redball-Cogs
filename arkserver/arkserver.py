@@ -20,8 +20,6 @@ except ImportError:
 
 ON_POSIX = 'posix' in sys.builtin_module_names
 
-class HTTPException(Exception):
-	pass
 
 class arkserver:
 	"""Ark Server commands"""
@@ -39,7 +37,13 @@ class arkserver:
 		self.settings.register_global(
 			Verbose=True,
 			AutoUpdate=False,
-			Map=None
+			Map=None,
+			SetupDone=False,
+			ARKDataDirectory=None,
+			ARKManagerConfigDirectory=None,
+			ARKStorageDirectory=None,
+			Channel=None,
+			AdminChannel=None
 		)
 		self.settings.register_user(**default_user)
 
@@ -94,12 +98,47 @@ class arkserver:
 				return output
 		return output
 	
+	@commands.command()
+	@commands.is_owner()
+	async def arksetup(self, ctx):
+		"""Interactive setup process"""
+		def waitcheck(m):
+			return m.author == ctx.author and m.channel == ctx.channel
+		try:
+			await ctx.send("This setup process will set required options for this cog to function. For each question, you should respond with desired setting.")
+			await ctx.send("First, please repond with the location the ARK Dedicated Server is installed to. This should be the top level directory. For example, '/home/[your username]/ARK/'.")
+			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
+			ARKDedi = answer.content
+			await ctx.send("Next, please respond with the location arkmanager configuration files are located. Unless you changed this, the default is usually '/etc/arkmanager/'.")
+			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
+			ARKManager = answer.content
+			await ctx.send("Next, please repond with a location to store inactive character and world save files, used for the map swapping and character swap features.")
+			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
+			ARKStorage = answer.content
+			await ctx.send("You have chosen:")
+			await ctx.send("{0} as the server installation location.")
+			await ctx.send("{0} as the arkmanager configuration location.")
+			await ctx.send("{0} as the additional storage location.")
+			await ctx.send("Reply 'Yes' to confirm these settings and complete setup.")
+			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
+			if answer.content.lower() != 'yes'
+				return await ctx.send("Okay, setup cancelled.")
+		except asyncio.TimeoutError:
+			return await ctx.send("You didn't reply in time, setup cancelled.")
+		await self.settings.ARKDataDirectory.set(ARKDedi)
+		await self.settings.ARKManagerConfigDirectory.set(ARKManager)
+		await self.settings.ARKStorageDirectory.set(ARKStorage)
+		await self.settings.SetupDone.set(True)
+		await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
+
 	@commands.group()
 	@commands.has_role('ARK')
 	async def ark(self, ctx):
 		"""Commands related to Ark Server Management"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
+		if not await self.settings.SetupDone():
+			return await ctx.send("Please finish setup first with {0}arksetup before using any other command.".format(ctx.prefix))
 
 	@commands.group()
 	@commands.is_owner()
@@ -107,6 +146,8 @@ class arkserver:
 		"""Commands related to Ark Server Administration"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
+		if not await self.settings.SetupDone():
+			return await ctx.send("Please finish setup first with {0}arksetup before using any other command.".format(ctx.prefix))
 
 	@arkadmin.command()
 	async def resetstatus(self, ctx):
@@ -149,7 +190,7 @@ class arkserver:
 			await ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
 			return
 		output = '```\nAvailable characters in storage:'
-		directory = '/home/ark/ARK/ShooterGame/Saved/SavedArks/characters/'
+		directory = await self.settings.ARKStorageDirectory()
 		search = directory + steamid + '*'
 		list_replacements = [steamid, directory, '.bak']
 		for name in glob.glob(search):
@@ -172,8 +213,8 @@ class arkserver:
 		if steamid == None:
 			ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
 			return
-		source = '/home/ark/ARK/ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
-		destination = '/home/ark/ARK/ShooterGame/Saved/SavedArks/characters/' + steamid + savename + '.bak'
+		source = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
+		destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
 		if os.path.isfile(source) == False:
 			await ctx.send("You don't have a character active at the moment.")
 			return
@@ -207,8 +248,8 @@ class arkserver:
 		if steamid == None:
 			ctx.send("You need to have your steam ID attached to your discord account by Redball before you can use this command.")
 			return
-		source = '/home/ark/ARK/ShooterGame/Saved/SavedArks/characters/' + steamid + savename + '.bak'
-		destination = '/home/ark/ARK/ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
+		source = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
+		destination = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
 		if os.path.isfile(source) == False:
 			await ctx.send("That character doesn't exist in storage.")
 			return
@@ -248,7 +289,7 @@ class arkserver:
 
 	@ark.command()
 	async def map(self, ctx, minput : str = 'info'):
-		"""Swaps the server over to the desired map."""
+		"""Swaps the server over to the desired map. This works by renaming instance configuration files."""
 		await ctx.channel.trigger_typing()
 		if minput == 'info':
 			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok', 'Island', 'Center', 'Aberration' and 'Scorched'. (e.g +ark map ragnarok)")
@@ -291,15 +332,15 @@ class arkserver:
 		await message.clear_reactions()
 		await ctx.channel.trigger_typing()
 		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
-		activeSaveLocation = '/home/ark/ARK/ShooterGame/Saved/SavedArks/'
-		inactiveLocation = 'InactiveArks/'
-		configLocation = '/etc/arkmanager/instances/'
+		activeSaveLocation = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/'
+		inactiveLocation = await self.settings.ARKStorageDirectory()
+		configLocation = await self.settings.ARKManagerConfigDirectory() + 'instances/'
 		self.updating = True #prevents the bot from restarting or updating while this is happening
 		try:
 			confTarget = configLocation + 'main.cfg'
 			confDestination = configLocation + await self.settings.Map() + '.cfg'
 			target = activeSaveLocation + await self.settings.Map() + '.ark'
-			destination = activeSaveLocation + 'InactiveArks/' + await self.settings.Map() + '.ark'
+			destination = await self.settings.ARKStorageDirectory() + await self.settings.Map() + '.ark'
 			if await self.settings.Map() == 'Ragnarok':
 				os.rename(confTarget, confDestination)
 				os.rename(target, destination)
@@ -322,7 +363,7 @@ class arkserver:
 		try:
 			rConfTarget = configLocation + desiredMap + '.cfg'
 			rConfDestination = configLocation + 'main.cfg'
-			rTarget = activeSaveLocation + 'InactiveArks/' + desiredMap + '.ark'
+			rTarget = await self.settings.ARKStorageDirectory() + desiredMap + '.ark'
 			rDestination = activeSaveLocation + desiredMap + '.ark'
 			if desiredMap == 'Ragnarok':
 				os.rename(rConfTarget, rConfDestination)
@@ -402,12 +443,12 @@ class arkserver:
 		await ctx.send(players)
 
 	@arkadmin.command(name="dinowipe")
-	async def ark_dinowipe(self, ctx):
+	async def arkadmin_dinowipe(self, ctx):
 		"""Runs DestroyWildDinos."""
 		output = await self.runcommand('arkmanager rconcmd "destroywilddinos"', ctx.channel, True)
 
 	@arkadmin.command(name="autoupdate")
-	async def ark_autoupdate(self, ctx, toggle : str = 'info'):
+	async def arkadmin_autoupdate(self, ctx, toggle : str = 'info'):
 		"""Toggles autoupdating"""
 		togglestatus = await self.settings.AutoUpdate() #retrives current status of toggle from settings file
 		if toggle.lower() == 'off':
@@ -415,12 +456,29 @@ class arkserver:
 			await ctx.send("Automatic updating is now disabled.")
 		elif toggle.lower() == 'on':
 			await self.settings.AutoUpdate.set(True)
-			await ctx.send("Automatic server updating is now enabled.")
+			await ctx.send("Automatic server updating is now enabled. You may wish to select a channel for autoupdate messages to go to via {0}arkadmin channel.".format(ctx.prefix))
 		else:
 			if togglestatus == True:
-				await ctx.send("Automatic updating is currently enabled.")
+				await ctx.send("Automatic updating is currently enabled. You may wish to select a channel for autoupdate messages to go to via {0}arkadmin channel.".format(ctx.prefix))
 			elif togglestatus == False:
 				await ctx.send("Automatic updating is currently disabled.")
+
+	@arkadmin.command(name="channel")
+	async def arkadmin_channel(self, ctx, channel: discord.TextChannel):
+		if not ctx.guild.me.permissions_in(channel).send_messages:
+            return await ctx.send("I do not have permissions to send "
+                                  "messages to {.mention}".format(channel))
+        await self.settings.Channel.set(channel.id)
+        await ctx.send("Channel set to {.mention}".format(channel))
+        await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for diagnostics.".format(ctx.prefix))
+
+	@arkadmin.command(name="adminchannel")
+	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
+		if not ctx.guild.me.permissions_in(channel).send_messages:
+            return await ctx.send("I do not have permissions to send "
+                                  "messages to {.mention}".format(channel))
+        await self.settings.AdminChannel.set(channel.id)
+        await ctx.send("Channel set to {.mention}".format(channel))
 
 	@arkadmin.command(name="verbose")
 	async def ark_verbose(self, ctx, toggle : str = 'info'):
@@ -604,18 +662,6 @@ class arkserver:
 		"""Updates with the -force parameter"""
 		output = self.runcommand("arkmanager update --update-mods --backup --force", ctx.channel, True)
 
-	@arkadmin.command(name="checksize")
-	async def ark_checksize(self, ctx):
-		"""Prints the size of the world save files"""
-		listsaves = ["Aberration_P", "ScorchedEarth_P", "TheCenter", "TheIsland", "Ragnarok"]
-		for savefile in listsaves:
-			try:
-				target = "/home/ark/ARK/ShooterGame/Saved/SavedArks/" + savefile + ".ark"
-				filesize = os.path.getsize(target)
-				await ctx.send("{0} file size is {1}.".format(savefile, filesize))
-			except OSError as e:
-				await ctx.send("{0} error occured when attempting to retrieve file size for {1}.".format(e, savefile))
-
 	async def checkmods(self, channel=None, verbose=False):
 		output = await self.runcommand("arkmanager checkmodupdate", channel, verbose)
 		for line in output:
@@ -695,8 +741,8 @@ class arkserver:
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose =  await self.settings.Verbose()
-						adminchannel = self.bot.get_channel(331076958425186305)
-						channel = self.bot.get_channel(333605978560004097)
+						adminchannel = self.bot.get_channel(await self.settings.Channel())
+						channel = self.bot.get_channel(await self.settings.AdminChannel())
 						status = await self.updatechecker()
 						modstatus = await self.checkmods()
 						print("Update check completed at {0}".format(datetime.utcnow()))
@@ -718,35 +764,41 @@ class arkserver:
 							if self.updating == False:
 								await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
 								self.updating = True
-								message = await channel.send("Server is updating...")
+								if channel is not None:
+									message = await channel.send("Server is updating...")
 								update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
 								if self.successcheck(update):
 									status = ''
 									while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 										await asyncio.sleep(15)
 										status = await self.runcommand("arkmanager status")
-									await message.edit(content="Server has been updated and is now online.")
+									if channel is not None:
+										await message.edit(content="Server has been updated and is now online.")
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 								else:
-									await channel.send("Something went wrong during automatic update")
+									if channel is not None:
+										await message.edit(content="Something went wrong during automatic update.")
 									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 									self.updating = False
 							else:
 								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
 						else:
-							message = await channel.send("Server is updating...")
+							if channel is not None:
+								message = await channel.send("Server is updating...")
 							update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
 							if self.successcheck(update):									
 								status = ''
 								while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 									await asyncio.sleep(15)
 									status = await self.runcommand("arkmanager status")
-								await message.edit(content="Server has been updated and is now online.")
+								if channel is not None:
+									await message.edit(content="Server has been updated and is now online.")
 								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 								self.updating = False
 							else:
-								await channel.send("Something went wrong during automatic update")
+								if channel is not None:
+									await message.edit(content="Something went wrong during automatic update")
 								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 								self.updating = False
 					else:
