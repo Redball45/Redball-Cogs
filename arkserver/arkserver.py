@@ -115,11 +115,7 @@ class arkserver:
 			await ctx.send("Next, please repond with a location to store inactive character and world save files, used for the map swapping and character swap features.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKStorage = answer.content
-			await ctx.send("You have chosen:")
-			await ctx.send("{0} as the server installation location.")
-			await ctx.send("{0} as the arkmanager configuration location.")
-			await ctx.send("{0} as the additional storage location.")
-			await ctx.send("Reply 'Yes' to confirm these settings and complete setup.")
+			await ctx.send("You have chosen:\n{0} as the server installation location.\n{1} as the arkmanager configuration location.\n{2} as the additional storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ARKDedi, ARKManager, ARKStorage))
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			if answer.content.lower() != 'yes':
 				return await ctx.send("Okay, setup cancelled.")
@@ -131,23 +127,34 @@ class arkserver:
 		await self.settings.SetupDone.set(True)
 		await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
 
+	async def setupCheck(ctx):
+		return await self.settings.SetupDone()
+
+	@commands.command()
+	@commands.is_owner()
+	async def arksettings(self, ctx):
+		"""Displays the current data settings and whether setup is complete"""
+		ARKDedi = await self.settings.ARKDataDirectory()
+		ARKManager = await self.settings.ARKManagerDirectory()
+		ARKStorage = await self.settings.ARKStorageDirectory()
+		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the additional storage location.".format(ARKDedi, ARKManager, ARKStorage))
+
+
 	@commands.group()
 	@commands.has_role('ARK')
+	@commands.check(setupCheck)
 	async def ark(self, ctx):
 		"""Commands related to Ark Server Management"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
-		if not await self.settings.SetupDone():
-			return await ctx.send("Please finish setup first with {0}arksetup before using any other command.".format(ctx.prefix))
 
 	@commands.group()
 	@commands.is_owner()
+	@commands.check(setupCheck)
 	async def arkadmin(self, ctx):
 		"""Commands related to Ark Server Administration"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
-		if not await self.settings.SetupDone():
-			return await ctx.send("Please finish setup first with {0}arksetup before using any other command.".format(ctx.prefix))
 
 	@arkadmin.command()
 	async def resetstatus(self, ctx):
