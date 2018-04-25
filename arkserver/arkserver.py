@@ -318,7 +318,7 @@ class arkserver:
 		if await self.playercheck():
 			await ctx.send("The map cannot be swapped while players are in the server.")
 			return
-		desiredMap = next((s for s in availableMaps if minput.lower() in s), None)
+		desiredMap = next((s for s in availableMaps if minput.lower() in s.lower()), None)
 		if not desiredMap:
 			await ctx.send("I don't recognize that map, available options are {0}.".format(availableMaps))
 			return
