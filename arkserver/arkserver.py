@@ -295,8 +295,10 @@ class arkserver:
 			desiredMap = 'TheCenter'
 		elif minput.lower() == 'aberration':
 			desiredMap = 'Aberration_P'
+		elif minput.lower() == 'crystalisles':
+			desiredMap = 'CrystalIsles'
 		else:
-			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, Aberration and Scorched")
+			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, Aberration, CrystalIsles and Scorched")
 			return
 		await self.settings.Map.set(desiredMap)
 		await ctx.send("Done.")	
@@ -306,7 +308,7 @@ class arkserver:
 		"""Swaps the server over to the desired map. This works by renaming instance configuration files."""
 		await ctx.channel.trigger_typing()
 		if minput == 'info':
-			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok', 'Island', 'Center', 'Aberration' and 'Scorched'. (e.g +ark map ragnarok)")
+			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok', 'Island', 'Center', 'Aberration', 'CrystalIsles' and 'Scorched'. (e.g +ark map ragnarok)")
 			await ctx.send("Current map is {0}".format(await self.settings.Map()))
 			return
 		if self.updating == True: #don't change the map if the server is restarting or updating
@@ -322,8 +324,10 @@ class arkserver:
 			desiredMap = 'TheCenter'
 		elif minput.lower() == 'aberration':
 			desiredMap = 'Aberration_P'
+		elif minput.lower() == 'crystalisles':
+			desiredMap = 'CrystalIsles'
 		else:
-			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center and Scorched.")
+			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, CrystalIsles and Scorched.")
 			return
 		if await self.settings.Map() == desiredMap:
 			await ctx.send("The server is already running this map!") 
@@ -353,21 +357,8 @@ class arkserver:
 			confDestination = configLocation + await self.settings.Map() + '.cfg'
 			target = activeSaveLocation + await self.settings.Map() + '.ark'
 			destination = await self.settings.ARKStorageDirectory() + await self.settings.Map() + '.ark'
-			if await self.settings.Map() == 'Ragnarok':
-				os.rename(confTarget, confDestination)
-				os.rename(target, destination)
-			elif await self.settings.Map() == 'TheIsland':
-				os.rename(confTarget, confDestination)
-				os.rename(target, destination)
-			elif await self.settings.Map() == 'ScorchedEarth_P':
-				os.rename(confTarget, confDestination)
-				os.rename(target, destination)
-			elif await self.settings.Map() == 'TheCenter':
-				os.rename(confTarget, confDestination)
-				os.rename(target, destination)
-			elif await self.settings.Map() == 'Aberration_P':
-				os.rename(confTarget, confDestination)
-				os.rename(target, destination)
+			os.rename(confTarget, confDestination)
+			os.rename(target, destination)
 		except FileNotFoundError as e:
 			await ctx.send("An error occured {0} when trying to rename files. Manual intervention required.".format(e))
 			self.updating = False
@@ -377,21 +368,8 @@ class arkserver:
 			rConfDestination = configLocation + 'main.cfg'
 			rTarget = await self.settings.ARKStorageDirectory() + desiredMap + '.ark'
 			rDestination = activeSaveLocation + desiredMap + '.ark'
-			if desiredMap == 'Ragnarok':
-				os.rename(rConfTarget, rConfDestination)
-				os.rename(rTarget, rDestination)
-			elif desiredMap == 'TheIsland':
-				os.rename(rConfTarget, rConfDestination)
-				os.rename(rTarget, rDestination)
-			elif desiredMap == 'ScorchedEarth_P':
-				os.rename(rConfTarget, rConfDestination)
-				os.rename(rTarget, rDestination)
-			elif desiredMap == 'TheCenter':
-				os.rename(rConfTarget, rConfDestination)
-				os.rename(rTarget, rDestination)
-			elif desiredMap == 'Aberration_P':
-				os.rename(rConfTarget, rConfDestination)
-				os.rename(rTarget, rDestination)
+			os.rename(rConfTarget, rConfDestination)
+			os.rename(rTarget, rDestination)
 		except FileNotFoundError as e:
 			await ctx.send("An error occured {0} when trying to rename files.".format(e))
 			self.updating = False
