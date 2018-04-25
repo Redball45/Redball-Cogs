@@ -315,7 +315,7 @@ class arkserver:
 		if self.updating == True: #don't change the map if the server is restarting or updating
 			await ctx.send("I'm already carrying out a restart or update!")
 			return
-		if await self.emptycheck():
+		if await self.playercheck():
 			await ctx.send("The map cannot be swapped while players are in the server.")
 			return
 		desiredMap = next((s for s in availableMaps if minput.lower() in s), None)
@@ -529,7 +529,7 @@ class arkserver:
 		if delay > 900:
 			delay = 900
 		output = await self.runcommand("arkmanager status", ctx.channel, False)
-		if await self.emptycheck():
+		if await self.playercheck():
 			await ctx.send("Players are currently in the server, restart anyway?")
 			answer = await self.bot.wait_for('message', check=waitcheck)
 			try:	
@@ -587,7 +587,7 @@ class arkserver:
 			await ctx.send("Updates are available.")
 			empty = await self.runcommand("arkmanager status", ctx.channel, False)
 			offline = await self.offlinecheck()
-			if await self.emptycheck():
+			if await self.playercheck():
 				await ctx.send("Players are currently in the server, update anyway?")
 				answer = await self.bot.wait_for('message', check=waitcheck)
 				try:	
@@ -668,9 +668,10 @@ class arkserver:
 		else:
 			return True
 
-	async def emptycheck(self, channel=None, verbose=False):
+	async def playercheck(self, channel=None, verbose=False):
+		"""Returns True if players are present in the server."""
 		if await self.offlinecheck():
-			return True
+			return False
 		output = await self.runcommand("arkmanager status", channel, verbose)
 		for line in output:
 			if 'Players: 0' in line:
@@ -678,6 +679,7 @@ class arkserver:
 		return True
 
 	async def offlinecheck(self, channel=None, verbose=False):
+		"""Returns True if the server is offline"""
 		output = await self.runcommand("arkmanager status")
 		if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' in output:
 			return False
@@ -745,7 +747,7 @@ class arkserver:
 						await asyncio.sleep(240)
 						status = ''
 					if status == True or modstatus == True: #proceed with update if checkupdate tells us that an update is available
-						if await self.emptycheck():
+						if await self.playercheck():
 							#players detected in the server, queue update for in 15 minutes
 							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 15 minutes."', channel, False)
 							await asyncio.sleep(300)
