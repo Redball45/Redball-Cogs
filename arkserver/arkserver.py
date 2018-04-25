@@ -298,7 +298,7 @@ class arkserver:
 		elif minput.lower() == 'crystalisles':
 			desiredMap = 'CrystalIsles'
 		else:
-			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, Aberration, CrystalIsles and Scorched")
+			await ctx.send("I don't recognize that map, available options are {0}.".format(availableMaps))
 			return
 		await self.settings.Map.set(desiredMap)
 		await ctx.send("Done.")	
@@ -307,33 +307,23 @@ class arkserver:
 	async def map(self, ctx, minput : str = 'info'):
 		"""Swaps the server over to the desired map. This works by renaming instance configuration files."""
 		await ctx.channel.trigger_typing()
+		availableMaps = await self.detectMaps()
 		if minput == 'info':
-			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are 'Ragnarok', 'Island', 'Center', 'Aberration', 'CrystalIsles' and 'Scorched'. (e.g +ark map ragnarok)")
+			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are {0}. (e.g +ark map ragnarok)".format(availableMaps))
 			await ctx.send("Current map is {0}".format(await self.settings.Map()))
 			return
 		if self.updating == True: #don't change the map if the server is restarting or updating
 			await ctx.send("I'm already carrying out a restart or update!")
 			return
-		if minput.lower() == 'ragnarok':
-			desiredMap = 'Ragnarok'
-		elif minput.lower() == 'island':
-			desiredMap = 'TheIsland'
-		elif minput.lower() == 'scorched':
-			desiredMap = 'ScorchedEarth_P'
-		elif minput.lower() == 'center':
-			desiredMap = 'TheCenter'
-		elif minput.lower() == 'aberration':
-			desiredMap = 'Aberration_P'
-		elif minput.lower() == 'crystalisles':
-			desiredMap = 'CrystalIsles'
-		else:
-			await ctx.send("I don't recognize that map, available options are Ragnarok, Island, Center, CrystalIsles and Scorched.")
+		if await self.emptycheck():
+			await ctx.send("The map cannot be swapped while players are in the server.")
+			return
+		desiredMap = next((s for s in availableMaps if minput.lower() in s), None)
+		if not desiredMap:
+			await ctx.send("I don't recognize that map, available options are {0}.".format(availableMaps))
 			return
 		if await self.settings.Map() == desiredMap:
 			await ctx.send("The server is already running this map!") 
-			return
-		if await self.emptycheck():
-			await ctx.send("The map cannot be swapped while players are in the server.")
 			return
 		message = await ctx.send("Map will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredMap))
 		await message.add_reaction('✔')
@@ -393,6 +383,20 @@ class arkserver:
 		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
 		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
+
+	async def detectMaps(self):
+		"""Returns a list of available maps based on available instance files within the instance configuration directory."""
+		directory = await self.settings.ARKManagerConfigDirectory() + 'instances/'
+		availableMaps = []
+		for file in os.listdir(directory):
+			if file.endswith(".cfg") and file != 'main.cfg':
+				file = file.replace('.cfg', "")
+				availableMaps.append(file)
+		current = await self.settings.Map()
+		availableMaps.append(current)
+		return availableMaps
+
+
 
 	@ark.command()
 	async def checkupdate(self, ctx):
