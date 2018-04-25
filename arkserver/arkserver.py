@@ -751,8 +751,8 @@ class arkserver:
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose =  await self.settings.Verbose()
-						adminchannel = self.bot.get_channel(await self.settings.Channel())
-						channel = self.bot.get_channel(await self.settings.AdminChannel())
+						channel = self.bot.get_channel(await self.settings.Channel())
+						adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
 						status = await self.updatechecker()
 						modstatus = await self.checkmods()
 						print("Update check completed at {0}".format(datetime.utcnow()))
