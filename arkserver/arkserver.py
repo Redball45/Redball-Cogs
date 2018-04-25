@@ -161,8 +161,9 @@ class arkserver:
 		ARKAdminChannel = await self.settings.AdminChannel()
 		SetupDone = await self.settings.SetupDone()
 		ARKRole = await self.settings.Role()
+		ARKChar = await self.settings.CharacterEnabled()
 		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the "
-			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.\nSelected priviledged role ID {6}".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel, ARKRole))
+			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.\nSelected priviledged role ID {6}.\nCharacter management enabled? {7}.".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel, ARKRole, ARKChar))
 
 
 	@commands.group()
