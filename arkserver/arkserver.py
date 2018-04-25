@@ -669,6 +669,8 @@ class arkserver:
 			return True
 
 	async def emptycheck(self, channel=None, verbose=False):
+		if await self.offlinecheck():
+			return True
 		output = await self.runcommand("arkmanager status", channel, verbose)
 		for line in output:
 			if 'Players: 0' in line:
