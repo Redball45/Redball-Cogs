@@ -36,13 +36,15 @@ class arkserver:
 		self.settings.register_global(
 			Verbose=True,
 			AutoUpdate=False,
-			Map=None,
+			Instance=None,
 			SetupDone=False,
+			CharacterEnabled=False,
 			ARKDataDirectory=None,
 			ARKManagerConfigDirectory=None,
 			ARKStorageDirectory=None,
 			Channel=None,
-			AdminChannel=None
+			AdminChannel=None,
+			ARKRole=None
 		)
 		self.settings.register_user(**default_user)
 
@@ -111,7 +113,7 @@ class arkserver:
 			await ctx.send("Next, please respond with the location arkmanager configuration files are located. Unless you changed this, the default is usually '/etc/arkmanager/'.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKManager = answer.content
-			await ctx.send("Next, please repond with a location to store inactive character and world save files, used for the map swapping and character swap features.")
+			await ctx.send("Next, please repond with a location to store inactive character and world save files, used for the instance swapping and character swap features.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKStorage = answer.content
 			await ctx.send("You have chosen:\n{0} as the server installation location.\n{1} as the arkmanager configuration location.\n{2} as the additional storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ARKDedi, ARKManager, ARKStorage))
@@ -125,12 +127,28 @@ class arkserver:
 		await self.settings.ARKStorageDirectory.set(ARKStorage)
 		await self.settings.SetupDone.set(True)
 		await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
+		await ctx.send("This cog makes use of three seperate permission levels.\nAll users can see the status of the server and make use of the character management system if enabled.\nPriviledged users can "
+				"start, stop, restart, update, and change the active instance.\n As the owner you have access to additional commands to manage advanced settings that control cog functionality.\n"
+				"A discord role needs to be assigned if you wish to grant other users access to the priviledged commands, you can do this via +arkadmin role (mention the role directly).")
 
 	async def setupCheck(ctx):
 		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
 		from redbot.core import Config
 		settings = Config.get_conf(None, 3931293439, False, 'arkserver')
 		return await settings.SetupDone()
+
+	async def arkRoleCheck(ctx):
+		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
+		from redbot.core import Config
+		settings = Config.get_conf(None, 3931293439, False, 'arkserver')
+		role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
+		return role in ctx.author.roles
+
+	async def arkCharCheck(ctx):
+		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
+		from redbot.core import Config
+		settings = Config.get_conf(None, 3931293439, False, 'arkserver')
+		return await settings.CharacterEnabled()
 
 	@commands.command()
 	@commands.is_owner()
@@ -142,15 +160,16 @@ class arkserver:
 		ARKChannel = await self.settings.Channel()
 		ARKAdminChannel = await self.settings.AdminChannel()
 		SetupDone = await self.settings.SetupDone()
+		ARKRole = await self.settings.ARKRole()
 		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the "
-			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel))
+			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.\nSelected priviledged role ID {6}".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel, ARKRole))
 
 
 	@commands.group()
-	@commands.has_role('ARK')
+	@commands.check(arkRoleCheck)
 	@commands.check(setupCheck)
 	async def ark(self, ctx):
-		"""Commands related to Ark Server Management"""
+		"""Commands related to the Ark Server"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
@@ -162,24 +181,19 @@ class arkserver:
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
-	@arkadmin.command()
-	async def resetstatus(self, ctx):
-		"""Resets bot and the update lock"""
-		self.updating = False
-
-
 	@commands.group()
-	@commands.has_role('ARK')
 	@commands.check(setupCheck)
+	@commands.check(arkCharCheck)
 	async def arkchar(self, ctx):
 		"""Commands related to Ark Character Management"""
 		if ctx.invoked_subcommand is None:
 			return await ctx.send_help()
 
+
 	@arkchar.command()
 	@commands.is_owner()
 	async def setid(self, ctx, userobject: discord.Member, *, inputid):
-		"""Sets the steam identifier for the mentioned user, required to use any character commands"""
+		"""Sets the steam identifier for the mentioned user, required to use any character commands. Enter a steamID64."""
 		if len(inputid) != 17:
 			await ctx.send("That's not a valid steam ID.")
 			return
@@ -283,49 +297,40 @@ class arkserver:
 		
 
 	@arkadmin.command()
-	async def forcemap(self, ctx, minput : str = 'info'):
-		"""Swaps the settings save file to a specific map."""
-		if minput.lower() == 'ragnarok':
-			desiredMap = 'Ragnarok'
-		elif minput.lower() == 'island':
-			desiredMap = 'TheIsland'
-		elif minput.lower() == 'scorched':
-			desiredMap = 'ScorchedEarth_P'
-		elif minput.lower() == 'center':
-			desiredMap = 'TheCenter'
-		elif minput.lower() == 'aberration':
-			desiredMap = 'Aberration_P'
-		elif minput.lower() == 'crystalisles':
-			desiredMap = 'CrystalIsles'
-		else:
-			await ctx.send("I don't recognize that map, available options are {0}.".format(availableMaps))
+	async def forceinstance(self, ctx, minput : str = 'info'):
+		"""Swaps the cog configuration to a specific instance. You should only use this if the instance the cog believes the server is on doesn't match the server."""
+		availableInstances = await self.detectInstances()
+		desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+		if not desiredInstance:
+			await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
 			return
-		await self.settings.Map.set(desiredMap)
-		await ctx.send("Done.")	
+		await self.settings.Instance.set(desiredInstance)
+		await ctx.send("Set to {0}.".format(desiredInstance))	
 
-	@ark.command()
-	async def map(self, ctx, minput : str = 'info'):
-		"""Swaps the server over to the desired map. This works by renaming instance configuration files."""
+	@ark.command(name="instance", aliases=["map"])
+	async def instance(self, ctx, minput : str = 'info'):
+		"""Swaps the server over to the desired instance. This works by renaming instance configuration files.
+		   Currently instances are tied to Maps, and you should not have more than one instance config file using the same map."""
 		await ctx.channel.trigger_typing()
-		availableMaps = await self.detectMaps()
+		availableInstances = await self.detectInstances()
 		if minput == 'info':
-			await ctx.send("This command can swap the map the server is running on to the desired map. Options available are {0}. (e.g +ark map ragnarok)".format(availableMaps))
-			await ctx.send("Current map is {0}".format(await self.settings.Map()))
+			await ctx.send("This command can swap the instance the server is running on to the desired instance. Options available are {0}. (e.g +ark instance ragnarok)".format(availableInstances))
+			await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
 			return
-		if self.updating == True: #don't change the map if the server is restarting or updating
+		if self.updating == True: #don't change the instance if the server is restarting or updating
 			await ctx.send("I'm already carrying out a restart or update!")
 			return
 		if await self.playercheck():
-			await ctx.send("The map cannot be swapped while players are in the server.")
+			await ctx.send("The instance cannot be swapped while players are in the server.")
 			return
-		desiredMap = next((s for s in availableMaps if minput.lower() in s.lower()), None)
-		if not desiredMap:
-			await ctx.send("I don't recognize that map, available options are {0}.".format(availableMaps))
+		desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+		if not desiredInstance:
+			await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
 			return
-		if await self.settings.Map() == desiredMap:
-			await ctx.send("The server is already running this map!") 
+		if await self.settings.Instance() == desiredInstance:
+			await ctx.send("The server is already running this instance!") 
 			return
-		message = await ctx.send("Map will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredMap))
+		message = await ctx.send("Instance will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredInstance))
 		await message.add_reaction('✔')
 		def waitcheck(react, user):
 			return react.emoji == '✔' and user == ctx.author  
@@ -344,9 +349,9 @@ class arkserver:
 		self.updating = True #prevents the bot from restarting or updating while this is happening
 		try:
 			confTarget = configLocation + 'main.cfg'
-			confDestination = configLocation + await self.settings.Map() + '.cfg'
-			target = activeSaveLocation + await self.settings.Map() + '.ark'
-			destination = await self.settings.ARKStorageDirectory() + await self.settings.Map() + '.ark'
+			confDestination = configLocation + await self.settings.Instance() + '.cfg'
+			target = activeSaveLocation + await self.settings.Instance() + '.ark'
+			destination = await self.settings.ARKStorageDirectory() + await self.settings.Instance() + '.ark'
 			os.rename(confTarget, confDestination)
 			os.rename(target, destination)
 		except FileNotFoundError as e:
@@ -354,17 +359,17 @@ class arkserver:
 			self.updating = False
 			return
 		try:
-			rConfTarget = configLocation + desiredMap + '.cfg'
+			rConfTarget = configLocation + desiredInstance + '.cfg'
 			rConfDestination = configLocation + 'main.cfg'
-			rTarget = await self.settings.ARKStorageDirectory() + desiredMap + '.ark'
-			rDestination = activeSaveLocation + desiredMap + '.ark'
+			rTarget = await self.settings.ARKStorageDirectory() + desiredInstance + '.ark'
+			rDestination = activeSaveLocation + desiredInstance + '.ark'
 			os.rename(rConfTarget, rConfDestination)
 			os.rename(rTarget, rDestination)
 		except FileNotFoundError as e:
 			await ctx.send("An error occured {0} when trying to rename files.".format(e))
 			self.updating = False
 			return
-		await self.settings.Map.set(desiredMap)
+		await self.settings.Instance.set(desiredInstance)
 		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		await ctx.bot.change_presence(activity=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
 		if self.successcheck(output):
@@ -380,21 +385,21 @@ class arkserver:
 		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 			await asyncio.sleep(15)
 			status = await self.runcommand("arkmanager status")
-		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
+		await message.edit(content="Instance swapped to {0} and server is now running.".format(desiredInstance))
 		await ctx.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
 		self.updating = False
 
-	async def detectMaps(self):
-		"""Returns a list of available maps based on available instance files within the instance configuration directory."""
+	async def detectInstances(self):
+		"""Returns a list of available Instances based on available instance files within the instance configuration directory."""
 		directory = await self.settings.ARKManagerConfigDirectory() + 'instances/'
-		availableMaps = []
+		availableInstances = []
 		for file in os.listdir(directory):
 			if file.endswith(".cfg") and file != 'main.cfg':
 				file = file.replace('.cfg', "")
-				availableMaps.append(file)
-		current = await self.settings.Map()
-		availableMaps.append(current)
-		return availableMaps
+				availableInstances.append(file)
+		current = await self.settings.Instance()
+		availableInstances.append(current)
+		return availableInstances
 
 
 
@@ -465,12 +470,34 @@ class arkserver:
 		await ctx.send("Channel set to {.mention}".format(channel))
 		await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for diagnostics.".format(ctx.prefix))
 
+	@arkadmin.command(name="role")
+	async def arkadmin_role(self, ctx, role: discord.Role):
+		await self.settings.Role.set(role.id)
+		await ctx.send("Role set to {.mention}".format(role))
+
 	@arkadmin.command(name="adminchannel")
 	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
 		if not ctx.guild.me.permissions_in(channel).send_messages:
 			return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
 		await self.settings.AdminChannel.set(channel.id)
 		await ctx.send("Channel set to {.mention}".format(channel))
+
+	@arkadmin.command(name="charmanagement")
+	async def arkadmin_charactermanagement(self, ctx, toggle : str = 'info'):
+		"""Enables or disables the ability for users to store and retrieve character files belonging to them in the storage directory.""" 
+		togglestatus = await self.settings.CharacterEnabled() #retrives current status of toggle from settings file
+		if toggle.lower() == 'off':
+			await self.settings.CharacterEnabled.set(False)
+			await ctx.send("Character management has been disabled.")
+		elif toggle.lower() == 'on':
+			await self.settings.CharacterEnabled.set(True)
+			await ctx.send("Character management has been enabled. Each user that wishes to use this feature needs to have a SteamID assigned to their discord profile by my owner to ensure they can only "
+				"modify their own character save files.")
+		else:
+			if togglestatus == True:
+				await ctx.send("Character management is currently enabled.")
+			elif togglestatus == False:
+				await ctx.send("Character management is currently disabled.")
 
 	@arkadmin.command(name="verbose")
 	async def ark_verbose(self, ctx, toggle : str = 'info'):
@@ -709,7 +736,7 @@ class arkserver:
 		"""Reports server status using discord status"""
 		while self is self.bot.get_cog("arkserver"):
 			if self.updating == False:
-				currentmap = await self.settings.Map()
+				currentinstance = await self.settings.Instance()
 				output = await self.runcommand("arkmanager status")
 				if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
 					await self.bot.change_presence(activity=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
@@ -721,7 +748,7 @@ class arkserver:
 						if 'Server Name' in line:
 							version = '(' + line.split('(')[1]
 					try:
-						message = currentmap + ' ' + players + version
+						message = currentinstance + ' ' + players + version
 						await self.bot.change_presence(activity=discord.Game(name=message), status=discord.Status.online)
 					except:
 						pass
