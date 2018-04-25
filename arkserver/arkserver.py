@@ -366,7 +366,7 @@ class arkserver:
 			return
 		await self.settings.Map.set(desiredMap)
 		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
-		await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+		await ctx.bot.change_presence(game=discord.Activity(name="Restarting Server"),status=discord.Status.dnd)
 		if self.successcheck(output):
 			message = await ctx.send("Server is restarting...")
 		else:
@@ -381,7 +381,7 @@ class arkserver:
 			await asyncio.sleep(15)
 			status = await self.runcommand("arkmanager status")
 		await message.edit(content="Map swapped to {0} and server is now running.".format(desiredMap))
-		await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+		await ctx.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 		self.updating = False
 
 	async def detectMaps(self):
@@ -545,14 +545,14 @@ class arkserver:
 			self.updating = True
 			self.cancel = False
 			await ctx.send("Restarting in {0} seconds.".format(delay))
-			await ctx.bot.change_presence(game=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
+			await ctx.bot.change_presence(game=discord.Activity(name="Restarting Server"),status=discord.Status.dnd)
 			command = 'arkmanager broadcast "Server will shutdown for a user-requested restart in ' + str(delay) + ' seconds."'
 			alert = await self.runcommand(command, ctx.channel, False)
 			await asyncio.sleep(delay)
 			if self.cancel != True:
 				message = await ctx.send("Server is restarting...")
 				output = await self.runcommand("arkmanager restart", ctx.channel, await self.settings.Verbose())
-				await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+				await ctx.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 				self.updating = False
 				if self.successcheck(output):
 					status = ''
@@ -560,19 +560,19 @@ class arkserver:
 						await asyncio.sleep(15)
 						status = await self.runcommand("arkmanager status")
 					await message.edit(content="Server is up.")
-					await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+					await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 					self.updating = False
 				else:
 					try:
 						await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
 					except:
 						await ctx.send("Something went wrong \U0001F44F")
-					await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+					await ctx.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 					self.updating = False
 			else:
 				self.cancel = False
 				alert = await self.runcommand('arkmanager broadcast "Restart was cancelled by user request."', ctx.channel, False)
-				await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+				await ctx.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 				self.updating = False
 				#restart was cancelled
 
@@ -602,14 +602,14 @@ class arkserver:
 				await ctx.send("I'm already carrying out a restart or update!")
 			else:
 				self.updating = True
-				await ctx.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+				await ctx.bot.change_presence(game=discord.Activity(name="Updating Server"),status=discord.Status.dnd)
 				alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', ctx.channel, False)
 				await asyncio.sleep(60)
 				message = await ctx.send("Server is updating...")
 				output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, await self.settings.Verbose())
 				if self.successcheck(output):
 					if offline:
-						await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+						await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 						self.updating = False
 						return await message.edit(content="Server has been updated and is now online.")
 					status = ''
@@ -617,14 +617,14 @@ class arkserver:
 						await asyncio.sleep(15)
 						status = await self.runcommand("arkmanager status")
 					await message.edit(content="Server has been updated and is now online.")
-					await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+					await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 					self.updating = False
 				else:
 					try:
 						await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
 					except:
 						await ctx.send("Something went wrong \U0001F44F")
-					await ctx.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+					await ctx.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 					self.updating = False
 		else:
 			await ctx.send("No updates found.")
@@ -712,7 +712,7 @@ class arkserver:
 				currentmap = await self.settings.Map()
 				output = await self.runcommand("arkmanager status")
 				if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
-					await self.bot.change_presence(game=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
+					await self.bot.change_presence(game=discord.Activity(name="Server is offline!"),status=discord.Status.dnd)
 					await asyncio.sleep(30)
 				else:
 					for line in output:
@@ -722,7 +722,7 @@ class arkserver:
 							version = '(' + line.split('(')[1]
 					try:
 						message = currentmap + ' ' + players + version
-						await self.bot.change_presence(game=discord.Game(name=message), status=discord.Status.online)
+						await self.bot.change_presence(game=discord.Activity(name=message), status=discord.Status.online)
 					except:
 						pass
 					await asyncio.sleep(30)
@@ -758,7 +758,7 @@ class arkserver:
 							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', channel, False)
 							await asyncio.sleep(60)
 							if self.updating == False:
-								await self.bot.change_presence(game=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+								await self.bot.change_presence(game=discord.Activity(name="Updating Server"),status=discord.Status.dnd)
 								self.updating = True
 								if channel is not None:
 									message = await channel.send("Server is updating...")
@@ -770,12 +770,12 @@ class arkserver:
 										status = await self.runcommand("arkmanager status")
 									if channel is not None:
 										await message.edit(content="Server has been updated and is now online.")
-									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+									await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 									self.updating = False
 								else:
 									if channel is not None:
 										await message.edit(content="Something went wrong during automatic update.")
-									await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+									await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 									self.updating = False
 							else:
 								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
@@ -790,12 +790,12 @@ class arkserver:
 									status = await self.runcommand("arkmanager status")
 								if channel is not None:
 									await message.edit(content="Server has been updated and is now online.")
-								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+								await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 								self.updating = False
 							else:
 								if channel is not None:
 									await message.edit(content="Something went wrong during automatic update")
-								await self.bot.change_presence(game=discord.Game(name=None),status=discord.Status.online)
+								await self.bot.change_presence(game=discord.Activity(name=None),status=discord.Status.online)
 								self.updating = False
 					else:
 						await asyncio.sleep(3540)
