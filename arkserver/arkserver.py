@@ -166,7 +166,6 @@ class arkserver:
 
 
 	@commands.group()
-	@commands.check(arkRoleCheck)
 	@commands.check(setupCheck)
 	async def ark(self, ctx):
 		"""Commands related to the Ark Server"""
@@ -308,6 +307,7 @@ class arkserver:
 		await ctx.send("Set to {0}.".format(desiredInstance))	
 
 	@ark.command(name="instance", aliases=["map"])
+	@commands.check(arkRoleCheck)
 	async def instance(self, ctx, minput : str = 'info'):
 		"""Swaps the server over to the desired instance. This works by renaming instance configuration files.
 		   Currently instances are tied to Maps, and you should not have more than one instance config file using the same map."""
@@ -402,8 +402,8 @@ class arkserver:
 		return availableInstances
 
 
-
 	@ark.command()
+	@commands.check(arkRoleCheck)
 	async def checkupdate(self, ctx):
 		"""Just checks for ark updates - use +ark update to start update"""
 		if await self.updatechecker(ctx.channel, await self.settings.Verbose()):
@@ -412,6 +412,7 @@ class arkserver:
 			await ctx.send("Your server is up to date!")
 
 	@ark.command()
+	@commands.check(arkRoleCheck)
 	async def checkmodupdate(self, ctx):
 		"""Just checks for mod updates - use +ark update to start update"""
 		if await self.checkmods(ctx.channel, await self.settings.Verbose()):
@@ -420,7 +421,7 @@ class arkserver:
 			await ctx.send("No mod updates found.")		
 
 	@ark.command(name="stop")
-	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
+	@commands.check(arkRoleCheck)
 	async def ark_stop(self, ctx):
 		"""Stops the Ark Server"""
 		await ctx.channel.trigger_typing()
@@ -516,7 +517,7 @@ class arkserver:
 				await ctx.send("I am currently not being verbose when executing commands.")
 
 	@ark.command(name="start")
-	@commands.has_any_role('Admin', 'Moderator', 'Swole Cabbage')
+	@commands.check(arkRoleCheck)
 	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
 		await ctx.channel.trigger_typing()
@@ -535,12 +536,14 @@ class arkserver:
 			await ctx.send(output)
 
 	@ark.command(name="cancel")
+	@commands.check(arkRoleCheck)
 	async def ark_cancel(self, ctx):
 		"""Cancels a pending restart"""
 		self.cancel = True
 		await ctx.send("Restart cancelled.")
 
 	@ark.command(name="restart")
+	@commands.check(arkRoleCheck)
 	async def ark_restart(self, ctx, delay : int = 60):
 		"""Restarts the ARK Server with a specificed delay (in seconds)"""
 		def waitcheck(m):
@@ -604,6 +607,7 @@ class arkserver:
 				#restart was cancelled
 
 	@ark.command(name="update")
+	@commands.check(arkRoleCheck)
 	async def ark_update(self, ctx):
 		"""Checks for updates, if found, downloads, then restarts the server"""
 		def waitcheck(m):
