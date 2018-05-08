@@ -515,6 +515,8 @@ class arkserver:
 		"""Checks the server status"""
 		await ctx.channel.trigger_typing()
 		verbose = await self.settings.Verbose()
+		if instance == 'all':
+			verbose = True
 		output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
