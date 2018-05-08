@@ -518,7 +518,7 @@ class arkserver:
 		if instance == 'all':
 			verbose = True
 		output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
-		if await self.settings.Verbose() == False:
+		if verbose == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
 
