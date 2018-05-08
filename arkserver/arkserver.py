@@ -155,6 +155,7 @@ class arkserver:
 	@commands.is_owner()
 	async def arksettings(self, ctx):
 		"""Displays the current data settings and whether setup is complete"""
+		ARKLimit = await self.settings.InstanceLimit()
 		ARKManager = await self.settings.ARKManagerConfigDirectory()
 		ARKStorage = await self.settings.ARKStorageDirectory()
 		ARKChannel = await self.settings.Channel()
@@ -162,8 +163,8 @@ class arkserver:
 		SetupDone = await self.settings.SetupDone()
 		ARKRole = await self.settings.Role()
 		ARKChar = await self.settings.CharacterEnabled()
-		await ctx.send("{0} is the server installation location.\n{1} is the arkmanager configuration location.\n{2} is the "
-			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.\nSelected priviledged role ID {6}.\nCharacter management enabled? {7}.".format(ARKDedi, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel, ARKRole, ARKChar))
+		await ctx.send("{0} is the current instance limit.\n{1} is the arkmanager configuration location.\n{2} is the "
+			"additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin channel ID {5}.\nSelected priviledged role ID {6}.\nCharacter management enabled? {7}.".format(ARKLimit, ARKManager, ARKStorage, SetupDone, ARKChannel, ARKAdminChannel, ARKRole, ARKChar))
 
 
 	@commands.group()
