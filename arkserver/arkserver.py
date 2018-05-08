@@ -503,6 +503,7 @@ class arkserver:
 		"""Starts the Ark Server"""
 		if self.activeInstances >= await self.settings.InstanceLimit():
 			await ctx.send("Instance limit has been reached, please stop another instance first.")
+			return
 		await ctx.channel.trigger_typing()
 		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		if await self.settings.Verbose() == False:
@@ -515,8 +516,6 @@ class arkserver:
 		"""Checks the server status"""
 		await ctx.channel.trigger_typing()
 		verbose = await self.settings.Verbose()
-		if instance == 'all':
-			verbose = True
 		output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
 		if verbose == False:
 			output = self.sanitizeoutput(output)
