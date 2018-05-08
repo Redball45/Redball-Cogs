@@ -30,6 +30,7 @@ class arkserver:
 		self.settings = Config.get_conf(self, 3931293439)
 		self.updating = False
 		self.cancel = False
+		self.activeInstances = 0
 		default_user = {
 			"steamid": None
 		}
@@ -39,12 +40,12 @@ class arkserver:
 			Instance=None,
 			SetupDone=False,
 			CharacterEnabled=False,
-			ARKDataDirectory=None,
 			ARKManagerConfigDirectory=None,
 			ARKStorageDirectory=None,
 			Channel=None,
 			AdminChannel=None,
-			Role=None
+			Role=None,
+			InstanceLimit=1
 		)
 		self.settings.register_user(**default_user)
 
@@ -54,8 +55,11 @@ class arkserver:
 			queue.put(line)
 		out.close()
 
-	async def runcommand(self, command, channel=None, verbose=False):
+	async def runcommand(self, command, channel=None, verbose=False, instance='default'):
 		"""This function runs a command in the terminal and uses a seperate thread to collect the response so it isn't blocking"""
+		if instance == 'default':
+			instance = await self.settings.Instance()
+		command = command + ' @' + instance
 		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 		q = Queue()
 		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
@@ -107,22 +111,18 @@ class arkserver:
 			return m.author == ctx.author and m.channel == ctx.channel
 		try:
 			await ctx.send("This setup process will set required options for this cog to function. For each question, you should respond with desired setting.")
-			await ctx.send("First, please repond with the location the ARK Dedicated Server is installed to. This should be the top level directory. For example, '/home/[your username]/ARK/'.")
-			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
-			ARKDedi = answer.content
-			await ctx.send("Next, please respond with the location arkmanager configuration files are located. Unless you changed this, the default is usually '/etc/arkmanager/'.")
+			await ctx.send("First, please respond with the location arkmanager configuration files are located. Unless you changed this, the default is usually '/etc/arkmanager/'.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKManager = answer.content
-			await ctx.send("Next, please repond with a location to store inactive character and world save files, used for the instance swapping and character swap features.")
+			await ctx.send("Next, please repond with a location to store inactive character world save files, used for the character swap features.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKStorage = answer.content
-			await ctx.send("You have chosen:\n{0} as the server installation location.\n{1} as the arkmanager configuration location.\n{2} as the additional storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ARKDedi, ARKManager, ARKStorage))
+			await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ARKManager, ARKStorage))
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			if answer.content.lower() != 'yes':
 				return await ctx.send("Okay, setup cancelled.")
 		except asyncio.TimeoutError:
 			return await ctx.send("You didn't reply in time, setup cancelled.")
-		await self.settings.ARKDataDirectory.set(ARKDedi)
 		await self.settings.ARKManagerConfigDirectory.set(ARKManager)
 		await self.settings.ARKStorageDirectory.set(ARKStorage)
 		await self.settings.SetupDone.set(True)
@@ -130,6 +130,7 @@ class arkserver:
 		await ctx.send("This cog makes use of three seperate permission levels.\nAll users can see the status of the server and make use of the character management system if enabled.\nPriviledged users can "
 				"start, stop, restart, update, and change the active instance.\n As the owner you have access to additional commands to manage advanced settings that control cog functionality.\n"
 				"A discord role needs to be assigned if you wish to grant other users access to the priviledged commands, you can do this via +arkadmin role (mention the role directly).")
+		await ctx.send("The default instance limit is 1. This is the maximum number of ARK Dedicated Server processes that can be run at once with this cog. You can change this with arkadmin instancelimit (n) if you desire but you should NOT set this to more than your server is capable of running.")
 
 	async def setupCheck(ctx):
 		"""Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need to get them seperately here"""
@@ -154,7 +155,6 @@ class arkserver:
 	@commands.is_owner()
 	async def arksettings(self, ctx):
 		"""Displays the current data settings and whether setup is complete"""
-		ARKDedi = await self.settings.ARKDataDirectory()
 		ARKManager = await self.settings.ARKManagerConfigDirectory()
 		ARKStorage = await self.settings.ARKStorageDirectory()
 		ARKChannel = await self.settings.Channel()
@@ -296,9 +296,13 @@ class arkserver:
 		await ctx.send("Character {0} is now active.".format(savename))
 		
 
-	@arkadmin.command()
-	async def forceinstance(self, ctx, minput : str = 'info'):
-		"""Swaps the cog configuration to a specific instance. You should only use this if the instance the cog believes the server is on doesn't match the server."""
+	@ark.command()
+	@commands.check(arkRoleCheck)
+	async def instance(self, ctx, minput : str = 'info'):
+		"""Sets the instance that cog commands operate on. Use this command with no instance specified to see a list."""
+		if minput == 'info':
+			await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
+			return
 		availableInstances = await self.detectInstances()
 		desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
 		if not desiredInstance:
@@ -307,15 +311,14 @@ class arkserver:
 		await self.settings.Instance.set(desiredInstance)
 		await ctx.send("Set to {0}.".format(desiredInstance))	
 
-	@ark.command(name="instance", aliases=["map"])
+	@ark.command(name="swap", aliases=["map"])
 	@commands.check(arkRoleCheck)
-	async def instance(self, ctx, minput : str = 'info'):
-		"""Swaps the server over to the desired instance. This works by renaming instance configuration files.
-		   Currently instances are tied to Maps, and you should not have more than one instance config file using the same map."""
+	async def swap(self, ctx, minput : str = 'info'):
+		"""Swaps an active instance to another instance. This works by stopping a running instance and starting a different one."""
 		await ctx.channel.trigger_typing()
 		availableInstances = await self.detectInstances()
 		if minput == 'info':
-			await ctx.send("This command can swap the instance the server is running on to the desired instance. Options available are {0}. (e.g +ark instance ragnarok)".format(availableInstances))
+			await ctx.send("This command can swap the instance the server is running on to the desired instance. Options available are {0}. (e.g +ark swap ragnarok)".format(availableInstances))
 			await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
 			return
 		if self.updating == True: #don't change the instance if the server is restarting or updating
@@ -343,65 +346,32 @@ class arkserver:
 			return
 		await message.clear_reactions()
 		await ctx.channel.trigger_typing()
+		if await self.offlinecheck():
+			await ctx.send("The instance the cog is currently using isn't online, this must be an active instance. Otherwise you could just start the instance you want with +ark start (instance name).")
+			return
+		if not await self.offlinecheck(instance=desiredInstance):
+			await ctx.send("The instance you have selected to swap to is already running!")
+			return
+		self.updating = True
 		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
-		activeSaveLocation = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/'
-		inactiveLocation = await self.settings.ARKStorageDirectory()
-		configLocation = await self.settings.ARKManagerConfigDirectory() + 'instances/'
-		self.updating = True #prevents the bot from restarting or updating while this is happening
-		try:
-			confTarget = configLocation + 'main.cfg'
-			confDestination = configLocation + await self.settings.Instance() + '.cfg'
-			target = activeSaveLocation + await self.settings.Instance() + '.ark'
-			destination = await self.settings.ARKStorageDirectory() + await self.settings.Instance() + '.ark'
-			os.rename(confTarget, confDestination)
-			os.rename(target, destination)
-		except FileNotFoundError as e:
-			await ctx.send("An error occured {0} when trying to rename files. Manual intervention required.".format(e))
-			self.updating = False
-			return
-		try:
-			rConfTarget = configLocation + desiredInstance + '.cfg'
-			rConfDestination = configLocation + 'main.cfg'
-			rTarget = await self.settings.ARKStorageDirectory() + desiredInstance + '.ark'
-			rDestination = activeSaveLocation + desiredInstance + '.ark'
-			os.rename(rConfTarget, rConfDestination)
-			os.rename(rTarget, rDestination)
-		except FileNotFoundError as e:
-			await ctx.send("An error occured {0} when trying to rename files.".format(e))
-			self.updating = False
-			return
+		self.activeInstances = self.activeInstances - 1
+		#All done, now we can start the new instance.
 		await self.settings.Instance.set(desiredInstance)
-		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
-		await ctx.bot.change_presence(activity=discord.Game(name="Restarting Server"),status=discord.Status.dnd)
-		if self.successcheck(output):
-			message = await ctx.send("Server is restarting...")
-		else:
-			try:
-				await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
-				return
-			except:
-				await ctx.send("Something went wrong \U0001F44F")
-				return
-		status = ''
-		while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
-			await asyncio.sleep(15)
-			status = await self.runcommand("arkmanager status")
-		await message.edit(content="Instance swapped to {0} and server is now running.".format(desiredInstance))
-		await ctx.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
+		verbose = await self.settings.Verbose()
+		output = await self.runcommand(command="arkmanager start", channel=ctx.channel, verbose=verbose)
+		self.activeInstances = self.activeInstances + 1
 		self.updating = False
+
 
 	async def detectInstances(self):
 		"""Returns a list of available Instances based on available instance files within the instance configuration directory."""
 		directory = await self.settings.ARKManagerConfigDirectory() + 'instances/'
 		availableInstances = []
 		for file in os.listdir(directory):
-			if file.endswith(".cfg") and file != 'main.cfg':
+			if file.endswith(".cfg"):
 				file = file.replace('.cfg', "")
 				availableInstances.append(file)
-		current = await self.settings.Instance()
-		availableInstances.append(current)
 		return availableInstances
-
 
 	@ark.command()
 	@commands.check(arkRoleCheck)
@@ -430,6 +400,7 @@ class arkserver:
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
+		self.activeInstances = self.activeInstances - 1
 
 	@ark.command(name="players")
 	async def ark_players(self, ctx):
@@ -477,6 +448,15 @@ class arkserver:
 		await self.settings.Role.set(role.id)
 		await ctx.send("Role set to {.mention}".format(role))
 
+	@arkadmin.command(name="instancelimit")
+	async def arkadmin_instancelimit(self, ctx):
+		try:
+			instanceLimit = int(ctx.content)
+			await self.settings.InstanceLimit.set(instanceLimit)
+		except:
+			await ctx.send("Not a valid number.")
+		await ctx.send("Instance limit set to {0}".format(ctx.content))
+
 	@arkadmin.command(name="adminchannel")
 	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
 		if not ctx.guild.me.permissions_in(channel).send_messages:
@@ -521,17 +501,21 @@ class arkserver:
 	@commands.check(arkRoleCheck)
 	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
+		if self.activeInstances >= await self.settings.InstanceLimit():
+			await ctx.send("Instance limit has been reached, please stop another instance first.")
 		await ctx.channel.trigger_typing()
 		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
+		self.activeInstances = self.activeInstances + 1
 
 	@ark.command(name="status")
-	async def ark_status(self, ctx):
+	async def ark_status(self, ctx, instance: str = 'default'):
 		"""Checks the server status"""
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager status", ctx.channel, await self.settings.Verbose())
+		verbose = await self.settings.Verbose()
+		output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
@@ -638,7 +622,8 @@ class arkserver:
 				alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', ctx.channel, False)
 				await asyncio.sleep(60)
 				message = await ctx.send("Server is updating...")
-				output = await self.runcommand("arkmanager update --update-mods --backup", ctx.channel, await self.settings.Verbose())
+				verbose = await self.settings.Verbose()
+				output = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=verbose, instance='all')
 				if self.successcheck(output):
 					if offline:
 						await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
@@ -669,7 +654,7 @@ class arkserver:
 	@arkadmin.command(name="backup")
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config"""
-		output = await self.runcommand("arkmanager backup", ctx.channel, True)
+		output = await self.runcommand(command="arkmanager backup", channel=ctx.channel, verbose=True, instance='all')
 
 	@arkadmin.command(name="updatenow")
 	async def ark_updatenow(self, ctx):
@@ -710,10 +695,10 @@ class arkserver:
 				return False
 		return True
 
-	async def offlinecheck(self, channel=None, verbose=False):
+	async def offlinecheck(self, channel=None, verbose=False, instance='default'):
 		"""Returns True if the server is offline"""
-		output = await self.runcommand("arkmanager status")
-		if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' in output:
+		output = await self.runcommand("arkmanager status", instance=instance)
+		if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' in output and '\x1b[0;39m Server running:  \x1b[1;32m Yes \x1b[0;39m\n' in output:
 			return False
 		else:
 			return True
@@ -737,8 +722,19 @@ class arkserver:
 		message += "```"
 		return message
 
+	async def discover_instances(self):
+		for instance in await self.detectInstances():
+			if not await self.offlinecheck(instance=instance):
+				self.activeInstances = self.activeInstances + 1
+		if self.activeInstances > await self.settings.InstanceLimit():
+			print('Warning: More instances are currently running than the instance limit!')
+			adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
+			if adminchannel is not None:
+				await adminchannel.send('Warning: More instances are currently running than the instance limit!')
+
+
 	async def presence_manager(self):
-		"""Reports server status using discord status"""
+		"""Reports status of the currently active instance using discord status"""
 		while self is self.bot.get_cog("arkserver"):
 			if self.updating == False:
 				currentinstance = await self.settings.Instance()
@@ -794,7 +790,7 @@ class arkserver:
 								self.updating = True
 								if channel is not None:
 									message = await channel.send("Server is updating...")
-								update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
+								update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=True, instance='all')
 								if self.successcheck(update):
 									status = ''
 									while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
@@ -814,7 +810,7 @@ class arkserver:
 						else:
 							if channel is not None:
 								message = await channel.send("Server is updating...")
-							update = await self.runcommand("arkmanager update --update-mods --backup", adminchannel, True)
+							update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=True, instance='all')
 							if self.successcheck(update):									
 								status = ''
 								while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
