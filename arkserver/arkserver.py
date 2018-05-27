@@ -60,7 +60,7 @@ class arkserver:
 		if instance == 'default':
 			instance = await self.settings.Instance()
 		command = command + ' @' + instance
-		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX, start_new_session=True)
 		q = Queue()
 		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
 		t.daemon = True
@@ -111,7 +111,7 @@ class arkserver:
 			return m.author == ctx.author and m.channel == ctx.channel
 		try:
 			await ctx.send("This setup process will set required options for this cog to function. For each question, you should respond with desired setting.")
-			await ctx.send("First, please respond with the location arkmanager configuration files are located. Unless you changed this, the default is usually '/etc/arkmanager/'.")
+			await ctx.send("First, please respond with the location arkmanager configuration files are located. Please include the last '/' Unless you changed this, the default is usually '/etc/arkmanager/'.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			ARKManager = answer.content
 			await ctx.send("Next, please repond with a location to store inactive character world save files, used for the character swap features.")
@@ -242,8 +242,19 @@ class arkserver:
 		if steamid == None:
 			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
-		source = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
+		instance = await self.settings.Instance()
+		serverLocation = await self.getServerLocation(instance)
+		if not serverLocation:
+			await ctx.send("Couldn't find the server location for the current instance.")
+			return
+		saveDir = await self.getAltSaveDirectory(serverLocation)
+		if not saveDir:
+			await ctx.send("Couldn't find the save location for the current instance.")
+			return
+		source = serverLocation + '/ShooterGame/Saved/' + saveDir + '/' + steamid + '.arkprofile'
+		await ctx.send(source)
 		destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
+		await ctx.send(destination)
 		if os.path.isfile(source) == False:
 			await ctx.send("You don't have a character active at the moment.")
 			return
@@ -267,6 +278,26 @@ class arkserver:
 				return True
 		return False
 
+	async def getServerLocation(self, instance):
+		serverLocation = None
+		output = await self.runcommand('arkmanager list-instances', instance=instance)
+		for elem in output:
+			if ('@' + instance) in elem:
+				config, serverLocation = elem.split('=> ')
+				serverLocation = serverLocation.replace('\n','')
+		return serverLocation
+
+	async def getAltSaveDirectory(self, serverLocation):
+		saveDir = None
+		configFile = await self.settings.ARKManagerConfigDirectory() + 'instances/' + await self.settings.Instance() + '.cfg'
+		with open(configFile, 'r') as f:
+			for line in f:
+				if line.startswith('ark_AltSaveDirectoryName'):
+					command, value = line.split('=')
+					saveDir = value.replace('"', '')
+					saveDir = saveDir.replace('\n', '')
+		return saveDir
+
 	@arkchar.command()
 	async def retrieve(self, ctx, savename: str):
 		"""Retrieves the specificed character"""
@@ -277,8 +308,17 @@ class arkserver:
 		if steamid == None:
 			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
+		instance = await self.settings.Instance()
+		serverLocation = await self.getServerLocation(instance)
+		if not serverLocation:
+			await ctx.send("Couldn't find the server location for the current instance.")
+			return
+		saveDir = await self.getAltSaveDirectory(serverLocation)
+		if not saveDir:
+			await ctx.send("Couldn't find the save location for the current instance.")
+			return
 		source = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
-		destination = await self.settings.ARKDataDirectory() + 'ShooterGame/Saved/SavedArks/' + steamid + '.arkprofile'
+		destination = serverLocation + '/ShooterGame/Saved/' + saveDir + '/' + steamid + '.arkprofile'
 		if os.path.isfile(source) == False:
 			await ctx.send("That character doesn't exist in storage.")
 			return
