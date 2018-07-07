@@ -492,11 +492,11 @@ class arkserver:
 	@arkadmin.command(name="instancelimit")
 	async def arkadmin_instancelimit(self, ctx):
 		try:
-			instanceLimit = int(ctx.content)
+			instanceLimit = int(ctx.message.content)
 			await self.settings.InstanceLimit.set(instanceLimit)
 		except:
 			await ctx.send("Not a valid number.")
-		await ctx.send("Instance limit set to {0}".format(ctx.content))
+		await ctx.send("Instance limit set to {0}".format(ctx.message.content))
 
 	@arkadmin.command(name="adminchannel")
 	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
