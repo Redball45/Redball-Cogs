@@ -340,7 +340,7 @@ class arkserver:
 	@ark.command()
 	@commands.check(arkRoleCheck)
 	async def instance(self, ctx, minput : str = 'info'):
-		"""Sets the instance that cog commands operate on. Use this command with no instance specified to see a list."""
+		"""Sets the instance that cog commands operate on. Use this command with no instance specified to see the current instance."""
 		if minput == 'info':
 			await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
 			return
@@ -496,7 +496,7 @@ class arkserver:
 			await self.settings.InstanceLimit.set(instanceLimit)
 		except:
 			return await ctx.send("Not a valid number.")
-		await ctx.send("Instance limit set to {0}".format(ctx.message.content))
+		await ctx.send("Instance limit set to {0}".format(instanceLimit))
 
 	@arkadmin.command(name="adminchannel")
 	async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
@@ -780,7 +780,7 @@ class arkserver:
 		while self is self.bot.get_cog("arkserver"):
 			if self.updating == False:
 				currentinstance = await self.settings.Instance()
-				output = await self.runcommand("arkmanager status")
+				output = await self.runcommand("arkmanager status", instance=currentinstance)
 				if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
 					await self.bot.change_presence(activity=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
 					await asyncio.sleep(30)
