@@ -24,7 +24,7 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 
 BaseCog = getattr(commands, "Cog", object)
 
-class ArkServer(BaseCog):
+class arkserver(BaseCog):
 	"""Ark Server commands"""
 
 
