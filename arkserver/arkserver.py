@@ -1,8 +1,7 @@
-import discord
-from redbot.core import commands
-from redbot.core import Config
-from datetime import datetime
+#pylint: disable=W,C,R
 
+
+from datetime import datetime
 import os
 import sys
 import asyncio
@@ -10,6 +9,10 @@ import glob
 from subprocess import PIPE, Popen
 from threading import Thread
 import shlex
+
+import discord
+from redbot.core import commands
+from redbot.core import Config
 
 
 try:
@@ -19,8 +22,9 @@ except ImportError:
 
 ON_POSIX = 'posix' in sys.builtin_module_names
 
+BaseCog = getattr(commands, "Cog", object)
 
-class arkserver:
+class ArkServer(BaseCog):
 	"""Ark Server commands"""
 
 
@@ -30,7 +34,7 @@ class arkserver:
 		self.settings = Config.get_conf(self, 3931293439)
 		self.updating = False
 		self.cancel = False
-		self.activeInstances = 0
+		self.active_instances = 0
 		default_user = {
 			"steamid": None
 		}
@@ -51,6 +55,7 @@ class arkserver:
 
 
 	def enqueue_output(self, out, queue):
+		"""Queues output from Popen output"""
 		for line in iter(out.readline, b''):
 			queue.put(line)
 		out.close()
@@ -61,39 +66,38 @@ class arkserver:
 			instance = await self.settings.Instance()
 		command = command + ' @' + instance
 		process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX, start_new_session=True)
-		q = Queue()
-		t = Thread(target=self.enqueue_output, args=(process.stdout, q))
-		t.daemon = True
-		t.start()
+		queue = Queue()
+		thread = Thread(target=self.enqueue_output, args=(process.stdout, queue))
+		thread.daemon = True
+		thread.start()
 		output = []
 		list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m", "  ]", "\033"]
 		while True:
 			try:
 				try:
-					readline = q.get_nowait().decode()
+					readline = queue.get_nowait().decode()
 				except Empty:
-					if t.isAlive() == False and q.empty() == True:
+					if thread.isAlive() is False and queue.empty() is True:
 						break
 					else:
 						pass
-				else: 
+				else:
 					if readline:
 						if len(readline) > 1900:
 							output.append("Line exceeded character limit.")
 						else:
 							output.append(readline)
-						if verbose == True and channel != None:
+						if verbose and channel is not None:
 							sani = readline.lstrip("7")
 							for elem in list_replacements:
 								sani = sani.replace(elem, "")
 							try:
 								await channel.send("{0}".format(sani))
-							except Exception as e:
-								print("Error posting to discord {0}, {1}".format(e, sani))
-								pass
+							except Exception as exception:
+								print("Error posting to discord {0}, {1}".format(exception, sani))
 
-			except Exception as e:
-				print("Something went wrong... you should check the status of the server with +ark status. {0}".format(e))
+			except Exception as exception:
+				print("Something went wrong... you should check the status of the server with +ark status. {0}".format(exception))
 				print("Updating and restarting options will be locked for 3 minutes for safety.")
 				self.updating = True
 				await asyncio.sleep(180)
@@ -102,29 +106,29 @@ class arkserver:
 					process.kill()
 				return output
 		return output
-	
+
 	@commands.command()
 	@commands.is_owner()
 	async def arksetup(self, ctx):
 		"""Interactive setup process"""
-		def waitcheck(m):
-			return m.author == ctx.author and m.channel == ctx.channel
+		def waitcheck(message):
+			return message.author == ctx.author and message.channel == ctx.channel
 		try:
 			await ctx.send("This setup process will set required options for this cog to function. For each question, you should respond with desired setting.")
 			await ctx.send("First, please respond with the location arkmanager configuration files are located. Please include the last '/' Unless you changed this, the default is usually '/etc/arkmanager/'.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
-			ARKManager = answer.content
+			ark_manager = answer.content
 			await ctx.send("Next, please repond with a location to store inactive character world save files, used for the character swap features.")
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
-			ARKStorage = answer.content
-			await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ARKManager, ARKStorage))
+			ark_storage = answer.content
+			await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(ark_manager, ark_storage))
 			answer = await self.bot.wait_for('message', check=waitcheck, timeout=30)
 			if answer.content.lower() != 'yes':
 				return await ctx.send("Okay, setup cancelled.")
 		except asyncio.TimeoutError:
 			return await ctx.send("You didn't reply in time, setup cancelled.")
-		await self.settings.ARKManagerConfigDirectory.set(ARKManager)
-		await self.settings.ARKStorageDirectory.set(ARKStorage)
+		await self.settings.ARKManagerConfigDirectory.set(ark_manager)
+		await self.settings.ARKStorageDirectory.set(ark_storage)
 		await self.settings.SetupDone.set(True)
 		await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
 		await ctx.send("This cog makes use of three seperate permission levels.\nAll users can see the status of the server and make use of the character management system if enabled.\nPriviledged users can "
@@ -215,7 +219,7 @@ class arkserver:
 	async def list(self, ctx):
 		"""Lists characters currently in storage"""
 		steamid = await self.settings.user(ctx.author).steamid()
-		if steamid == None:
+		if steamid is None:
 			await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		output = '```\nAvailable characters in storage:'
@@ -247,7 +251,7 @@ class arkserver:
 		if not serverLocation:
 			await ctx.send("Couldn't find the server location for the current instance.")
 			return
-		saveDir = await self.getAltSaveDirectory(serverLocation)
+		saveDir = await self.getAltSaveDirectory()
 		if not saveDir:
 			await ctx.send("Couldn't find the save location for the current instance.")
 			return
@@ -255,10 +259,10 @@ class arkserver:
 		await ctx.send(source)
 		destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
 		await ctx.send(destination)
-		if os.path.isfile(source) == False:
+		if os.path.isfile(source) is False:
 			await ctx.send("You don't have a character active at the moment.")
 			return
-		if os.path.isfile(destination) == True:
+		if os.path.isfile(destination) is True:
 			await ctx.send("A file already exists with that name, please choose another.")
 			return
 		if await self.ingamecheck(steamid):
@@ -287,7 +291,7 @@ class arkserver:
 				serverLocation = serverLocation.replace('\n','')
 		return serverLocation
 
-	async def getAltSaveDirectory(self, serverLocation):
+	async def getAltSaveDirectory(self):
 		saveDir = None
 		configFile = await self.settings.ARKManagerConfigDirectory() + 'instances/' + await self.settings.Instance() + '.cfg'
 		with open(configFile, 'r') as f:
@@ -313,7 +317,7 @@ class arkserver:
 		if not serverLocation:
 			await ctx.send("Couldn't find the server location for the current instance.")
 			return
-		saveDir = await self.getAltSaveDirectory(serverLocation)
+		saveDir = await self.getAltSaveDirectory()
 		if not saveDir:
 			await ctx.send("Couldn't find the save location for the current instance.")
 			return
@@ -395,12 +399,12 @@ class arkserver:
 			return
 		self.updating = True
 		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
-		self.activeInstances = self.activeInstances - 1
+		self.active_instances = self.active_instances - 1
 		#All done, now we can start the new instance.
 		await self.settings.Instance.set(desiredInstance)
 		verbose = await self.settings.Verbose()
 		output = await self.runcommand(command="arkmanager start", channel=ctx.channel, verbose=verbose)
-		self.activeInstances = self.activeInstances + 1
+		self.active_instances = self.active_instances + 1
 		self.updating = False
 
 
@@ -441,7 +445,7 @@ class arkserver:
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
-		self.activeInstances = self.activeInstances - 1
+		self.active_instances = self.active_instances - 1
 
 	@ark.command(name="players")
 	async def ark_players(self, ctx):
@@ -542,7 +546,7 @@ class arkserver:
 	@commands.check(arkRoleCheck)
 	async def ark_start(self, ctx):
 		"""Starts the Ark Server"""
-		if self.activeInstances >= await self.settings.InstanceLimit():
+		if self.active_instances >= await self.settings.InstanceLimit():
 			await ctx.send("Instance limit has been reached, please stop another instance first.")
 			return
 		await ctx.channel.trigger_typing()
@@ -550,7 +554,7 @@ class arkserver:
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
-		self.activeInstances = self.activeInstances + 1
+		self.active_instances = self.active_instances + 1
 
 	@ark.command(name="status")
 	async def ark_status(self, ctx, instance: str = 'default'):
@@ -665,7 +669,7 @@ class arkserver:
 				await asyncio.sleep(60)
 				message = await ctx.send("Server is updating...")
 				verbose = await self.settings.Verbose()
-				output = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=verbose, instance='all')
+				output = await self.runcommand(command="arkmanager update --update-mods --backup", channel=ctx.channel, verbose=verbose, instance='all')
 				if self.successcheck(output):
 					if offline:
 						await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
@@ -767,8 +771,8 @@ class arkserver:
 	async def discover_instances(self):
 		for instance in await self.detectInstances():
 			if not await self.offlinecheck(instance=instance):
-				self.activeInstances = self.activeInstances + 1
-		if self.activeInstances > await self.settings.InstanceLimit():
+				self.active_instances = self.active_instances + 1
+		if self.active_instances > await self.settings.InstanceLimit():
 			print('Warning: More instances are currently running than the instance limit!')
 			adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
 			if adminchannel is not None:
