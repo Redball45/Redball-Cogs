@@ -238,7 +238,7 @@ class arkserver(BaseCog):
 			return		
 		steamid = await self.settings.user(ctx.author).steamid()
 		if steamid == None:
-			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
+			await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		instance = await self.settings.Instance()
 		serverLocation = await self.getServerLocation(instance)
@@ -304,7 +304,7 @@ class arkserver(BaseCog):
 			return		
 		steamid = await self.settings.user(ctx.author).steamid()
 		if steamid == None:
-			ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
+			await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can use this command.")
 			return
 		instance = await self.settings.Instance()
 		serverLocation = await self.getServerLocation(instance)
