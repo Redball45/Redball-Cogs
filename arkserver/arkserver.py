@@ -175,8 +175,6 @@ class arkserver(BaseCog):
 	@commands.check(setupCheck)
 	async def ark(self, ctx):
 		"""Commands related to the Ark Server"""
-		if ctx.invoked_subcommand is None:
-			return await ctx.send_help()
 
 	@commands.group()
 	@commands.is_owner()
@@ -189,8 +187,6 @@ class arkserver(BaseCog):
 	@commands.check(arkCharCheck)
 	async def arkchar(self, ctx):
 		"""Commands related to Ark Character Management"""
-		if ctx.invoked_subcommand is None:
-			return await ctx.send_help()
 
 
 	@arkchar.command()
