@@ -250,9 +250,7 @@ class arkserver(BaseCog):
 			await ctx.send("Couldn't find the save location for the current instance.")
 			return
 		source = serverLocation + '/ShooterGame/Saved/' + saveDir + '/' + steamid + '.arkprofile'
-		await ctx.send(source)
 		destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
-		await ctx.send(destination)
 		if os.path.isfile(source) is False:
 			await ctx.send("You don't have a character active at the moment.")
 			return
