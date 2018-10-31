@@ -784,21 +784,25 @@ class arkserver(BaseCog):
 		while self is self.bot.get_cog("arkserver"):
 			if self.updating == False:
 				currentinstance = await self.settings.Instance()
-				output = await self.runcommand("arkmanager status", instance=currentinstance)
-				if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
-					await self.bot.change_presence(activity=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
-					await asyncio.sleep(30)
-				else:
-					for line in output:
-						if 'Players:' in line and 'Active' not in line:
-							players = line
-						if 'Server Name' in line:
-							version = '(' + line.split('(')[1]
-					try:
-						message = currentinstance + ' ' + players + version
-						await self.bot.change_presence(activity=discord.Game(name=message), status=discord.Status.online)
-					except:
-						pass
+				try:
+					output = await self.runcommand("arkmanager status", instance=currentinstance)
+					if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
+						await self.bot.change_presence(activity=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
+						await asyncio.sleep(30)
+					else:
+						for line in output:
+							if 'Players:' in line and 'Active' not in line:
+								players = line
+							if 'Server Name' in line:
+								version = '(' + line.split('(')[1]
+						try:
+							message = currentinstance + ' ' + players + version
+							await self.bot.change_presence(activity=discord.Game(name=message), status=discord.Status.online)
+						except:
+							pass
+						await asyncio.sleep(30)
+				except Exception as e:
+					print("Error in presence_manager: {0}".format(e))
 					await asyncio.sleep(30)
 			else:
 				await asyncio.sleep(15)
