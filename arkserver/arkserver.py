@@ -183,8 +183,6 @@ class arkserver(BaseCog):
 	@commands.check(setupCheck)
 	async def arkadmin(self, ctx):
 		"""Commands related to Ark Server Administration"""
-		if ctx.invoked_subcommand is None:
-			return await ctx.send_help()
 
 	@commands.group()
 	@commands.check(setupCheck)
