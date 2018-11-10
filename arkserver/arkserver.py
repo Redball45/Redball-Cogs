@@ -807,7 +807,6 @@ class arkserver(BaseCog):
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose =  await self.settings.Verbose()
-
 						status = await self.updatechecker()
 						modstatus = await self.checkmods()
 						print("Update check completed at {0}".format(datetime.utcnow()))
@@ -846,7 +845,8 @@ class arkserver(BaseCog):
 			message = await channel.send("Server is updating...")
 		await self.runcommand(command="arkmanager stop", instance="all")
 		update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=await self.settings.Verbose(), instance='all')
-		if self.successcheck(update):
+		start = await self.runcommand(command="arkmanager start")
+		if self.successcheck(start):
 			status = ''
 			while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 				await asyncio.sleep(15)
