@@ -692,7 +692,7 @@ class arkserver(BaseCog):
 	@arkadmin.command(name="backup")
 	async def ark_backup(self, ctx):
 		"""Creates a backup of the save and config"""
-		output = await self.runcommand(command="arkmanager backup", channel=ctx.channel, verbose=True, instance='all')
+		output = await self.runcommand(command="arkmanager backup", channel=ctx.channel, verbose=True)
 
 	@arkadmin.command(name="updatenow")
 	async def ark_updatenow(self, ctx):
@@ -807,8 +807,7 @@ class arkserver(BaseCog):
 				if self.updating == False: #proceed only if the bot isn't already manually updating or restarting
 					try:
 						verbose =  await self.settings.Verbose()
-						channel = self.bot.get_channel(await self.settings.Channel())
-						adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
+
 						status = await self.updatechecker()
 						modstatus = await self.checkmods()
 						print("Update check completed at {0}".format(datetime.utcnow()))
@@ -819,56 +818,47 @@ class arkserver(BaseCog):
 					if status == True or modstatus == True: #proceed with update if checkupdate tells us that an update is available
 						if await self.playercheck():
 							#players detected in the server, queue update for in 15 minutes
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 15 minutes."', channel, False)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 15 minutes."')
 							await asyncio.sleep(300)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 10 minutes."', channel, False)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 10 minutes."')
 							await asyncio.sleep(300)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 5 minutes."', channel, False)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 5 minutes."')
 							await asyncio.sleep(240)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."', channel, False)
+							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."')
 							await asyncio.sleep(60)
 							if self.updating == False:
-								await self.bot.change_presence(activity=discord.Game(name="Updating Server"),status=discord.Status.dnd)
-								self.updating = True
-								if channel is not None:
-									message = await channel.send("Server is updating...")
-								update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=True, instance='all')
-								if self.successcheck(update):
-									status = ''
-									while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
-										await asyncio.sleep(15)
-										status = await self.runcommand("arkmanager status")
-									if channel is not None:
-										await message.edit(content="Server has been updated and is now online.")
-									await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-									self.updating = False
-								else:
-									if channel is not None:
-										await message.edit(content="Something went wrong during automatic update.")
-									await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-									self.updating = False
+								await self.update_server()
 							else:
 								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
 						else:
-							if channel is not None:
-								message = await channel.send("Server is updating...")
-							update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=True, instance='all')
-							if self.successcheck(update):									
-								status = ''
-								while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
-									await asyncio.sleep(15)
-									status = await self.runcommand("arkmanager status")
-								if channel is not None:
-									await message.edit(content="Server has been updated and is now online.")
-								await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-								self.updating = False
-							else:
-								if channel is not None:
-									await message.edit(content="Something went wrong during automatic update")
-								await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-								self.updating = False
+							await self.update_server()
 					else:
 						await asyncio.sleep(3540)
 				else:
 					print("Server is already updating or restarting, auto-update cancelled")
+
+	async def update_server(self):
+		await self.bot.change_presence(activity=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+		channel = self.bot.get_channel(await self.settings.Channel())
+		adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
+		self.updating = True
+		if channel is not None:
+			message = await channel.send("Server is updating...")
+		await self.runcommand(command="arkmanager stop", instance="all")
+		update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=await self.settings.Verbose(), instance='all')
+		if self.successcheck(update):
+			status = ''
+			while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
+				await asyncio.sleep(15)
+				status = await self.runcommand("arkmanager status")
+			if channel is not None:
+				await message.edit(content="Server has been updated and is now online.")
+			await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
+			self.updating = False
+		else:
+			if channel is not None:
+				await message.edit(content="Something went wrong during automatic update.")
+			await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
+			self.updating = False
+
 					
