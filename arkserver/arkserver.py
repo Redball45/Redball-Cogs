@@ -352,52 +352,51 @@ class arkserver(BaseCog):
 	@commands.check(arkRoleCheck)
 	async def swap(self, ctx, minput : str = 'info'):
 		"""Swaps an active instance to another instance. This works by stopping a running instance and starting a different one."""
-		await ctx.channel.trigger_typing()
-		availableInstances = await self.detectInstances()
-		if minput == 'info':
-			await ctx.send("This command can swap the instance the server is running on to the desired instance. Options available are {0}. (e.g +ark swap ragnarok)".format(availableInstances))
-			await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
-			return
-		if self.updating == True: #don't change the instance if the server is restarting or updating
-			await ctx.send("I'm already carrying out a restart or update!")
-			return
-		if await self.playercheck():
-			await ctx.send("The instance cannot be swapped while players are in the server.")
-			return
-		desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
-		if not desiredInstance:
-			await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
-			return
-		if await self.settings.Instance() == desiredInstance:
-			await ctx.send("The server is already running this instance!") 
-			return
-		message = await ctx.send("Instance will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredInstance))
-		await message.add_reaction('✔')
-		def waitcheck(react, user):
-			return react.emoji == '✔' and user == ctx.author  
-		try:
-			react, user = await self.bot.wait_for('reaction_add', check=waitcheck, timeout=30.0)
-		except asyncio.TimeoutError:
+		async with ctx.channel.typing():
+			availableInstances = await self.detectInstances()
+			if minput == 'info':
+				await ctx.send("This command can swap the instance the server is running on to the desired instance. Options available are {0}. (e.g +ark swap ragnarok)".format(availableInstances))
+				await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
+				return
+			if self.updating == True: #don't change the instance if the server is restarting or updating
+				await ctx.send("I'm already carrying out a restart or update!")
+				return
+			if await self.playercheck():
+				await ctx.send("The instance cannot be swapped while players are in the server.")
+				return
+			desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+			if not desiredInstance:
+				await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
+				return
+			if await self.settings.Instance() == desiredInstance:
+				await ctx.send("The server is already running this instance!") 
+				return
+			message = await ctx.send("Instance will be swapped to {0}, the server will need to be restarted to complete the change, react agree to confirm.".format(desiredInstance))
+			await message.add_reaction('✔')
+			def waitcheck(react, user):
+				return react.emoji == '✔' and user == ctx.author  
+			try:
+				react, user = await self.bot.wait_for('reaction_add', check=waitcheck, timeout=30.0)
+			except asyncio.TimeoutError:
+				await message.clear_reactions()
+				await message.edit(content="You took too long..")
+				return
 			await message.clear_reactions()
-			await message.edit(content="You took too long..")
-			return
-		await message.clear_reactions()
-		await ctx.channel.trigger_typing()
-		if await self.offlinecheck():
-			await ctx.send("The instance the cog is currently using isn't online, this must be an active instance. Otherwise you could just start the instance you want with +ark start (instance name).")
-			return
-		if not await self.offlinecheck(instance=desiredInstance):
-			await ctx.send("The instance you have selected to swap to is already running!")
-			return
-		self.updating = True
-		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
-		self.active_instances = self.active_instances - 1
-		#All done, now we can start the new instance.
-		await self.settings.Instance.set(desiredInstance)
-		verbose = await self.settings.Verbose()
-		output = await self.runcommand(command="arkmanager start", channel=ctx.channel, verbose=verbose)
-		self.active_instances = self.active_instances + 1
-		self.updating = False
+			if await self.offlinecheck():
+				await ctx.send("The instance the cog is currently using isn't online, this must be an active instance. Otherwise you could just start the instance you want with +ark start (instance name).")
+				return
+			if not await self.offlinecheck(instance=desiredInstance):
+				await ctx.send("The instance you have selected to swap to is already running!")
+				return
+			self.updating = True
+			output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
+			self.active_instances = self.active_instances - 1
+			#All done, now we can start the new instance.
+			await self.settings.Instance.set(desiredInstance)
+			verbose = await self.settings.Verbose()
+			output = await self.runcommand(command="arkmanager start", channel=ctx.channel, verbose=verbose)
+			self.active_instances = self.active_instances + 1
+			self.updating = False
 
 	async def detectInstances(self):
 		"""Returns a list of available Instances based on available instance files within the instance configuration directory."""
@@ -431,20 +430,20 @@ class arkserver(BaseCog):
 	@commands.check(arkRoleCheck)
 	async def ark_stop(self, ctx, minput : str = 'default'):
 		"""Stops the Ark Server"""
-		await ctx.channel.trigger_typing()
-		if minput != 'default':
-			availableInstances = await self.detectInstances()
-			desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
-			if not desiredInstance:
-				await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
-				return
-		else:
-			desiredInstance = minput
-		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose(), desiredInstance)
-		if await self.settings.Verbose() == False:
-			output = self.sanitizeoutput(output)
-			await ctx.send(output)
-		self.active_instances = self.active_instances - 1
+		async with ctx.channel.typing():
+			if minput != 'default':
+				availableInstances = await self.detectInstances()
+				desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+				if not desiredInstance:
+					await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
+					return
+			else:
+				desiredInstance = minput
+			output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose(), desiredInstance)
+			if await self.settings.Verbose() == False:
+				output = self.sanitizeoutput(output)
+				await ctx.send(output)
+			self.active_instances = self.active_instances - 1
 
 	@ark.command(name="players")
 	async def ark_players(self, ctx):
@@ -548,20 +547,20 @@ class arkserver(BaseCog):
 		if self.active_instances >= await self.settings.InstanceLimit():
 			await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is incorrect, use [p]ark instancecheck.")
 			return
-		await ctx.channel.trigger_typing()
-		if minput != 'default':
-			availableInstances = await self.detectInstances()
-			desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
-			if not desiredInstance:
-				await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
-				return
-		else:
-			desiredInstance = minput
-		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose(), desiredInstance)
-		if await self.settings.Verbose() == False:
-			output = self.sanitizeoutput(output)
-			await ctx.send(output)
-		self.active_instances = self.active_instances + 1
+		async with ctx.channel.typing()
+			if minput != 'default':
+				availableInstances = await self.detectInstances()
+				desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+				if not desiredInstance:
+					await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
+					return
+			else:
+				desiredInstance = minput
+			output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose(), desiredInstance)
+			if await self.settings.Verbose() == False:
+				output = self.sanitizeoutput(output)
+				await ctx.send(output)
+			self.active_instances = self.active_instances + 1
 
 	@ark.command(name="instancecheck")
 	@commands.check(arkRoleCheck)
@@ -573,12 +572,12 @@ class arkserver(BaseCog):
 	@ark.command(name="status")
 	async def ark_status(self, ctx, instance: str = 'default'):
 		"""Checks the server status"""
-		await ctx.channel.trigger_typing()
-		verbose = await self.settings.Verbose()
-		output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
-		if verbose == False:
-			output = self.sanitizeoutput(output)
-			await ctx.send(output)
+		async with ctx.channel.typing():
+			verbose = await self.settings.Verbose()
+			output = await self.runcommand("arkmanager status", instance=instance, channel=ctx.channel, verbose=verbose)
+			if verbose == False:
+				output = self.sanitizeoutput(output)
+				await ctx.send(output)
 
 	@ark.command(name="cancel")
 	@commands.check(arkRoleCheck)
