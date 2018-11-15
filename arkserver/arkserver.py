@@ -399,7 +399,6 @@ class arkserver(BaseCog):
 		self.active_instances = self.active_instances + 1
 		self.updating = False
 
-
 	async def detectInstances(self):
 		"""Returns a list of available Instances based on available instance files within the instance configuration directory."""
 		directory = await self.settings.ARKManagerConfigDirectory() + 'instances/'
@@ -430,10 +429,18 @@ class arkserver(BaseCog):
 
 	@ark.command(name="stop")
 	@commands.check(arkRoleCheck)
-	async def ark_stop(self, ctx):
+	async def ark_stop(self, ctx, minput : str = 'default'):
 		"""Stops the Ark Server"""
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose())
+		if minput != 'default':
+			availableInstances = await self.detectInstances()
+			desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+			if not desiredInstance:
+				await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
+				return
+		else:
+			desiredInstance = minput
+		output = await self.runcommand("arkmanager stop", ctx.channel, await self.settings.Verbose(), desiredInstance)
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
@@ -536,17 +543,32 @@ class arkserver(BaseCog):
 
 	@ark.command(name="start")
 	@commands.check(arkRoleCheck)
-	async def ark_start(self, ctx):
+	async def ark_start(self, ctx, minput: str = 'default'):
 		"""Starts the Ark Server"""
 		if self.active_instances >= await self.settings.InstanceLimit():
-			await ctx.send("Instance limit has been reached, please stop another instance first.")
+			await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is incorrect, use [p]ark instancecheck.")
 			return
 		await ctx.channel.trigger_typing()
-		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose())
+		if minput != 'default':
+			availableInstances = await self.detectInstances()
+			desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
+			if not desiredInstance:
+				await ctx.send("I don't recognize that instance, available options are {0}.".format(availableInstances))
+				return
+		else:
+			desiredInstance = minput
+		output = await self.runcommand("arkmanager start", ctx.channel, await self.settings.Verbose(), desiredInstance)
 		if await self.settings.Verbose() == False:
 			output = self.sanitizeoutput(output)
 			await ctx.send(output)
 		self.active_instances = self.active_instances + 1
+
+	@ark.command(name="instancecheck")
+	@commands.check(arkRoleCheck)
+	async def ark_instancecheck(self, ctx):
+		"""Resets self.active_instances incase it has become desynced from reality"""
+		await self.discover_instances()
+		await ctx.send("Detected {0} instances.".format(self.active_instances))
 
 	@ark.command(name="status")
 	async def ark_status(self, ctx, instance: str = 'default'):
@@ -761,6 +783,7 @@ class arkserver(BaseCog):
 		return message
 
 	async def discover_instances(self):
+		self.active_instances = 0
 		for instance in await self.detectInstances():
 			if not await self.offlinecheck(instance=instance):
 				self.active_instances = self.active_instances + 1
@@ -779,8 +802,8 @@ class arkserver(BaseCog):
 				try:
 					output = await self.runcommand("arkmanager status", instance=currentinstance)
 					if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
-						await self.bot.change_presence(activity=discord.Game(name="Server is offline!"),status=discord.Status.dnd)
-						await asyncio.sleep(30)
+						message = currentinstance + ': Offline'
+						await self.bot.change_presence(activity=discord.Game(name=message),status=discord.Status.dnd)
 					else:
 						for line in output:
 							if 'Players:' in line and 'Active' not in line:
@@ -792,7 +815,7 @@ class arkserver(BaseCog):
 							await self.bot.change_presence(activity=discord.Game(name=message), status=discord.Status.online)
 						except:
 							pass
-						await asyncio.sleep(30)
+					await asyncio.sleep(30)
 				except Exception as e:
 					print("Error in presence_manager: {0}".format(e))
 					await asyncio.sleep(30)
