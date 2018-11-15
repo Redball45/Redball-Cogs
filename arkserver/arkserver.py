@@ -547,7 +547,7 @@ class arkserver(BaseCog):
 		if self.active_instances >= await self.settings.InstanceLimit():
 			await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is incorrect, use [p]ark instancecheck.")
 			return
-		async with ctx.channel.typing()
+		async with ctx.channel.typing():
 			if minput != 'default':
 				availableInstances = await self.detectInstances()
 				desiredInstance = next((s for s in availableInstances if minput.lower() in s.lower()), None)
