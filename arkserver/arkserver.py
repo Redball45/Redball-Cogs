@@ -783,14 +783,17 @@ class arkserver(BaseCog):
 
 	async def discover_instances(self):
 		self.active_instances = 0
+		instance_list = []
 		for instance in await self.detectInstances():
 			if not await self.offlinecheck(instance=instance):
 				self.active_instances = self.active_instances + 1
+				instance_list.append(instance)
 		if self.active_instances > await self.settings.InstanceLimit():
 			print('Warning: More instances are currently running than the instance limit!')
 			adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
 			if adminchannel is not None:
 				await adminchannel.send('Warning: More instances are currently running than the instance limit!')
+		return instance_list
 
 
 	async def presence_manager(self):
@@ -821,6 +824,7 @@ class arkserver(BaseCog):
 			else:
 				await asyncio.sleep(15)
 
+
 	async def update_checker(self):
 		"""Checks for updates automatically every hour"""
 		while self is self.bot.get_cog("arkserver"):
@@ -831,56 +835,45 @@ class arkserver(BaseCog):
 						verbose =  await self.settings.Verbose()
 						status = await self.updatechecker()
 						modstatus = await self.checkmods()
+						adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
 						print("Update check completed at {0}".format(datetime.utcnow()))
 					except Exception as e:
 						print("checkupdate commands encountered an exception {0}".format(e))
 						await asyncio.sleep(240)
 						status = ''
 					if status == True or modstatus == True: #proceed with update if checkupdate tells us that an update is available
-						if await self.playercheck():
-							#players detected in the server, queue update for in 15 minutes
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 15 minutes."')
-							await asyncio.sleep(300)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 10 minutes."')
-							await asyncio.sleep(300)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 5 minutes."')
-							await asyncio.sleep(240)
-							alert = await self.runcommand('arkmanager broadcast "Server will shutdown for updates in 60 seconds."')
-							await asyncio.sleep(60)
-							if self.updating == False:
-								await self.update_server()
-							else:
-								print("Manual update or restart was triggered during 15 minute delay, automatic update has been cancelled")
-						else:
-							await self.update_server()
+						instance_list = await self.discover_instances()
+						self.updating = True
+						await self.bot.change_presence(activity=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+						if not instance_list:
+							update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=await self.settings.Verbose(), instance='all')
+							if not await self.settings.Verbose():
+								await adminchannel.send(update)
+						else:						
+							for instance in instance_list:
+								await self.update_server(instance)
+						self.updating = False
 					else:
 						await asyncio.sleep(3540)
 				else:
 					print("Server is already updating or restarting, auto-update cancelled")
 
-	async def update_server(self):
-		await self.bot.change_presence(activity=discord.Game(name="Updating Server"),status=discord.Status.dnd)
+	async def update_server(self, instance):
 		channel = self.bot.get_channel(await self.settings.Channel())
 		adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
-		self.updating = True
 		if channel is not None:
-			message = await channel.send("Server is updating...")
-		await self.runcommand(command="arkmanager stop", instance="all")
-		update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=await self.settings.Verbose(), instance='all')
-		start = await self.runcommand(command="arkmanager start")
+			message = await channel.send("{0} is restarting for updates...".format(instance))
+		await self.runcommand(command="arkmanager stop", instance=instance)
+		update = await self.runcommand(command="arkmanager update --update-mods --backup", channel=adminchannel, verbose=await self.settings.Verbose(), instance=instance)
+		if not await self.settings.Verbose():
+			await adminchannel.send(update)
+		start = await self.runcommand(command="arkmanager start", instance=instance)
 		if self.successcheck(start):
 			status = ''
 			while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 				await asyncio.sleep(15)
 				status = await self.runcommand("arkmanager status")
-			if channel is not None:
-				await message.edit(content="Server has been updated and is now online.")
-			await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-			self.updating = False
-		else:
-			if channel is not None:
-				await message.edit(content="Something went wrong during automatic update.")
-			await self.bot.change_presence(activity=discord.Game(name=None),status=discord.Status.online)
-			self.updating = False
+				await message.edit(content="{0} is up.".format(instance))
+		
 
 					
