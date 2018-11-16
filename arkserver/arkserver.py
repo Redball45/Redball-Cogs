@@ -868,12 +868,14 @@ class arkserver(BaseCog):
 		if not await self.settings.Verbose():
 			await adminchannel.send(update)
 		start = await self.runcommand(command="arkmanager start", instance=instance)
+		if not await self.settings.Verbose():
+			await adminchannel.send(start)
 		if self.successcheck(start):
 			status = ''
 			while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
 				await asyncio.sleep(15)
 				status = await self.runcommand("arkmanager status")
-				await message.edit(content="{0} is up.".format(instance))
+			await message.edit(content="{0} is up.".format(instance))
 		
 
 					
