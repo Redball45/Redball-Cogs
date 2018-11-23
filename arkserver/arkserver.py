@@ -665,8 +665,8 @@ class Arkserver(BaseCog):
                 else:
                     try:
                         await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
-                    except discord.DiscordException:
-                        print("Something went wrong \U0001F44F. {0}".format(output))
+                    except discord.DiscordException as e:
+                        print("Discord Exception {0} when trying to send {1}".format(e, output))
                     self.updating = False
             else:
                 self.cancel = False
@@ -722,8 +722,8 @@ class Arkserver(BaseCog):
                 else:
                     try:
                         await ctx.send("Something went wrong \U0001F44F. {0}".format(output))
-                    except discord.DiscordException:
-                        print("Something went wrong \U0001F44F. {0}".format(output))
+                    except discord.DiscordException as e:
+                        print("Discord Exception {0} when trying to send {1}".format(e, output))
                     self.updating = False
         else:
             await ctx.send("No updates found.")
@@ -855,10 +855,10 @@ class Arkserver(BaseCog):
                             await self.bot.change_presence(activity=discord.Game(name=message),
                                                            status=discord.Status.online)
                         except discord.DiscordException as e:
-                            print(e)
+                            print("Discord Exception {0} in presence_manager.".format(e))
                     await asyncio.sleep(30)
                 except Exception as e:
-                    print("Error in presence_manager: {0}".format(e))
+                    print("Generic Exception in presence_manager: {0}".format(e))
                     await asyncio.sleep(30)
             else:
                 await asyncio.sleep(15)
