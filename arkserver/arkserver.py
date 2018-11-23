@@ -41,6 +41,10 @@ async def arkcharcheck(ctx):
     return await settings.CharacterEnabled()
 
 
+class ArkManagerException(Exception):
+    pass
+
+
 class Arkserver(BaseCog):
     """Ark Server commands"""
     def __init__(self, bot):
@@ -66,6 +70,14 @@ class Arkserver(BaseCog):
             InstanceLimit=1
         )
         self.settings.register_user(**default_user)
+
+    @staticmethod
+    async def error_handler(channel, e):
+        if isinstance(e, ArkManagerException):
+            if channel is not None:
+                await channel.send("A program execution error has occurred, please contact my owner. {0}".format(e))
+            else:
+                print("A program execution error has occurred, please contact my owner. {0}".format(e))
 
     @staticmethod
     async def read_stream_and_display(stream, channel, verbose):
@@ -96,25 +108,26 @@ class Arkserver(BaseCog):
         try:
             stdout = await asyncio.gather(
                 self.read_stream_and_display(process.stdout, channel, verbose))
-        except Exception:
+        except Exception as e:
             process.kill()
-            raise
+            raise ArkManagerException("Arkmanager encountered an exception. {0}".format(e))
         finally:
             # wait for the process to exit
             rc = await process.wait()
         return rc, stdout
 
-    async def runcommand(self, command, channel=None, verbose=False, instance='default'):
+    async def run_command(self, command, channel=None, verbose=False, instance="default"):
         """This function creates a shell to run arkmanager commands in a way that isn't blocking, and returns the
         combined output of stderr and stdout"""
-        if instance == 'default':
+        if instance == "default":
             instance = await self.settings.Instance()
-        args = 'arkmanager ' + command + ' @' + instance
+        args = "arkmanager " + command + " @" + instance
         try:
             rc, output = await asyncio.ensure_future(self.read_and_display(args=args, channel=channel,
                                                      verbose=verbose))
-        except Exception as e:
-            return "Program encountered an Exception {0}".format(e)
+        except ArkManagerException as e:
+            await self.error_handler(channel, e)
+            return None
         return output[0]
 
     @commands.command()
@@ -128,17 +141,17 @@ class Arkserver(BaseCog):
                            "you should respond with desired setting.")
             await ctx.send("First, please respond with the location arkmanager configuration files are located. Please "
                            "include the last '/' Unless you changed this, the default is usually '/etc/arkmanager/'.")
-            answer = await self.bot.wait_for('message', check=wait_check, timeout=30)
+            answer = await self.bot.wait_for("message", check=wait_check, timeout=30)
             ark_manager = answer.content
             await ctx.send("Next, please respond with a location to store inactive character world save files, "
                            "used for the character swap features.")
-            answer = await self.bot.wait_for('message', check=wait_check, timeout=30)
+            answer = await self.bot.wait_for("message", check=wait_check, timeout=30)
             ark_storage = answer.content
             await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character"
                            "storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(
                             ark_manager, ark_storage))
-            answer = await self.bot.wait_for('message', check=wait_check, timeout=30)
-            if answer.content.lower() != 'yes':
+            answer = await self.bot.wait_for("message", check=wait_check, timeout=30)
+            if answer.content.lower() != "yes":
                 return await ctx.send("Okay, setup cancelled.")
         except asyncio.TimeoutError:
             return await ctx.send("You didn't reply in time, setup cancelled.")
@@ -220,15 +233,15 @@ class Arkserver(BaseCog):
             await ctx.send("You need to have your steam ID attached to your discord account by my owner before you "
                            "can use this command.")
             return
-        output = '```\nAvailable characters in storage:'
+        output = "```\nAvailable characters in storage:"
         directory = await self.settings.ARKStorageDirectory()
-        search = directory + steamid + '*'
-        list_replacements = [steamid, directory, '.bak']
+        search = directory + steamid + "*"
+        list_replacements = [steamid, directory, ".bak"]
         for name in glob.glob(search):
             for elem in list_replacements:
                 name = name.replace(elem, "")
-            output += '\n' + name
-        output += '```'
+            output += "\n" + name
+        output += "```"
         await ctx.send(output)
 
     @arkchar.command()
@@ -254,8 +267,8 @@ class Arkserver(BaseCog):
         if not save_dir:
             await ctx.send("Couldn't find the save location for the current instance.")
             return
-        source = server_location + '/ShooterGame/Saved/' + save_dir + '/' + steamid + '.arkprofile'
-        destination = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
+        source = server_location + "/ShooterGame/Saved/" + save_dir + "/" + steamid + ".arkprofile"
+        destination = await self.settings.ARKStorageDirectory() + steamid + savename + ".bak"
         if os.path.isfile(source) is False:
             await ctx.send("You don't have a character active at the moment.")
             return
@@ -273,7 +286,9 @@ class Arkserver(BaseCog):
         await ctx.send("Stored your current character as {0}.".format(savename))
 
     async def ingamecheck(self, steamid):
-        output = await self.runcommand('rconcmd "listplayers"')
+        output = await self.run_command("rconcmd 'listplayers'")
+        if not output:
+            return False
         for line in output:
             if steamid in line:
                 return True
@@ -281,23 +296,25 @@ class Arkserver(BaseCog):
 
     async def get_server_location(self, instance):
         server_location = None
-        output = await self.runcommand('list-instances', instance=instance)
+        output = await self.run_command("list-instances", instance=instance)
+        if not output:
+            return None
         for elem in output:
-            if ('@' + instance) in elem:
-                config, server_location = elem.split('=> ')
-                server_location = server_location.replace('\n', '')
+            if ("@" + instance) in elem:
+                config, server_location = elem.split("=> ")
+                server_location = server_location.replace("\n", "")
         return server_location
 
     async def get_alt_save_directory(self):
         save_dir = None
-        config_file = await self.settings.ARKManagerConfigDirectory() + 'instances/' + await self.settings.Instance() +\
-            '.cfg'
-        with open(config_file, 'r') as f:
+        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + await self.settings.Instance() +\
+            ".cfg"
+        with open(config_file, "r") as f:
             for line in f:
-                if line.startswith('ark_AltSaveDirectoryName'):
-                    command, value = line.split('=')
+                if line.startswith("ark_AltSaveDirectoryName"):
+                    command, value = line.split("=")
                     save_dir = value.replace('"', '')
-                    save_dir = save_dir.replace('\n', '')
+                    save_dir = save_dir.replace("\n", "")
         return save_dir
 
     @arkchar.command()
@@ -320,15 +337,14 @@ class Arkserver(BaseCog):
         if not save_dir:
             await ctx.send("Couldn't find the save location for the current instance.")
             return
-        source = await self.settings.ARKStorageDirectory() + steamid + savename + '.bak'
-        destination = server_location + '/ShooterGame/Saved/' + save_dir + '/' + steamid + '.arkprofile'
+        source = await self.settings.ARKStorageDirectory() + steamid + savename + ".bak"
+        destination = server_location + "/ShooterGame/Saved/" + save_dir + "/" + steamid + ".arkprofile"
         if not os.path.isfile(source):
             await ctx.send("That character doesn't exist in storage.")
             return
         if os.path.isfile(destination):
             await ctx.send("You already have a character active, you need to store it first!")
             return
-        await self.runcommand('rconcmd "listplayers"', ctx.channel)
         if await self.ingamecheck(steamid):
             await ctx.send("You need to leave the server before I can do this.")
             return
@@ -341,10 +357,10 @@ class Arkserver(BaseCog):
 
     @ark.command()
     @commands.check(arkrolecheck)
-    async def instance(self, ctx, minput: str = 'info'):
+    async def instance(self, ctx, minput: str = "info"):
         """Sets the instance that cog commands operate on. Use this command with no instance specified to see the
         current instance."""
-        if minput == 'info':
+        if minput == "info":
             await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
             return
         available_instances = await self.detect_instances()
@@ -357,12 +373,13 @@ class Arkserver(BaseCog):
 
     @ark.command(name="swap", aliases=["map"])
     @commands.check(arkrolecheck)
-    async def swap(self, ctx, minput: str = 'info'):
+    async def swap(self, ctx, minput: str = "info"):
         """Swaps an active instance to another instance. This works by stopping a running instance and starting a
          different one."""
         async with ctx.channel.typing():
+            verbose = await self.settings.Verbose()
             available_instances = await self.detect_instances()
-            if minput == 'info':
+            if minput == "info":
                 await ctx.send("This command can swap the instance the server is running on to the desired instance."
                                "Options available are {0}. (e.g +ark swap ragnarok)".format(available_instances))
                 await ctx.send("Current instance is {0}".format(await self.settings.Instance()))
@@ -383,13 +400,13 @@ class Arkserver(BaseCog):
                 return
             message = await ctx.send("Instance will be swapped to {0}, the server will need to be restarted to complete"
                                      "the change, react agree to confirm.".format(desired_instance))
-            await message.add_reaction('✔')
+            await message.add_reaction("✔")
 
             def waitcheck(wait_react, wait_user):
-                return wait_react.emoji == '✔' and wait_user == ctx.author
+                return wait_react.emoji == "✔" and wait_user == ctx.author
 
             try:
-                await self.bot.wait_for('reaction_add', check=waitcheck, timeout=30.0)
+                await self.bot.wait_for("reaction_add", check=waitcheck, timeout=30.0)
             except asyncio.TimeoutError:
                 await message.clear_reactions()
                 await message.edit(content="You took too long..")
@@ -404,23 +421,26 @@ class Arkserver(BaseCog):
                 await ctx.send("The instance you have selected to swap to is already running!")
                 return
             self.updating = True
-            await self.runcommand("stop", ctx.channel, await self.settings.Verbose())
+            output = await self.run_command(command="stop", channel=ctx.channel, verbose=verbose)
+            if not output:
+                return
             self.active_instances = self.active_instances - 1
             # All done, now we can start the new instance.
             await self.settings.Instance.set(desired_instance)
-            verbose = await self.settings.Verbose()
-            await self.runcommand(command="start", channel=ctx.channel, verbose=verbose)
+            start_output = await self.run_command(command="start", channel=ctx.channel, verbose=verbose)
+            if not start_output:
+                return
             self.active_instances = self.active_instances + 1
             self.updating = False
 
     async def detect_instances(self):
         """Returns a list of available Instances based on available instance files within the instance configuration
         directory."""
-        directory = await self.settings.ARKManagerConfigDirectory() + 'instances/'
+        directory = await self.settings.ARKManagerConfigDirectory() + "instances/"
         available_instances = []
         for file in os.listdir(directory):
             if file.endswith(".cfg"):
-                file = file.replace('.cfg', "")
+                file = file.replace(".cfg", "")
                 available_instances.append(file)
         return available_instances
 
@@ -444,10 +464,10 @@ class Arkserver(BaseCog):
 
     @ark.command(name="stop")
     @commands.check(arkrolecheck)
-    async def ark_stop(self, ctx, minput: str = 'default'):
+    async def ark_stop(self, ctx, minput: str = "default"):
         """Stops the Ark Server"""
         async with ctx.channel.typing():
-            if minput != 'default':
+            if minput != "default":
                 available_instances = await self.detect_instances()
                 desired_instance = next((s for s in available_instances if minput.lower() in s.lower()), None)
                 if not desired_instance:
@@ -456,8 +476,10 @@ class Arkserver(BaseCog):
                     return
             else:
                 desired_instance = minput
-            output = await self.runcommand("stop", ctx.channel, await self.settings.Verbose(),
-                                           desired_instance)
+            output = await self.run_command("stop", ctx.channel, await self.settings.Verbose(),
+                                            desired_instance)
+            if not output:
+                return
             if not await self.settings.Verbose():
                 output = self.sanitizeoutput(output)
                 await ctx.send(output)
@@ -466,28 +488,30 @@ class Arkserver(BaseCog):
     @ark.command(name="players")
     async def ark_players(self, ctx):
         """Lists players currently in the server."""
-        output = await self.runcommand('rconcmd "listplayers"', ctx.channel, False)
+        output = await self.run_command('rconcmd "listplayers"', ctx.channel, False)
+        if not output:
+            return
         players = "```Players ingame:"
         for line in output:
-            if '.' in line:
-                slot, name, steamid = line.split(' ', 2)
-                players += "\n" + name.rstrip(',')
+            if "." in line:
+                slot, name, steamid = line.split(" ", 2)
+                players += "\n" + name.rstrip(",")
         players += "```"
         await ctx.send(players)
 
     @arkadmin.command(name="dinowipe")
     async def arkadmin_dinowipe(self, ctx):
         """Runs DestroyWildDinos."""
-        await self.runcommand('rconcmd "destroywilddinos"', ctx.channel, True)
+        await self.run_command('rconcmd "destroywilddinos"', ctx.channel, True)
 
     @arkadmin.command(name="autoupdate")
-    async def arkadmin_autoupdate(self, ctx, toggle: str = 'info'):
+    async def arkadmin_autoupdate(self, ctx, toggle: str = "info"):
         """Toggles autoupdating"""
         toggle_status = await self.settings.AutoUpdate()  # retrieves current status of toggle from settings file
-        if toggle.lower() == 'off':
+        if toggle.lower() == "off":
             await self.settings.AutoUpdate.set(False)
             await ctx.send("Automatic updating is now disabled.")
-        elif toggle.lower() == 'on':
+        elif toggle.lower() == "on":
             await self.settings.AutoUpdate.set(True)
             await ctx.send("Automatic server updating is now enabled. You may wish to select a channel for autoupdate"
                            "messages to go to via {0}arkadmin channel.".format(ctx.prefix))
@@ -514,7 +538,7 @@ class Arkserver(BaseCog):
         await ctx.send("Role set to {.mention}".format(role))
 
     @arkadmin.command(name="instancelimit")
-    async def arkadmin_instancelimit(self, ctx, instance_limit: str = 'info'):
+    async def arkadmin_instancelimit(self, ctx, instance_limit: str = "info"):
         try:
             instance_limit = int(instance_limit)
             await self.settings.InstanceLimit.set(instance_limit)
@@ -530,14 +554,14 @@ class Arkserver(BaseCog):
         await ctx.send("Channel set to {.mention}".format(channel))
 
     @arkadmin.command(name="charmanagement")
-    async def arkadmin_charactermanagement(self, ctx, toggle: str = 'info'):
+    async def arkadmin_charactermanagement(self, ctx, toggle: str = "info"):
         """Enables or disables the ability for users to store and retrieve character files belonging to them in the
          storage directory."""
         toggle_status = await self.settings.CharacterEnabled()
-        if toggle.lower() == 'off':
+        if toggle.lower() == "off":
             await self.settings.CharacterEnabled.set(False)
             await ctx.send("Character management has been disabled.")
-        elif toggle.lower() == 'on':
+        elif toggle.lower() == "on":
             await self.settings.CharacterEnabled.set(True)
             await ctx.send("Character management has been enabled. Each user that wishes to use this feature needs to"
                            "have a SteamID assigned to their discord profile by my owner to ensure they can only "
@@ -549,13 +573,13 @@ class Arkserver(BaseCog):
                 await ctx.send("Character management is currently disabled.")
 
     @arkadmin.command(name="verbose")
-    async def ark_verbose(self, ctx, toggle: str = 'info'):
+    async def ark_verbose(self, ctx, toggle: str = "info"):
         """Toggles command verbosity"""
         toggle_status = await self.settings.Verbose()  # retrieves current status of toggle from settings file
-        if toggle.lower() == 'off':
+        if toggle.lower() == "off":
             await self.settings.Verbose.set(False)
             await ctx.send("I will not be verbose when executing commands.")
-        elif toggle.lower() == 'on':
+        elif toggle.lower() == "on":
             await self.settings.Verbose.set(True)
             await ctx.send("I will output all lines from the console when executing commands.")
         else:
@@ -566,14 +590,14 @@ class Arkserver(BaseCog):
 
     @ark.command(name="start")
     @commands.check(arkrolecheck)
-    async def ark_start(self, ctx, minput: str = 'default'):
+    async def ark_start(self, ctx, minput: str = "default"):
         """Starts the Ark Server"""
         if self.active_instances >= await self.settings.InstanceLimit():
             await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is"
                            "incorrect, use [p]ark instancecheck.")
             return
         async with ctx.channel.typing():
-            if minput != 'default':
+            if minput != "default":
                 available_instances = await self.detect_instances()
                 desired_instance = next((s for s in available_instances if minput.lower() in s.lower()), None)
                 if not desired_instance:
@@ -582,8 +606,10 @@ class Arkserver(BaseCog):
                     return
             else:
                 desired_instance = minput
-            output = await self.runcommand("start", ctx.channel, await self.settings.Verbose(),
-                                           desired_instance)
+            output = await self.run_command("start", ctx.channel, await self.settings.Verbose(),
+                                            desired_instance)
+            if not output:
+                return
             if not await self.settings.Verbose():
                 output = self.sanitizeoutput(output)
                 await ctx.send(output)
@@ -597,11 +623,13 @@ class Arkserver(BaseCog):
         await ctx.send("Detected {0} instances.".format(self.active_instances))
 
     @ark.command(name="status")
-    async def ark_status(self, ctx, instance: str = 'default'):
+    async def ark_status(self, ctx, instance: str = "default"):
         """Checks the server status"""
         async with ctx.channel.typing():
             verbose = await self.settings.Verbose()
-            output = await self.runcommand("status", instance=instance, channel=ctx.channel, verbose=verbose)
+            output = await self.run_command("status", instance=instance, channel=ctx.channel, verbose=verbose)
+            if not output:
+                return
             if not verbose:
                 output = self.sanitizeoutput(output)
                 await ctx.send(output)
@@ -629,10 +657,9 @@ class Arkserver(BaseCog):
                 return
         if delay > 900:
             delay = 900
-        await self.runcommand("status", ctx.channel, False)
         if await self.playercheck():
             await ctx.send("Players are currently in the server, restart anyway?")
-            answer = await self.bot.wait_for('message', check=waitcheck)
+            answer = await self.bot.wait_for("message", check=waitcheck)
             try:
                 if answer.content.lower() != "yes":
                     await ctx.send("Okay, restart cancelled.")
@@ -647,19 +674,21 @@ class Arkserver(BaseCog):
             self.cancel = False
             await ctx.send("Restarting in {0} seconds.".format(delay))
             await ctx.bot.change_presence(activity=discord.Game(name="Restarting Server"), status=discord.Status.dnd)
-            command = 'broadcast "Server will shutdown for a user-requested restart in '\
-                      + str(delay) + ' seconds."'
-            await self.runcommand(command, ctx.channel, False)
+            command = 'broadcast "Server will shutdown for a user-requested restart in "\
+                      + str(delay) + " seconds."'
+            await self.run_command(command, ctx.channel, False)
             await asyncio.sleep(delay)
             if not self.cancel:
                 message = await ctx.send("Server is restarting...")
-                output = await self.runcommand("restart", ctx.channel, await self.settings.Verbose())
+                output = await self.run_command("restart", ctx.channel, await self.settings.Verbose())
+                if not output:
+                    return
                 self.updating = False
                 if self.successcheck(output):
-                    status = ''
-                    while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
+                    status = ""
+                    while "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" not in status:
                         await asyncio.sleep(15)
-                        status = await self.runcommand("status")
+                        status = await self.run_command("status")
                     await message.edit(content="Server is up.")
                     self.updating = False
                 else:
@@ -670,8 +699,8 @@ class Arkserver(BaseCog):
                     self.updating = False
             else:
                 self.cancel = False
-                await self.runcommand('broadcast "Restart was cancelled by user request."', ctx.channel,
-                                      False)
+                await self.run_command('broadcast "Restart was cancelled by user request."', ctx.channel,
+                                       False)
                 self.updating = False
                 # restart was cancelled
 
@@ -688,7 +717,7 @@ class Arkserver(BaseCog):
             offline = await self.offlinecheck()
             if await self.playercheck():
                 await ctx.send("Players are currently in the server, update anyway?")
-                answer = await self.bot.wait_for('message', check=waitcheck)
+                answer = await self.bot.wait_for("message", check=waitcheck)
                 try:
                     if answer.content.lower() != "yes":
                         await ctx.send("Okay, restart cancelled.")
@@ -702,21 +731,23 @@ class Arkserver(BaseCog):
             else:
                 self.updating = True
                 await ctx.bot.change_presence(activity=discord.Game(name="Updating Server"), status=discord.Status.dnd)
-                await self.runcommand('broadcast "Server will shutdown for updates in 60 seconds."',
-                                      ctx.channel, False)
+                await self.run_command('broadcast "Server will shutdown for updates in 60 seconds."',
+                                       ctx.channel, False)
                 await asyncio.sleep(60)
                 message = await ctx.send("Server is updating...")
                 verbose = await self.settings.Verbose()
-                output = await self.runcommand(command="update --update-mods --backup", channel=ctx.channel,
-                                               verbose=verbose, instance='all')
+                output = await self.run_command(command="update --update-mods --backup", channel=ctx.channel,
+                                                verbose=verbose, instance="all")
+                if not output:
+                    return
                 if self.successcheck(output):
                     if offline:
                         self.updating = False
                         return await message.edit(content="Server has been updated and is now online.")
-                    status = ''
-                    while '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in status:
+                    status = ""
+                    while "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" not in status:
                         await asyncio.sleep(15)
-                        status = await self.runcommand("status")
+                        status = await self.run_command("status")
                     await message.edit(content="Server has been updated and is now online.")
                     self.updating = False
                 else:
@@ -729,52 +760,74 @@ class Arkserver(BaseCog):
             await ctx.send("No updates found.")
 
     @arkadmin.command(name="save")
-    async def ark_save(self, ctx, minput: str = 'default'):
+    async def ark_save(self, ctx, minput: str = "default"):
         """Saves the world state"""
         async with ctx.channel.typing():
-            output = await self.runcommand(command="save", channel=ctx.channel,
-                                           verbose=await self.settings.Verbose(), instance=minput)
+            output = await self.run_command(command="save", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=minput)
+            if not output:
+                return
             if not await self.settings.Verbose():
                 await ctx.send(output)
 
     @arkadmin.command(name="backup")
-    async def ark_backup(self, ctx, minput: str = 'default'):
+    async def ark_backup(self, ctx, minput: str = "default"):
         """Creates a backup of the save and config for the current instance. Use 'all' to backup all instances."""
         async with ctx.channel.typing():
-            output = await self.runcommand(command="backup", channel=ctx.channel,
-                                           verbose=await self.settings.Verbose(), instance=minput)
+            output = await self.run_command(command="backup", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=minput)
+            if not output:
+                return
             if not await self.settings.Verbose():
                 await ctx.send(output)
 
     @arkadmin.command(name="updatenow")
-    async def ark_updatenow(self, ctx):
+    async def ark_updatenow(self, ctx, minput: str = "default"):
         """Updates with no delay or checks"""
-        await self.runcommand("update --update-mods --backup", ctx.channel, True)
+        async with ctx.channel.typing():
+            output = await self.run_command(command="update --update-mods --backup", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=minput)
+            if not output:
+                return
+            if not await self.settings.Verbose():
+                await ctx.send(output)
 
     @arkadmin.command(name="validate")
-    async def ark_validate(self, ctx, minput: str = 'default'):
+    async def ark_validate(self, ctx, minput: str = "default"):
         """Validates files with steamcmd"""
         async with ctx.channel.typing():
-            output = await self.runcommand(command="update --validate", channel=ctx.channel,
-                                           verbose=await self.settings.Verbose(), instance=minput)
+            output = await self.run_command(command="update --validate", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=minput)
+            if not output:
+                return
             if not await self.settings.Verbose():
                 await ctx.send(output)
 
     @arkadmin.command(name="forceupdate")
-    async def ark_forceupdate(self, ctx):
+    async def ark_forceupdate(self, ctx, minput: str = "default"):
         """Updates with the -force parameter"""
-        await self.runcommand("update --update-mods --backup --force", ctx.channel, True)
+        async with ctx.channel.typing():
+            output = await self.run_command(command="update --update-mods --backup --force", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=minput)
+            if not output:
+                return
+            if not await self.settings.Verbose():
+                await ctx.send(output)
 
     async def checkmods(self, channel=None, verbose=False):
-        output = await self.runcommand("checkmodupdate", channel, verbose)
+        output = await self.run_command("checkmodupdate", channel, verbose)
+        if not output:
+            return False
         for line in output:
-            if 'has been updated on the Steam workshop' in line:
+            if "has been updated on the Steam workshop" in line:
                 return True
         return False
 
     async def updatechecker(self, channel=None, verbose=False):
-        output = await self.runcommand("checkupdate", channel, verbose)
-        if 'Your server is up to date!\n' in output:
+        output = await self.run_command("checkupdate", channel, verbose)
+        if not output:
+            return False
+        if "Your server is up to date!\n" in output:
             return False
         else:
             return True
@@ -783,27 +836,33 @@ class Arkserver(BaseCog):
         """Returns True if players are present in the server."""
         if await self.offlinecheck():
             return False
-        output = await self.runcommand("status", channel, verbose)
+        output = await self.run_command("status", channel, verbose)
+        if not output:
+            return False
         for line in output:
-            if 'Players: 0' in line:
+            if "Players: 0" in line:
                 return False
         return True
 
-    async def offlinecheck(self, instance='default'):
+    async def offlinecheck(self, instance="default"):
         """Returns True if the server is offline"""
-        output = await self.runcommand("status", instance=instance)
-        if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' in output and\
-                '\x1b[0;39m Server running:  \x1b[1;32m Yes \x1b[0;39m\n' in output:
+        output = await self.run_command("status", instance=instance)
+        if not output:
+            return True
+        if "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" in output and\
+                "\x1b[0;39m Server running:  \x1b[1;32m Yes \x1b[0;39m\n" in output:
             return False
         else:
             return True
 
     @staticmethod
     def successcheck(output):
+        if not output:
+            return False
         for line in output:
-            if 'The server is now running, and should be up within 10 minutes' in line:
+            if "The server is now running, and should be up within 10 minutes" in line:
                 return True
-            if 'Update to' in line and 'complete' in line:
+            if "Update to" in line and "complete" in line:
                 return True
         return False
 
@@ -827,10 +886,10 @@ class Arkserver(BaseCog):
                 self.active_instances = self.active_instances + 1
                 instance_list.append(instance)
         if self.active_instances > await self.settings.InstanceLimit():
-            print('Warning: More instances are currently running than the instance limit!')
+            print("Warning: More instances are currently running than the instance limit!")
             adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
             if adminchannel is not None:
-                await adminchannel.send('Warning: More instances are currently running than the instance limit!')
+                await adminchannel.send("Warning: More instances are currently running than the instance limit!")
         return instance_list
 
     async def presence_manager(self):
@@ -839,19 +898,21 @@ class Arkserver(BaseCog):
             if not self.updating:
                 currentinstance = await self.settings.Instance()
                 try:
-                    output = await self.runcommand("status", instance=currentinstance)
-                    if '\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n' not in output:
-                        message = currentinstance + ': Offline'
+                    output = await self.run_command("status", instance=currentinstance)
+                    if not output:
+                        pass
+                    elif "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" not in output:
+                        message = currentinstance + ": Offline"
                         await self.bot.change_presence(activity=discord.Game(name=message), status=discord.Status.dnd)
                     else:
                         players, version = None, None
                         for line in output:
-                            if 'Players:' in line and 'Active' not in line:
+                            if "Players:" in line and "Active" not in line:
                                 players = line
-                            if 'Server Name' in line:
-                                version = '(' + line.split('(')[1]
+                            if "Server Name" in line:
+                                version = "(" + line.split("(")[1]
                         try:
-                            message = currentinstance + ' ' + players + version
+                            message = currentinstance + " " + players + version
                             await self.bot.change_presence(activity=discord.Game(name=message),
                                                            status=discord.Status.online)
                         except discord.DiscordException as e:
@@ -865,17 +926,17 @@ class Arkserver(BaseCog):
 
     async def notify_updates(self, instance):
         if await self.playercheck(instance):
-            await self.runcommand('broadcast "Server will shutdown for updates in approximately'
-                                  ' 15 minutes."', await self.settings.Channel(), False)
+            await self.run_command('broadcast "Server will shutdown for updates in approximately'
+                                   ' 15 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(300)
-            await self.runcommand('broadcast "Server will shutdown for updates in approximately'
-                                  ' 10 minutes."', await self.settings.Channel(), False)
+            await self.run_command('broadcast "Server will shutdown for updates in approximately'
+                                   ' 10 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(300)
-            await self.runcommand('broadcast "Server will shutdown for updates in approximately'
-                                  ' 5 minutes."', await self.settings.Channel(), False)
+            await self.run_command('broadcast "Server will shutdown for updates in approximately'
+                                   ' 5 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(240)
-            await self.runcommand('broadcast "Server will shutdown for updates in approximately'
-                                  ' 60 seconds."', await self.settings.Channel(), False)
+            await self.run_command('broadcast "Server will shutdown for updates in approximately'
+                                   ' 60 seconds."', await self.settings.Channel(), False)
             await asyncio.sleep(60)
 
     async def update_checker(self):
@@ -886,7 +947,6 @@ class Arkserver(BaseCog):
                 if not self.updating:  # proceed only if the bot isn't already manually updating or restarting
                     status = await self.updatechecker()
                     modstatus = await self.checkmods()
-                    adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
                     channel = self.bot.get_channel(await self.settings.Channel())
                     print("Update check completed at {0}".format(datetime.utcnow()))
                     if status or modstatus:  # proceed with update if checkupdate tells us that an update is available
@@ -894,20 +954,22 @@ class Arkserver(BaseCog):
                         self.updating = True
                         await self.bot.change_presence(activity=discord.Game(name="Updating Server"),
                                                        status=discord.Status.dnd)
+                        message = None
                         if not instance_list:
-                            update = await self.runcommand(command="update --update-mods --backup",
-                                                           channel=adminchannel, verbose=await self.settings.Verbose(),
-                                                           instance='all')
-                            if not await self.settings.Verbose():
-                                if adminchannel is not None:
-                                    await adminchannel.send(update)
+                            if channel is not None:
+                                message = await channel.send("Servers are updating.")
+                            await self.update_server()
                         else:
+                            if channel is not None:
+                                message = await channel.send("Servers are restarting soon for updates.")
                             await asyncio.gather(*[self.notify_updates(instance) for instance in instance_list])
+                            if channel is not None and message is not None:
+                                await message.edit(content="Servers are updating.")
                             await self.update_server()
                         await self.bot.change_presence(activity=discord.Game(name="Servers Launching..."),
                                                        status=discord.Status.idle)
-                        if channel is not None:
-                            await channel.send("Servers have been updated and should be up within 10 minutes.")
+                        if channel is not None and message is not None:
+                            await message.edit(content="Servers have been updated and should be up within 10 minutes.")
                         await asyncio.sleep(300)
                         self.updating = False
                     else:
@@ -916,12 +978,11 @@ class Arkserver(BaseCog):
                     print("Server is already updating or restarting, auto-update cancelled")
 
     async def update_server(self):
-        channel = self.bot.get_channel(await self.settings.Channel())
         adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
-        if channel is not None:
-            await channel.send("Servers are restarting for updates.")
-        update = await self.runcommand(command="update --update-mods --backup", channel=adminchannel,
-                                       verbose=await self.settings.Verbose(), instance="all")
+        update = await self.run_command(command="update --update-mods --backup", channel=adminchannel,
+                                        verbose=await self.settings.Verbose(), instance="all")
+        if not update:
+            return
         if not await self.settings.Verbose():
             if adminchannel is not None:
                 await adminchannel.send(update)
