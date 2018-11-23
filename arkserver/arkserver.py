@@ -1,26 +1,23 @@
 from datetime import datetime
 import os
-import sys
 import asyncio
 import glob
-from subprocess import PIPE, Popen
-from threading import Thread
-import shlex
+import locale
+from asyncio.subprocess import PIPE, STDOUT
 import discord
 from redbot.core import commands
 from redbot.core import Config
-from queue import Queue, Empty  # python 3.x
 
-ON_POSIX = 'posix' in sys.builtin_module_names
 BaseCog = getattr(commands, "Cog", object)
 
 
 async def setupcheck(ctx):
     """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we
     need to get them separately here"""
+    del ctx
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                               cog_name="arkserver")
+                               cog_name="Arkserver")
     return await settings.SetupDone()
 
 
@@ -29,7 +26,7 @@ async def arkrolecheck(ctx):
      to get them separately here"""
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                               cog_name="arkserver")
+                               cog_name="Arkserver")
     role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
     return role in ctx.author.roles
 
@@ -37,9 +34,10 @@ async def arkrolecheck(ctx):
 async def arkcharcheck(ctx):
     """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
      to get them separately here"""
+    del ctx
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                               cog_name="arkserver")
+                               cog_name="Arkserver")
     return await settings.CharacterEnabled()
 
 
@@ -70,61 +68,54 @@ class Arkserver(BaseCog):
         self.settings.register_user(**default_user)
 
     @staticmethod
-    def enqueue_output(out, queue):
-        """Queues output from Popen output"""
-        for line in iter(out.readline, b''):
-            queue.put(line)
-        out.close()
+    async def read_stream_and_display(stream, channel, verbose):
+        """Read from stream line by line until EOF, send each line to discord if verbose and capture the lines to
+        be returned in a list."""
+        output = []
+        while True:
+            line = await stream.readline()
+            sani = line.decode(locale.getpreferredencoding(False))
+            if not sani:
+                break
+            if len(sani) > 1900 or len(sani) < 1:
+                pass
+            else:
+                output.append(sani)
+            if verbose and channel is not None:
+                try:
+                    await channel.send(sani)
+                except discord.DiscordException as exception:
+                    print("Error posting to discord {0}, {1}".format(exception, sani))
+        return output
+
+    async def read_and_display(self, args, channel, verbose):
+        """Capture cmd's stdout, stderr while displaying them as they arrive (line by line)."""
+        # start process
+        process = await asyncio.create_subprocess_shell(args, stdout=PIPE, stderr=STDOUT)
+        # read child's stdout/stderr concurrently (capture and display)
+        try:
+            stdout = await asyncio.gather(
+                self.read_stream_and_display(process.stdout, channel, verbose))
+        except Exception:
+            process.kill()
+            raise
+        finally:
+            # wait for the process to exit
+            rc = await process.wait()
+        return rc, stdout
 
     async def runcommand(self, command, channel=None, verbose=False, instance='default'):
-        """This function runs a command in the terminal and uses a separate thread to collect the response
-        so it isn't blocking"""
+        """This function creates a shell to run arkmanager commands in a way that isn't blocking, and returns the
+        combined output of stderr and stdout"""
         if instance == 'default':
             instance = await self.settings.Instance()
-        command = 'arkmanager ' + command + ' @' + instance
-        process = Popen(shlex.split(command), stdout=PIPE, bufsize=1, close_fds=ON_POSIX, start_new_session=True)
-        queue = Queue()
-        thread = Thread(target=self.enqueue_output, args=(process.stdout, queue))
-        thread.daemon = True
-        thread.start()
-        output = []
-        list_replacements = ["[1;32m ", "[1;31m", "[0;39m   ", "[0;39m ", "[0;39m", "8[J", "[68G[   [1;32m",
-                             "  ]", "\033"]
-        while True:
-            try:
-                try:
-                    readline = queue.get_nowait().decode()
-                except Empty:
-                    if thread.isAlive() is False and queue.empty() is True:
-                        break
-                    else:
-                        pass
-                else:
-                    if readline:
-                        if len(readline) > 1900:
-                            output.append("Line exceeded character limit.")
-                        else:
-                            output.append(readline)
-                        if verbose and channel is not None:
-                            sani = readline.lstrip("7")
-                            for elem in list_replacements:
-                                sani = sani.replace(elem, "")
-                            try:
-                                await channel.send("{0}".format(sani))
-                            except Exception as exception:
-                                print("Error posting to discord {0}, {1}".format(exception, sani))
-
-            except Exception as exception:
-                print("Something went wrong... you should check the status of the server with +ark status. {0}".format(
-                    exception))
-                print("Updating and restarting options will be locked for 3 minutes for safety.")
-                self.updating = True
-                await asyncio.sleep(180)
-                self.updating = False
-                if process.poll() is None:
-                    process.kill()
-                return output
-        return output
+        args = 'arkmanager ' + command + ' @' + instance
+        try:
+            rc, output = await asyncio.ensure_future(self.read_and_display(args=args, channel=channel,
+                                                     verbose=verbose))
+        except Exception as e:
+            return "Program encountered an Exception {0}".format(e)
+        return output[0]
 
     @commands.command()
     @commands.is_owner()
@@ -761,9 +752,13 @@ class Arkserver(BaseCog):
         await self.runcommand("update --update-mods --backup", ctx.channel, True)
 
     @arkadmin.command(name="validate")
-    async def ark_validate(self, ctx):
+    async def ark_validate(self, ctx, minput: str = 'default'):
         """Validates files with steamcmd"""
-        await self.runcommand("update --validate", ctx.channel, True)
+        async with ctx.channel.typing():
+            output = await self.runcommand(command="update --validate", channel=ctx.channel,
+                                           verbose=await self.settings.Verbose(), instance=minput)
+            if not await self.settings.Verbose():
+                await ctx.send(output)
 
     @arkadmin.command(name="forceupdate")
     async def ark_forceupdate(self, ctx):
@@ -840,7 +835,7 @@ class Arkserver(BaseCog):
 
     async def presence_manager(self):
         """Reports status of the currently active instance using discord status"""
-        while self is self.bot.get_cog("arkserver"):
+        while self is self.bot.get_cog("Arkserver"):
             if not self.updating:
                 currentinstance = await self.settings.Instance()
                 try:
@@ -859,8 +854,8 @@ class Arkserver(BaseCog):
                             message = currentinstance + ' ' + players + version
                             await self.bot.change_presence(activity=discord.Game(name=message),
                                                            status=discord.Status.online)
-                        except discord.DiscordException:
-                            pass
+                        except discord.DiscordException as e:
+                            print(e)
                     await asyncio.sleep(30)
                 except Exception as e:
                     print("Error in presence_manager: {0}".format(e))
