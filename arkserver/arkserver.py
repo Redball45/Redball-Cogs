@@ -15,6 +15,34 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 BaseCog = getattr(commands, "Cog", object)
 
 
+async def setupcheck():
+    """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we
+    need to get them separately here"""
+    from redbot.core import Config
+    settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
+                               cog_name="arkserver")
+    return await settings.SetupDone()
+
+
+async def arkrolecheck(ctx):
+    """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
+     to get them separately here"""
+    from redbot.core import Config
+    settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
+                               cog_name="arkserver")
+    role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
+    return role in ctx.author.roles
+
+
+async def arkcharcheck():
+    """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
+     to get them separately here"""
+    from redbot.core import Config
+    settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
+                               cog_name="arkserver")
+    return await settings.CharacterEnabled()
+
+
 class Arkserver(BaseCog):
     """Ark Server commands"""
     def __init__(self, bot):
@@ -136,34 +164,6 @@ class Arkserver(BaseCog):
         await ctx.send("The default instance limit is 1. This is the maximum number of ARK Dedicated Server processes"
                        "that can be run at once with this cog. You can change this with arkadmin instancelimit (n) if"
                        "you desire but you should NOT set this to more than your server is capable of running.")
-
-    @staticmethod
-    async def setupcheck():
-        """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we
-        need to get them separately here"""
-        from redbot.core import Config
-        settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                                   cog_name="arkserver")
-        return await settings.SetupDone()
-
-    @staticmethod
-    async def arkrolecheck(ctx):
-        """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
-         to get them separately here"""
-        from redbot.core import Config
-        settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                                   cog_name="arkserver")
-        role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
-        return role in ctx.author.roles
-
-    @staticmethod
-    async def arkcharcheck():
-        """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
-         to get them separately here"""
-        from redbot.core import Config
-        settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                                   cog_name="arkserver")
-        return await settings.CharacterEnabled()
 
     @commands.command()
     @commands.is_owner()
