@@ -1,9 +1,9 @@
-from .arkserver import arkserver
+from .arkserver import Arkserver
 import asyncio
 
 
 def setup(bot):
-	n = arkserver(bot)
+	n = Arkserver(bot)
 	loop = asyncio.get_event_loop()
 	loop.create_task(n.discover_instances())
 	loop.create_task(n.update_checker())
