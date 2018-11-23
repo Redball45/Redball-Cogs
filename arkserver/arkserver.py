@@ -15,7 +15,7 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 BaseCog = getattr(commands, "Cog", object)
 
 
-async def setupcheck():
+async def setupcheck(ctx):
     """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we
     need to get them separately here"""
     from redbot.core import Config
@@ -34,7 +34,7 @@ async def arkrolecheck(ctx):
     return role in ctx.author.roles
 
 
-async def arkcharcheck():
+async def arkcharcheck(ctx):
     """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
      to get them separately here"""
     from redbot.core import Config
