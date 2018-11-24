@@ -638,8 +638,11 @@ class Arkserver(BaseCog):
     @commands.check(arkrolecheck)
     async def ark_cancel(self, ctx):
         """Cancels a pending restart"""
-        self.cancel = True
-        await ctx.send("Restart cancelled.")
+        if self.updating:
+            self.cancel = True
+            await ctx.send("Restart cancelled.")
+        else:
+            await ctx.send("No restarts are pending.")
 
     @ark.command(name="restart")
     @commands.check(arkrolecheck)
@@ -929,12 +932,21 @@ class Arkserver(BaseCog):
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
                                    ' 15 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(300)
+            if self.cancel:
+                await self.run_command('broadcast "Server shutdown was aborted by user request."')
+                return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
                                    ' 10 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(300)
+            if self.cancel:
+                await self.run_command('broadcast "Server shutdown was aborted by user request."')
+                return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
                                    ' 5 minutes."', await self.settings.Channel(), False)
             await asyncio.sleep(240)
+            if self.cancel:
+                await self.run_command('broadcast "Server shutdown was aborted by user request."')
+                return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
                                    ' 60 seconds."', await self.settings.Channel(), False)
             await asyncio.sleep(60)
@@ -947,9 +959,9 @@ class Arkserver(BaseCog):
                 if not self.updating:  # proceed only if the bot isn't already manually updating or restarting
                     status = await self.updatechecker()
                     modstatus = await self.checkmods()
-                    channel = self.bot.get_channel(await self.settings.Channel())
                     print("Update check completed at {0}".format(datetime.utcnow()))
                     if status or modstatus:  # proceed with update if checkupdate tells us that an update is available
+                        channel = self.bot.get_channel(await self.settings.Channel())
                         instance_list = await self.discover_instances()
                         self.updating = True
                         await self.bot.change_presence(activity=discord.Game(name="Updating Server"),
@@ -963,13 +975,26 @@ class Arkserver(BaseCog):
                             if channel is not None:
                                 message = await channel.send("Servers are restarting soon for updates.")
                             await asyncio.gather(*[self.notify_updates(instance) for instance in instance_list])
+                            if self.cancel:
+                                pass
+                            else:
+                                if channel is not None and message is not None:
+                                    await message.edit(content="Servers are updating.")
+                                await self.update_server()
+                        if self.cancel:
+                            self.cancel = False
+                            self.updating = False
+                            if channel is not None:
+                                await channel.send("Restart has been cancelled by user request. Automatic updates will "
+                                                   "begin again in 15 minutes. Type {0}arkadmin autoupdate off to "
+                                                   "disable.")
+                            await asyncio.sleep(540)
+                        else:
+                            await self.bot.change_presence(activity=discord.Game(name="Servers Launching..."),
+                                                           status=discord.Status.idle)
                             if channel is not None and message is not None:
-                                await message.edit(content="Servers are updating.")
-                            await self.update_server()
-                        await self.bot.change_presence(activity=discord.Game(name="Servers Launching..."),
-                                                       status=discord.Status.idle)
-                        if channel is not None and message is not None:
-                            await message.edit(content="Servers have been updated and should be up within 10 minutes.")
+                                await message.edit(content="Servers have been updated and should be up within 10"
+                                                           "minutes.")
                         await asyncio.sleep(300)
                         self.updating = False
                     else:
