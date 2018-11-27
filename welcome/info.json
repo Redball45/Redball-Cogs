@@ -1,9 +1,0 @@
-{
-    "AUTHOR" : "Redball45, Irdumbs",
-    "INSTALL_MSG" : "Welcome Cog",
-    "NAME" : "Welcome",
-    "SHORT" : "Welcome",
-    "DESCRIPTION" : "Welcome cog for personal use by Redball45, discord.py rewrite of original cog by Irdumbs https://github.com/irdumbs/Dumb-Cogs",
-    "TAGS" : ["welcome"],
-    "HIDDEN" : false
-}

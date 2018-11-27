@@ -1,8 +1,0 @@
-{
-    "AUTHOR" : "Redball45",
-    "INSTALL_MSG" : "Minecraft Server Manager Cog Successfully Installed",
-    "NAME" : "MCServer",
-    "SHORT" : "Minecraft Server management utility",
-    "DESCRIPTION" : "Remote update and restart of Minecraft Servers",
-    "TAGS": ["Minecraft", "utilities"]
-}
