@@ -953,7 +953,7 @@ class Arkserver(BaseCog):
 
     async def update_checker(self):
         """Checks for updates automatically every hour"""
-        while self is self.bot.get_cog("arkserver"):
+        while self is self.bot.get_cog("Arkserver"):
             await asyncio.sleep(60)
             if await self.settings.AutoUpdate():  # proceed only if autoupdating is enabled
                 if not self.updating:  # proceed only if the bot isn't already manually updating or restarting
