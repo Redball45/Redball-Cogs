@@ -1010,4 +1010,7 @@ class Arkserver(BaseCog):
             return
         if not await self.settings.Verbose():
             if adminchannel is not None:
-                await adminchannel.send(update)
+                try:
+                    await adminchannel.send(update)
+                except discord.HTTPException as e:
+                    await adminchannel.send("Update message was too long. {0}".format(e))
