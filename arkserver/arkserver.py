@@ -467,7 +467,13 @@ class Arkserver(BaseCog):
         """Returns a list of the mods used for the specified instance."""
         if instance is "default":
             instance = await self.settings.Instance()
-        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + instance + ".cfg"
+        available_instances = await self.detect_instances()
+        desired_instance = next((s for s in available_instances if instance.lower() in s.lower()), None)
+        if not desired_instance:
+            await ctx.send("I don't recognize that instance, available options are {0}.".format(available_instances))
+            return
+        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + desired_instance + ".cfg"
+        mod_list = []
         with open(config_file, "r") as f:
             for line in f:
                 if line.startswith("ark_GameModIds"):
@@ -476,7 +482,7 @@ class Arkserver(BaseCog):
                     mod_list = mod_list.strip().split(',')
 
         if mod_list:
-            output = "Mods used on instance {0}.\n".format(instance)
+            output = "Mods used on instance {0}.\n".format(desired_instance)
             for mod in mod_list:
                 try:
                     int(mod)
