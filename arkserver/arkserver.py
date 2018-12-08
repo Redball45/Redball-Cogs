@@ -447,7 +447,7 @@ class Arkserver(BaseCog):
     @ark.command()
     @commands.check(arkrolecheck)
     async def checkupdate(self, ctx):
-        """Just checks for ark updates - use +ark update to start update"""
+        """Checks for ark updates for the current instance."""
         if await self.updatechecker(ctx.channel, await self.settings.Verbose()):
             await ctx.send("Updates are available!")
         else:
@@ -456,7 +456,7 @@ class Arkserver(BaseCog):
     @ark.command()
     @commands.check(arkrolecheck)
     async def checkmodupdate(self, ctx):
-        """Just checks for mod updates - use +ark update to start update"""
+        """Checks for steam workshop mod updates for mods used for the current instance"""
         if await self.checkmods(ctx.channel, await self.settings.Verbose()):
             await ctx.send("Updates to some mods are available.")
         else:
@@ -496,7 +496,7 @@ class Arkserver(BaseCog):
     @ark.command(name="stop")
     @commands.check(arkrolecheck)
     async def ark_stop(self, ctx, minput: str = "default"):
-        """Stops the Ark Server"""
+        """Stops the specificed instance."""
         async with ctx.channel.typing():
             if minput != "default":
                 available_instances = await self.detect_instances()
@@ -518,7 +518,7 @@ class Arkserver(BaseCog):
 
     @ark.command(name="players")
     async def ark_players(self, ctx):
-        """Lists players currently in the server."""
+        """Lists players in the server of the current instance."""
         output = await self.run_command('rconcmd "listplayers"', ctx.channel, False)
         if not output:
             return
@@ -532,7 +532,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="dinowipe")
     async def arkadmin_dinowipe(self, ctx):
-        """Runs DestroyWildDinos."""
+        """Runs the rconcmd DestroyWildDinos on the current instance to wipe all wild dinosaurs."""
         await self.run_command('rconcmd "destroywilddinos"', ctx.channel, True)
 
     @arkadmin.command(name="autoupdate")
@@ -555,6 +555,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="channel")
     async def arkadmin_channel(self, ctx, channel: discord.TextChannel):
+        """Sets the channel that log messages are sent to, mostly used for the autoupdater."""
         if not ctx.guild.me.permissions_in(channel).send_messages:
             return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
         await self.settings.Channel.set(channel.id)
@@ -565,11 +566,15 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="role")
     async def arkadmin_role(self, ctx, role: discord.Role):
+        """Sets a privileged role that has access to additional commands, privileged users can
+        start, stop, restart, update, and change the active instance. """
         await self.settings.Role.set(role.id)
         await ctx.send("Role set to {.mention}".format(role))
 
     @arkadmin.command(name="instancelimit")
     async def arkadmin_instancelimit(self, ctx, instance_limit: str = "info"):
+        """Sets the maximum number of server instances that can be running at once. The bot will not start instances
+        when at the maximum"""
         try:
             instance_limit = int(instance_limit)
             await self.settings.InstanceLimit.set(instance_limit)
@@ -579,6 +584,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="adminchannel")
     async def arkadmin_adminchannel(self, ctx, channel: discord.TextChannel):
+        """Sets the channel that administration messages are sent to, mostly used for the autoupdater."""
         if not ctx.guild.me.permissions_in(channel).send_messages:
             return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
         await self.settings.AdminChannel.set(channel.id)
@@ -587,7 +593,8 @@ class Arkserver(BaseCog):
     @arkadmin.command(name="charmanagement")
     async def arkadmin_charactermanagement(self, ctx, toggle: str = "info"):
         """Enables or disables the ability for users to store and retrieve character files belonging to them in the
-         storage directory."""
+         storage directory. This effectively enables ARK Character Upload/Download across all instances managed by this
+         bot."""
         toggle_status = await self.settings.CharacterEnabled()
         if toggle.lower() == "off":
             await self.settings.CharacterEnabled.set(False)
@@ -605,7 +612,8 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="verbose")
     async def ark_verbose(self, ctx, toggle: str = "info"):
-        """Toggles command verbosity"""
+        """Toggles how verbose the bot is with command responses, when enabled the bot will reply more often and use
+        line by line output for arkmanager operations."""
         toggle_status = await self.settings.Verbose()  # retrieves current status of toggle from settings file
         if toggle.lower() == "off":
             await self.settings.Verbose.set(False)
@@ -622,7 +630,7 @@ class Arkserver(BaseCog):
     @ark.command(name="start")
     @commands.check(arkrolecheck)
     async def ark_start(self, ctx, minput: str = "default"):
-        """Starts the Ark Server"""
+        """Starts the specified instance."""
         if self.active_instances >= await self.settings.InstanceLimit():
             await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is"
                            "incorrect, use [p]ark instancecheck.")
@@ -649,13 +657,13 @@ class Arkserver(BaseCog):
     @ark.command(name="instancecheck")
     @commands.check(arkrolecheck)
     async def ark_instancecheck(self, ctx):
-        """Resets self.active_instances in case it has become desynced from reality"""
+        """Tells the bot to recheck how many active instances exist"""
         await self.discover_instances()
         await ctx.send("Detected {0} instances.".format(self.active_instances))
 
     @ark.command(name="status")
     async def ark_status(self, ctx, instance: str = "default"):
-        """Checks the server status"""
+        """Retrieves the status of the specified instance."""
         async with ctx.channel.typing():
             verbose = await self.settings.Verbose()
             output = await self.run_command("status", instance=instance, channel=ctx.channel, verbose=verbose)
@@ -668,7 +676,7 @@ class Arkserver(BaseCog):
     @ark.command(name="cancel")
     @commands.check(arkrolecheck)
     async def ark_cancel(self, ctx):
-        """Cancels a pending restart"""
+        """Cancels any pending restarts"""
         if self.updating:
             self.cancel = True
             await ctx.send("Restart cancelled.")
@@ -678,7 +686,7 @@ class Arkserver(BaseCog):
     @ark.command(name="restart")
     @commands.check(arkrolecheck)
     async def ark_restart(self, ctx, delay: int = 60):
-        """Restarts the ARK Server with a specified delay (in seconds)"""
+        """Restarts the currently selected instance with a specified delay (in seconds)"""
         def waitcheck(m):
             return m.author == ctx.author and m.channel == ctx.channel
         try:
@@ -741,7 +749,7 @@ class Arkserver(BaseCog):
     @ark.command(name="update")
     @commands.check(arkrolecheck)
     async def ark_update(self, ctx):
-        """Checks for updates, if found, downloads, then restarts the server"""
+        """Checks for updates, if found, updates all instances and restarts those that were active."""
         def waitcheck(m):
             return m.author == ctx.author and m.channel == ctx.channel
         status = await self.updatechecker(ctx.channel, await self.settings.Verbose())
@@ -795,7 +803,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="save")
     async def ark_save(self, ctx, minput: str = "default"):
-        """Saves the world state"""
+        """Saves the world state of the selected instance."""
         async with ctx.channel.typing():
             output = await self.run_command(command="save", channel=ctx.channel,
                                             verbose=await self.settings.Verbose(), instance=minput)
@@ -806,7 +814,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="backup")
     async def ark_backup(self, ctx, minput: str = "default"):
-        """Creates a backup of the save and config for the current instance. Use 'all' to backup all instances."""
+        """Creates a backup of the save and config for the selected instance. Use 'all' to backup all instances."""
         async with ctx.channel.typing():
             output = await self.run_command(command="backup", channel=ctx.channel,
                                             verbose=await self.settings.Verbose(), instance=minput)
@@ -817,7 +825,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="updatenow")
     async def ark_updatenow(self, ctx, minput: str = "default"):
-        """Updates with no delay or checks"""
+        """Updates the selected instance with no delay or player checks."""
         async with ctx.channel.typing():
             output = await self.run_command(command="update --update-mods --backup", channel=ctx.channel,
                                             verbose=await self.settings.Verbose(), instance=minput)
@@ -828,7 +836,7 @@ class Arkserver(BaseCog):
 
     @arkadmin.command(name="validate")
     async def ark_validate(self, ctx, minput: str = "default"):
-        """Validates files with steamcmd"""
+        """Validates the server files for the selected instance with steamcmd"""
         async with ctx.channel.typing():
             output = await self.run_command(command="update --validate", channel=ctx.channel,
                                             verbose=await self.settings.Verbose(), instance=minput)
