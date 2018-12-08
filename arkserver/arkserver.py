@@ -462,6 +462,31 @@ class Arkserver(BaseCog):
         else:
             await ctx.send("No mod updates found.")
 
+    @ark.command(name="mods")
+    async def ark_mods(self, ctx, instance: str = "default"):
+        """Returns a list of the mods used for the specified instance."""
+        if instance is "default":
+            instance = await self.settings.Instance()
+        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + instance + ".cfg"
+        with open(config_file, "r") as f:
+            for line in f:
+                if line.startswith("ark_GameModIds"):
+                    command, value = line.split("=")
+                    mod_list = value.replace('"', '')
+                    mod_list = mod_list.strip().split(',')
+
+        if mod_list:
+            output = "Mods used on instance {0}.\n".format(instance)
+            for mod in mod_list:
+                try:
+                    int(mod)
+                    output = output + "http://steamcommunity.com/sharedfiles/filedetails/?id=" + mod + "\n"
+                except ValueError:
+                    pass
+        else:
+            output = "This instance has no mods."
+        await ctx.send(output)
+
     @ark.command(name="stop")
     @commands.check(arkrolecheck)
     async def ark_stop(self, ctx, minput: str = "default"):
@@ -993,7 +1018,7 @@ class Arkserver(BaseCog):
                             await self.bot.change_presence(activity=discord.Game(name="Servers Launching..."),
                                                            status=discord.Status.idle)
                             if channel is not None and message is not None:
-                                await message.edit(content="Servers have been updated and should be up within 10"
+                                await message.edit(content="Servers have been updated and should be up within 10 "
                                                            "minutes.")
                         await asyncio.sleep(300)
                         self.updating = False
