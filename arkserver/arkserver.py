@@ -496,7 +496,7 @@ class Arkserver(BaseCog):
     @ark.command(name="stop")
     @commands.check(arkrolecheck)
     async def ark_stop(self, ctx, minput: str = "default"):
-        """Stops the specificed instance."""
+        """Stops the specified instance."""
         async with ctx.channel.typing():
             if minput != "default":
                 available_instances = await self.detect_instances()
@@ -1047,9 +1047,11 @@ class Arkserver(BaseCog):
                                         verbose=await self.settings.Verbose(), instance="all")
         if not update:
             return
+        update = self.sanitizeoutput(update)
         if not await self.settings.Verbose():
             if adminchannel is not None:
                 try:
                     await adminchannel.send(update)
                 except discord.HTTPException as e:
-                    await adminchannel.send("Update message was too long. {0}".format(e))
+                    await adminchannel.send("Update message was too long - {1} characters. Error: {0}".format(e, len(
+                        update)))
