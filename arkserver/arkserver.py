@@ -1041,6 +1041,16 @@ class Arkserver(BaseCog):
                 else:
                     print("Server is already updating or restarting, auto-update cancelled")
 
+    @staticmethod
+    async def split_and_send(message, destination):
+        """Splits a string over discords 2000 character limit into multiple messages."""
+        message = message.replace("```", "")
+        n = 1980
+        output = [message[i:i+n] for i in range(0, len(message), n)]
+        for line in output:
+            line = "```" + line + "```"
+            await destination.send(line)
+
     async def update_server(self):
         adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
         update = await self.run_command(command="update --update-mods --backup", channel=adminchannel,
@@ -1051,7 +1061,6 @@ class Arkserver(BaseCog):
         if not await self.settings.Verbose():
             if adminchannel is not None:
                 try:
-                    await adminchannel.send(update)
+                    await self.split_and_send(update, adminchannel)
                 except discord.HTTPException as e:
-                    await adminchannel.send("Update message was too long - {1} characters. Error: {0}".format(e, len(
-                        update)))
+                    await adminchannel.send("Error when trying to split and send. - {0}".format(e))
