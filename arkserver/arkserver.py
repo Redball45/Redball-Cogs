@@ -254,7 +254,7 @@ class Arkserver(BaseCog):
             await ctx.send("Please only use alphabetic characters in the savename.")
             return
         steamid = await self.settings.user(ctx.author).steamid()
-        if steamid:
+        if not steamid:
             await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can"
                            "use this command.")
             return
@@ -324,7 +324,7 @@ class Arkserver(BaseCog):
             await ctx.send("Please only use alphabetic characters in the savename.")
             return
         steamid = await self.settings.user(ctx.author).steamid()
-        if steamid:
+        if not steamid:
             await ctx.send("You need to have your steam ID attached to your discord account by my owner before you can"
                            "use this command.")
             return
