@@ -93,21 +93,21 @@ class MineServer(BaseCog):
     async def stop(self, ctx):
         """Stops the server gracefully, saving before shutdown."""
         def waitcheck(wait_react, wait_user):
-            return wait_user == ctx.author and str(wait_react.emoji) == '✔' or wait_user == ctx.author and \
-                   str(wait_react.emoji) == '❌'
+            return wait_user == ctx.author and str(wait_react.emoji) == '✅' or wait_user == ctx.author and \
+                   str(wait_react.emoji) == '❎'
         if await self.emptycheck():
             output = await self.rconcall("stop")
             return await ctx.send(output)
         message = await ctx.send("Players are currently in the server, shutdown anyway?")
-        await message.add_reaction("✔")
-        await message.add_reaction("❌")
+        await message.add_reaction("✅")
+        await message.add_reaction("❎")
         try:
             reaction, user = await self.bot.wait_for("reaction_add", check=waitcheck, timeout=30.0)
         except asyncio.TimeoutError:
             await message.clear_reactions()
             await message.edit(content="You took too long... shut down cancelled.")
             return
-        if str(reaction.emoji) == '✔':
+        if str(reaction.emoji) == '✅':
             output = await self.rconcall("stop")
         else:
             output = "Okay, shut down cancelled."
