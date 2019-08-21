@@ -2,7 +2,7 @@ import asyncio
 import discord
 from redbot.core import commands
 from redbot.core import Config
-from async_mcrcon import MinecraftClient
+from .async_mcrcon import MinecraftClient
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -12,8 +12,8 @@ async def setupcheck(ctx):
     need to get them separately here"""
     del ctx
     from redbot.core import Config
-    settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
-                               cog_name="mineserver")
+    settings = Config.get_conf(cog_instance=None, identifier=54252452, force_registration=False,
+                               cog_name="MineServer")
     return await settings.SetupDone()
 
 
@@ -22,7 +22,7 @@ async def minerolecheck(ctx):
      to get them separately here"""
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=54252452, force_registration=False,
-                               cog_name="mineserver")
+                               cog_name="MineServer")
     role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
     return role in ctx.author.roles
 
@@ -43,7 +43,9 @@ class MineServer(BaseCog):
         )
 
     async def rconcall(self, command):
-        async with MinecraftClient('localhost', self.settings.RCONPort(), self.settings.RCONPassword) as mc:
+        port = await self.settings.RCONPort()
+        password = await self.settings.RCONPassword()
+        async with MinecraftClient('localhost', port, password) as mc:
             output = await mc.send(command)
             return output
 
@@ -77,7 +79,31 @@ class MineServer(BaseCog):
 
     @minecraft.command()
     async def save(self, ctx):
-        await ctx.send(self.rconcall("save-all"))
+        output = await self.rconcall("save-all")
+        await ctx.send(output)
+
+    @minecraft.command()
+    async def list(self, ctx):
+        output = await self.rconcall("list")
+        await ctx.send(output)
+
+    @minecraft.command()
+    async def stop(self, ctx):
+        output = await self.rconcall("stop")
+        await ctx.send(output)
+
+    @minecraft.command()
+    async def whitelist(self, ctx, toggle: str = "info"):
+        """Toggles autoupdating"""
+        if toggle.lower() == "off":
+            output = await self.rconcall("whitelist off")
+            await ctx.send(output)
+        elif toggle.lower() == "on":
+            output = await self.rconcall("whitelist on")
+            await ctx.send(output)
+        else:
+            await ctx.send("To enable the whitelist, use {0}minecraft whitelist on, and to disable use {0} minecraft"
+                           "whitelist off.".format(ctx.prefix))
 
     @commands.command(name="minerole")
     @commands.is_owner()
