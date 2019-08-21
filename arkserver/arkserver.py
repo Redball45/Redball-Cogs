@@ -685,12 +685,12 @@ class Arkserver(BaseCog):
 
     @ark.command(name="restart")
     @commands.check(arkrolecheck)
-    async def ark_restart(self, ctx, delay: int = 60):
+    async def ark_restart(self, ctx, delay: str = "60"):
         """Restarts the currently selected instance with a specified delay (in seconds)"""
         def waitcheck(m):
             return m.author == ctx.author and m.channel == ctx.channel
         try:
-            int(delay)
+            delay = int(delay)
         except ValueError:
             try:
                 float(delay)

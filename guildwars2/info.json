@@ -1,9 +1,0 @@
-{
-    "AUTHOR" : "Redball45, Maselkov",
-    "INSTALL_MSG" : "Guild Wars 2 Cog Installed",
-    "NAME" : "guildwars2",
-    "SHORT" : "GW2 related commands",
-    "DESCRIPTION" : "Commands for Guild Wars 2",
-    "TAGS" : ["API", "gw2"],
-    "HIDDEN" : false
-}
