@@ -70,7 +70,7 @@ class MineServer(BaseCog):
         await self.settings.SetupDone.set(True)
         await ctx.send("Setup complete. If you need to change any of these settings, simply re-run this setup command.")
 
-    @commands.group()
+    @commands.group(aliases=["mc"])
     @commands.check(setupcheck)
     async def minecraft(self, ctx):
         """Commands related to remote management of a minecraft server."""
@@ -106,7 +106,7 @@ class MineServer(BaseCog):
             output = await self.rconcall("whitelist on")
             await ctx.send(output)
         else:
-            await ctx.send("To enable the whitelist, use {0}minecraft whitelist on, and to disable use {0} minecraft"
+            await ctx.send("To enable the whitelist, use {0}minecraft whitelist on, and to disable use {0}minecraft"
                            "whitelist off.".format(ctx.prefix))
 
     @minecraft.command()
