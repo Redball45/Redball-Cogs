@@ -8,8 +8,8 @@ BaseCog = getattr(commands, "Cog", object)
 
 
 async def setupcheck(ctx):
-    """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we
-    need to get them separately here"""
+    """Because the help formatter uses this check outside the cog to determine whether to show you can see this command,
+     and our checks access the cog config, we need to access the cog settings separately here"""
     del ctx
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=54252452, force_registration=False,
@@ -18,8 +18,8 @@ async def setupcheck(ctx):
 
 
 async def minerolecheck(ctx):
-    """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
-     to get them separately here"""
+    """Because the help formatter uses this check outside the cog to determine whether to show you can see this command,
+     and our checks access the cog config, we need to access the cog settings separately here"""
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=54252452, force_registration=False,
                                cog_name="MineServer")
@@ -27,12 +27,8 @@ async def minerolecheck(ctx):
     return role in ctx.author.roles
 
 
-class ArkManagerException(Exception):
-    pass
-
-
 class MineServer(BaseCog):
-    """Ark Server commands"""
+    """Minecraft server commands"""
     def __init__(self, bot):
         self.bot = bot
         self.settings = Config.get_conf(self, 54252452)
@@ -42,6 +38,9 @@ class MineServer(BaseCog):
             RCONPassword=None
         )
 
+    """Async RCON call using MrReacher's rcon implementation. Destination is hardcoded to localhost so this cog will 
+    only function when present on the same machine as the server. If used on the same machine you can safely block
+    external access to this port on your firewall."""
     async def rconcall(self, command):
         port = await self.settings.RCONPort()
         password = await self.settings.RCONPassword()
@@ -52,7 +51,7 @@ class MineServer(BaseCog):
     @commands.command()
     @commands.is_owner()
     async def minesetup(self, ctx):
-        """Interactive setup process. Please complete this setup in DM with the bot."""
+        """Interactive setup process. Please complete this setup in DM with the bot to protect your RCON password."""
         def wait_check(message):
             return message.author == ctx.author and message.channel == ctx.channel
         try:
@@ -73,28 +72,33 @@ class MineServer(BaseCog):
 
     @commands.group()
     @commands.check(setupcheck)
-    @commands.check(minerolecheck)
     async def minecraft(self, ctx):
-        """Commands related to the MinecraftServer"""
+        """Commands related to remote management of a minecraft server."""
 
     @minecraft.command()
+    @commands.check(minerolecheck)
     async def save(self, ctx):
+        """Saves the world state to disk."""
         output = await self.rconcall("save-all")
         await ctx.send(output)
 
     @minecraft.command()
     async def list(self, ctx):
+        """Returns a list of the players currently in the server."""
         output = await self.rconcall("list")
         await ctx.send(output)
 
     @minecraft.command()
+    @commands.check(minerolecheck)
     async def stop(self, ctx):
+        """Stops the server gracefully, saving before shutdown."""
         output = await self.rconcall("stop")
         await ctx.send(output)
 
     @minecraft.command()
+    @commands.check(minerolecheck)
     async def whitelist(self, ctx, toggle: str = "info"):
-        """Toggles autoupdating"""
+        """Enables and disables the whitelist. Use whitelist on to enable and whitelist off to disable."""
         if toggle.lower() == "off":
             output = await self.rconcall("whitelist off")
             await ctx.send(output)
@@ -109,6 +113,6 @@ class MineServer(BaseCog):
     @commands.is_owner()
     async def minerole(self, ctx, role: discord.Role):
         """Sets a privileged role that has access to additional commands, privileged users can
-        start, stop, restart, update, and change the active instance. """
+        stop the server, save the world state and enable/disable the whitelist. """
         await self.settings.Role.set(role.id)
         await ctx.send("Role set to {.mention}".format(role))
