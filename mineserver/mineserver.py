@@ -92,7 +92,26 @@ class MineServer(BaseCog):
     @commands.check(minerolecheck)
     async def stop(self, ctx):
         """Stops the server gracefully, saving before shutdown."""
-        output = await self.rconcall("stop")
+        def waitcheck(wait_react, wait_user):
+            return wait_user == ctx.author and str(wait_react.emoji) == '✔' or wait_user == ctx.author and \
+                   str(wait_react.emoji) == '❌'
+        if await self.emptycheck():
+            output = await self.rconcall("stop")
+            return await ctx.send(output)
+        message = await ctx.send("Players are currently in the server, shutdown anyway?")
+        await message.add_reaction("✔")
+        await message.add_reaction("❌")
+        try:
+            reaction, user = await self.bot.wait_for("reaction_add", check=waitcheck, timeout=30.0)
+        except asyncio.TimeoutError:
+            await message.clear_reactions()
+            await message.edit(content="You took too long... shut down cancelled.")
+            return
+        if str(reaction.emoji) == '✔':
+            output = await self.rconcall("stop")
+        else:
+            output = "Okay, shut down cancelled."
+        await message.clear_reactions()
         await ctx.send(output)
 
     @minecraft.command()
@@ -109,7 +128,7 @@ class MineServer(BaseCog):
             await ctx.send("To enable the whitelist, use {0}minecraft whitelist on, and to disable use {0}minecraft"
                            "whitelist off.".format(ctx.prefix))
 
-    @minecraft.command()
+    @minecraft.command(aliases=["wca"])
     @commands.check(minerolecheck)
     async def whitelistadd(self, ctx, username: str):
         """Adds a user to the whitelist. They must be in the server."""
@@ -124,3 +143,11 @@ class MineServer(BaseCog):
         stop the server, save the world state and enable/disable the whitelist. """
         await self.settings.Role.set(role.id)
         await ctx.send("Role set to {.mention}".format(role))
+
+    async def emptycheck(self):
+        output = await self.rconcall("list")
+        pccheck = output.split(":")
+        if 'There are 0 ' in pccheck[0]:
+            return True
+        else:
+            return False
