@@ -109,6 +109,14 @@ class MineServer(BaseCog):
             await ctx.send("To enable the whitelist, use {0}minecraft whitelist on, and to disable use {0} minecraft"
                            "whitelist off.".format(ctx.prefix))
 
+    @minecraft.command()
+    @commands.check(minerolecheck)
+    async def whitelistadd(self, ctx, username: str):
+        """Adds a user to the whitelist. They must be in the server."""
+        command = "whitelist add " + username
+        output = await self.rconcall(command)
+        await ctx.send(output)
+
     @commands.command(name="minerole")
     @commands.is_owner()
     async def minerole(self, ctx, role: discord.Role):
