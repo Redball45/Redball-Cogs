@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import linecache
 from redbot.core import commands
 from redbot.core import Config
 from .async_mcrcon import MinecraftClient
@@ -35,7 +36,8 @@ class MineServer(BaseCog):
         self.settings.register_global(
             SetupDone=False,
             RCONPort=None,
-            RCONPassword=None
+            RCONPassword=None,
+            LineNumber=1
         )
 
     """Async RCON call using MrReacher's rcon implementation. Destination is hardcoded to localhost so this cog will 
@@ -163,3 +165,38 @@ class MineServer(BaseCog):
             return True
         else:
             return False
+
+    @commands.command()
+    @commands.is_owner()
+    async def rlm(self, ctx):
+        """Reads next line from log"""
+        line = await self.settings.LineNumber()
+        await ctx.send(line)
+
+    @commands.command()
+    @commands.is_owner()
+    async def rlmfix(self, ctx):
+        """Reads next line from log"""
+        await self.settings.LineNumber.set(1)
+        line = await self.settings.LineNumber()
+        await ctx.send(line)
+
+    async def readlogloop(self):
+        """Reads from the minecraft log file and prints chat to a channel"""
+        # Hardcoded values that should be changed to settings
+        while True:
+            await asyncio.sleep(2)
+            channel = self.bot.get_channel(613143676884877341)
+            file = "/home/minecraft/minecraft/logs/latest.log"
+            with open(file, "r") as f:
+                data = f.readlines()
+                if await self.settings.LineNumber() > len(data):
+                    await self.settings.LineNumber.set(1)
+                elif await self.settings.LineNumber() == len(data):
+                    pass
+                else:
+                    line = data[await self.settings.LineNumber()]
+                    if "[Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: <" in line:
+                        await channel.send(line.split("]:")[1])
+                    await self.settings.LineNumber.set(await self.settings.LineNumber()+1)
+
