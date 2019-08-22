@@ -136,6 +136,14 @@ class MineServer(BaseCog):
         output = await self.rconcall(command)
         await ctx.send(output)
 
+    @minecraft.command(aliases=["chat"])
+    @commands.check(minerolecheck)
+    async def say(self, ctx, message: str):
+        """Sends a message that can be read by players in-game."""
+        command = "say " + message
+        output = await self.rconcall(command)
+        await ctx.send(output)
+
     @commands.command(name="minerole")
     @commands.is_owner()
     async def minerole(self, ctx, role: discord.Role):
