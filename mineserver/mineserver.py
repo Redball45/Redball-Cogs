@@ -44,8 +44,12 @@ class MineServer(BaseCog):
     async def rconcall(self, command):
         port = await self.settings.RCONPort()
         password = await self.settings.RCONPassword()
-        async with MinecraftClient('localhost', port, password) as mc:
-            output = await mc.send(command)
+        try:
+            async with MinecraftClient('localhost', port, password) as mc:
+                output = await mc.send(command)
+                return output
+        except OSError as e:
+            output = "Error when communicating with minecraft server: {0}".format(e)
             return output
 
     @commands.command()
@@ -138,11 +142,11 @@ class MineServer(BaseCog):
 
     @minecraft.command(aliases=["chat"])
     @commands.check(minerolecheck)
-    async def say(self, ctx, message: str):
+    async def say(self, ctx, *, message: str):
         """Sends a message that can be read by players in-game."""
         command = "say " + message
-        output = await self.rconcall(command)
-        await ctx.send(output)
+        await self.rconcall(command)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(name="minerole")
     @commands.is_owner()
