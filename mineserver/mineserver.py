@@ -216,6 +216,7 @@ class MineServer(BaseCog):
         """Reads from the minecraft log file and prints chat to a channel"""
         # Hardcoded values that should be changed to settings
         while self is self.bot.get_cog("MineServer"):
+            await asyncio.sleep(5)
             while await self.settings.ChatEnabled():
                 await asyncio.sleep(2)
                 channel = self.bot.get_channel(await self.settings.Channel())
