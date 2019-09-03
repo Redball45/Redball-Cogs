@@ -1,6 +1,5 @@
 import asyncio
 import discord
-import linecache
 from redbot.core import commands
 from redbot.core import Config
 from .async_mcrcon import MinecraftClient
@@ -37,7 +36,10 @@ class MineServer(BaseCog):
             SetupDone=False,
             RCONPort=None,
             RCONPassword=None,
-            LineNumber=1
+            LineNumber=1,
+            Channel=None,
+            LogFile=None,
+            ChatEnabled=False
         )
 
     """Async RCON call using MrReacher's rcon implementation. Destination is hardcoded to localhost so this cog will 
@@ -146,7 +148,8 @@ class MineServer(BaseCog):
     @commands.check(minerolecheck)
     async def say(self, ctx, *, message: str):
         """Sends a message that can be read by players in-game."""
-        command = "say " + message
+        nick = ctx.author.display_name
+        command = "say " + nick + ": " + message
         await self.rconcall(command)
         await ctx.message.add_reaction("✅")
 
@@ -163,40 +166,70 @@ class MineServer(BaseCog):
         pccheck = output.split(":")
         if 'There are 0 ' in pccheck[0]:
             return True
+        elif 'Error when communicating with minecraft server' in pccheck[0]:
+            return True
         else:
             return False
 
-    @commands.command()
+    @minecraft.command(name="channel")
+    async def channel(self, ctx, channel: discord.TextChannel):
+        """Sets the channel that in-game chat is sent to. Set to None to disable."""
+        if not ctx.guild.me.permissions_in(channel).send_messages:
+            return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
+        await self.settings.Channel.set(channel.id)
+        await ctx.send("Channel set to {.mention}".format(channel))
+
+    @minecraft.command(name="logfile")
+    async def logfile(self, ctx, *, filepath: str):
+        """Sets the path to the log file that chat messages will be read from. This should be the latest.log file
+        located within your minecraft/logs server directory."""
+        await self.settings.LogFile.set(filepath)
+        await ctx.send("File path set to {0}".format(filepath))
+
+    @minecraft.command()
+    @commands.is_owner()
+    async def chatenabled(self, ctx, toggle: str = "info"):
+        """Toggles whether chat is read from log files and outputted to discord. A channel and log file location must
+        be set for this to work."""
+        toggle_status = await self.settings.ChatEnabled()  # retrieves current status of toggle from settings file
+        if toggle.lower() == "off":
+            await self.settings.ChatEnabled.set(False)
+            await ctx.send("I will no longer output chat from the server to discord..")
+        elif toggle.lower() == "on":
+            await self.settings.ChatEnabled.set(True)
+            await ctx.send("I will output chat from the server to discord. A channel and log file location must be"
+                           "set for this to work.")
+        else:
+            if toggle_status:
+                await ctx.send("Chat output to discord is currently disabled.")
+            else:
+                await ctx.send("Chat output to discord is currently enabled.")
+
+    @minecraft.command()
     @commands.is_owner()
     async def rlm(self, ctx):
-        """Reads next line from log"""
-        line = await self.settings.LineNumber()
-        await ctx.send(line)
-
-    @commands.command()
-    @commands.is_owner()
-    async def rlmfix(self, ctx):
-        """Reads next line from log"""
-        await self.settings.LineNumber.set(1)
+        """Debug command, returns the current line number"""
         line = await self.settings.LineNumber()
         await ctx.send(line)
 
     async def readlogloop(self):
         """Reads from the minecraft log file and prints chat to a channel"""
         # Hardcoded values that should be changed to settings
-        while True:
-            await asyncio.sleep(2)
-            channel = self.bot.get_channel(613143676884877341)
-            file = "/home/minecraft/minecraft/logs/latest.log"
-            with open(file, "r") as f:
-                data = f.readlines()
-                if await self.settings.LineNumber() > len(data):
-                    await self.settings.LineNumber.set(1)
-                elif await self.settings.LineNumber() == len(data):
-                    pass
-                else:
-                    line = data[await self.settings.LineNumber()]
-                    if "[Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: <" in line:
-                        await channel.send(line.split("]:")[1])
-                    await self.settings.LineNumber.set(await self.settings.LineNumber()+1)
-
+        while self is self.bot.get_cog("MineServer"):
+            while await self.settings.ChatEnabled():
+                await asyncio.sleep(2)
+                channel = self.bot.get_channel(await self.settings.Channel())
+                file = await self.settings.LogFile()
+                if channel is not None and file is not None:
+                    if not await self.emptycheck():
+                        with open(file, "r") as f:
+                            data = f.readlines()
+                            if await self.settings.LineNumber() > len(data):
+                                await self.settings.LineNumber.set(1)
+                            elif await self.settings.LineNumber() == len(data):
+                                pass
+                            else:
+                                line = data[await self.settings.LineNumber()]
+                                if "[Async Chat Thread - #4/INFO]: " in line:
+                                    await channel.send(line.split("]:")[1])
+                                await self.settings.LineNumber.set(await self.settings.LineNumber()+1)
