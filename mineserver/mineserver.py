@@ -1,4 +1,6 @@
 import asyncio
+import glob
+
 import discord
 from redbot.core import commands
 from redbot.core import Config
@@ -29,6 +31,7 @@ async def minerolecheck(ctx):
 
 class MineServer(BaseCog):
     """Minecraft server commands"""
+
     def __init__(self, bot):
         self.bot = bot
         self.settings = Config.get_conf(self, 54252452)
@@ -45,6 +48,7 @@ class MineServer(BaseCog):
     """Async RCON call using MrReacher's rcon implementation. Destination is hardcoded to localhost so this cog will 
     only function when present on the same machine as the server. If used on the same machine you can safely block
     external access to this port on your firewall."""
+
     async def rconcall(self, command):
         port = await self.settings.RCONPort()
         password = await self.settings.RCONPassword()
@@ -60,8 +64,10 @@ class MineServer(BaseCog):
     @commands.is_owner()
     async def minesetup(self, ctx):
         """Interactive setup process. Please complete this setup in DM with the bot to protect your RCON password."""
+
         def wait_check(message):
             return message.author == ctx.author and message.channel == ctx.channel
+
         try:
             await ctx.send("This setup process will set required options for this cog to function. For each question,"
                            "you should respond with desired setting.")
@@ -97,12 +103,25 @@ class MineServer(BaseCog):
         await ctx.send(output)
 
     @minecraft.command()
+    async def mods(self, ctx):
+        """Returns a list of the mods currently in the server."""
+        output = "```"
+        for file in glob.glob("/home/minecraft/rebound/mods/*.jar"):
+            filename = file.replace("/home/minecraft/rebound/mods/", "")
+            filename = filename.replace(".jar", "")
+            output = output + filename + "\n"
+        output += "```"
+        await ctx.send(output)
+
+    @minecraft.command()
     @commands.check(minerolecheck)
     async def stop(self, ctx):
         """Stops the server gracefully, saving before shutdown."""
+
         def waitcheck(wait_react, wait_user):
             return wait_user == ctx.author and str(wait_react.emoji) == '✅' or wait_user == ctx.author and \
                    str(wait_react.emoji) == '❎'
+
         if await self.emptycheck():
             output = await self.rconcall("stop")
             return await ctx.send(output)
@@ -233,4 +252,4 @@ class MineServer(BaseCog):
                                 line = data[await self.settings.LineNumber()]
                                 if "[Async Chat Thread - #4/INFO]: " in line:
                                     await channel.send(line.split("]:")[1])
-                                await self.settings.LineNumber.set(await self.settings.LineNumber()+1)
+                                await self.settings.LineNumber.set(await self.settings.LineNumber() + 1)
