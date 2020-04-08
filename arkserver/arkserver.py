@@ -31,6 +31,13 @@ async def arkrolecheck(ctx):
     return role in ctx.author.roles
 
 
+def is_user(user_id):
+    async def predicate(ctx):
+        return ctx.user and ctx.user.id == user_id
+
+    return commands.check(predicate)
+
+
 async def arkcharcheck(ctx):
     """Because the help formatter uses this check outside the arkserver cog, to access the cog settings we need
      to get them separately here"""
@@ -47,6 +54,7 @@ class ArkManagerException(Exception):
 
 class Arkserver(BaseCog):
     """Ark Server commands"""
+
     def __init__(self, bot):
         self.bot = bot
         self.settings = Config.get_conf(self, 3931293439)
@@ -124,7 +132,7 @@ class Arkserver(BaseCog):
         args = "arkmanager " + command + " @" + instance
         try:
             rc, output = await asyncio.ensure_future(self.read_and_display(args=args, channel=channel,
-                                                     verbose=verbose))
+                                                                           verbose=verbose))
         except ArkManagerException as e:
             await self.error_handler(channel, e)
             return None
@@ -134,8 +142,10 @@ class Arkserver(BaseCog):
     @commands.is_owner()
     async def arksetup(self, ctx):
         """Interactive setup process"""
+
         def wait_check(message):
             return message.author == ctx.author and message.channel == ctx.channel
+
         try:
             await ctx.send("This setup process will set required options for this cog to function. For each question,"
                            "you should respond with desired setting.")
@@ -149,7 +159,7 @@ class Arkserver(BaseCog):
             ark_storage = answer.content
             await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character"
                            "storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(
-                            ark_manager, ark_storage))
+                                                        ark_manager, ark_storage))
             answer = await self.bot.wait_for("message", check=wait_check, timeout=30)
             if answer.content.lower() != "yes":
                 return await ctx.send("Okay, setup cancelled.")
@@ -307,8 +317,8 @@ class Arkserver(BaseCog):
 
     async def get_alt_save_directory(self):
         save_dir = None
-        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + await self.settings.Instance() +\
-            ".cfg"
+        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + \
+                                                                        await self.settings.Instance() + ".cfg "
         with open(config_file, "r") as f:
             for line in f:
                 if line.startswith("ark_AltSaveDirectoryName"):
@@ -530,12 +540,6 @@ class Arkserver(BaseCog):
         players += "```"
         await ctx.send(players)
 
-    @staticmethod
-    def is_user(user_id):
-        async def predicate(ctx):
-            return ctx.user and ctx.user.id == user_id
-        return commands.check(predicate)
-
     @ark.command(name="dinowipe")
     @commands.check(arkrolecheck)
     @is_user(73569608572870656)
@@ -700,8 +704,10 @@ class Arkserver(BaseCog):
     @commands.check(arkrolecheck)
     async def ark_restart(self, ctx, delay: str = "60"):
         """Restarts the currently selected instance with a specified delay (in seconds)"""
+
         def waitcheck(m):
             return m.author == ctx.author and m.channel == ctx.channel
+
         try:
             delay = int(delay)
         except ValueError:
@@ -763,8 +769,10 @@ class Arkserver(BaseCog):
     @commands.check(arkrolecheck)
     async def ark_update(self, ctx):
         """Checks for updates, if found, updates all instances and restarts those that were active."""
+
         def waitcheck(m):
             return m.author == ctx.author and m.channel == ctx.channel
+
         status = await self.updatechecker(ctx.channel, await self.settings.Verbose())
         modstatus = await self.checkmods(ctx.channel, await self.settings.Verbose())
         if status or modstatus:
@@ -904,7 +912,7 @@ class Arkserver(BaseCog):
         output = await self.run_command("status", instance=instance)
         if not output:
             return True
-        if "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" in output and\
+        if "\x1b[0;39m Server online:  \x1b[1;32m Yes \x1b[0;39m\n" in output and \
                 "\x1b[0;39m Server running:  \x1b[1;32m Yes \x1b[0;39m\n" in output:
             return False
         else:
@@ -1059,7 +1067,7 @@ class Arkserver(BaseCog):
         """Splits a string over discords 2000 character limit into multiple messages."""
         message = message.replace("```", "")
         n = 1980
-        output = [message[i:i+n] for i in range(0, len(message), n)]
+        output = [message[i:i + n] for i in range(0, len(message), n)]
         for line in output:
             line = "```" + line + "```"
             await destination.send(line)
