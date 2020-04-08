@@ -33,7 +33,7 @@ async def arkrolecheck(ctx):
 
 def is_user(user_id):
     async def predicate(ctx):
-        return ctx.user and ctx.user.id == user_id
+        return ctx.author and ctx.author.id == user_id
 
     return commands.check(predicate)
 
