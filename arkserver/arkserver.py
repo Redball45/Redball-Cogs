@@ -530,6 +530,19 @@ class Arkserver(BaseCog):
         players += "```"
         await ctx.send(players)
 
+    @staticmethod
+    def is_user(user_id):
+        async def predicate(ctx):
+            return ctx.user and ctx.user.id == user_id
+        return commands.check(predicate)
+
+    @ark.command(name="dinowipe")
+    @commands.check(arkrolecheck)
+    @is_user(73569608572870656)
+    async def ark_dinowipe(self, ctx):
+        """Unique version of dinowipe command for Tali to use"""
+        await self.run_command('rconcmd "destroywilddinos"', ctx.channel, True)
+
     @arkadmin.command(name="dinowipe")
     async def arkadmin_dinowipe(self, ctx):
         """Runs the rconcmd DestroyWildDinos on the current instance to wipe all wild dinosaurs."""
