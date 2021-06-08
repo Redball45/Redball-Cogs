@@ -193,7 +193,7 @@ class Arkserver(BaseCog):
         ark_char = await self.settings.CharacterEnabled()
         await ctx.send("{0} is the current instance limit.\n{1} is the arkmanager configuration location.\n{2} is the "
                        "additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin"
-                       "channel ID {5}.\n Selected privileged role ID {6}.\nCharacter management enabled? {7}.".format(
+                       "channel ID {5}.\nSelected privileged role ID {6}.\nCharacter management enabled? {7}.".format(
                         ark_limit, ark_manager, ark_storage, setup_done, ark_channel, ark_admin_channel, ark_role,
                         ark_char))
 
@@ -561,8 +561,8 @@ class Arkserver(BaseCog):
             await ctx.send("Automatic updating is now disabled.")
         elif toggle.lower() == "on":
             await self.settings.AutoUpdate.set(True)
-            await ctx.send("Automatic server updating is now enabled. You may wish to select a channel for autoupdate"
-                           "messages to go to via {0}arkadmin channel.".format(ctx.prefix))
+            await ctx.send("Automatic server updating is now enabled. You may wish to select a channel for auto-update"
+                           " messages to go to via {0}arkadmin channel.".format(ctx.prefix))
         else:
             if toggle_status:
                 await ctx.send("Automatic updating is currently enabled. You may wish to select a channel for"
@@ -578,8 +578,8 @@ class Arkserver(BaseCog):
         await self.settings.Channel.set(channel.id)
         await ctx.send("Channel set to {.mention}".format(channel))
         await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This"
-                       "channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for"
-                       "diagnostics.".format(ctx.prefix))
+                       " channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for"
+                       " diagnostics.".format(ctx.prefix))
 
     @arkadmin.command(name="role")
     async def arkadmin_role(self, ctx, role: discord.Role):
@@ -650,7 +650,7 @@ class Arkserver(BaseCog):
         """Starts the specified instance."""
         if self.active_instances >= await self.settings.InstanceLimit():
             await ctx.send("Instance limit has been reached, please stop another instance first. If you think this is"
-                           "incorrect, use [p]ark instancecheck.")
+                           " incorrect, use [p]ark instancecheck.")
             return
         async with ctx.channel.typing():
             if minput != "default":
@@ -683,7 +683,16 @@ class Arkserver(BaseCog):
         """Retrieves the status of the specified instance."""
         async with ctx.channel.typing():
             verbose = await self.settings.Verbose()
-            output = await self.run_command("status", instance=instance, channel=ctx.channel, verbose=verbose)
+            if instance != "default":
+                available_instances = await self.detect_instances()
+                desired_instance = next((s for s in available_instances if instance.lower() in s.lower()), None)
+                if not desired_instance:
+                    await ctx.send("I don't recognize that instance, available options are {0}.".format(
+                        available_instances))
+                    return
+            else:
+                desired_instance = instance
+            output = await self.run_command("status", instance=desired_instance, channel=ctx.channel, verbose=verbose)
             if not output:
                 return
             if not verbose:
@@ -826,11 +835,21 @@ class Arkserver(BaseCog):
     async def ark_save(self, ctx, minput: str = "default"):
         """Saves the world state of the selected instance."""
         async with ctx.channel.typing():
-            output = await self.run_command(command="save", channel=ctx.channel,
-                                            verbose=await self.settings.Verbose(), instance=minput)
+            if minput != "default":
+                available_instances = await self.detect_instances()
+                desired_instance = next((s for s in available_instances if minput.lower() in s.lower()), None)
+                if not desired_instance:
+                    await ctx.send("I don't recognize that instance, available options are {0}.".format(
+                        available_instances))
+                    return
+            else:
+                desired_instance = minput
+            output = await self.run_command(command="saveworld", channel=ctx.channel,
+                                            verbose=await self.settings.Verbose(), instance=desired_instance)
             if not output:
                 return
             if not await self.settings.Verbose():
+                output = self.sanitizeoutput(output)
                 await ctx.send(output)
 
     @arkadmin.command(name="backup")
@@ -1055,7 +1074,7 @@ class Arkserver(BaseCog):
                             if channel is not None and message is not None:
                                 await message.edit(content="Servers have been updated and should be up within 10 "
                                                            "minutes.")
-                        await asyncio.sleep(300)
+                        await asyncio.sleep(120)
                         self.updating = False
                     else:
                         await asyncio.sleep(3540)
