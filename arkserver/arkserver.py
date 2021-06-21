@@ -159,7 +159,7 @@ class Arkserver(BaseCog):
             ark_storage = answer.content
             await ctx.send("You have chosen:\n{0} as the arkmanager configuration location and \n{1} as the character"
                            "storage location.\nReply 'Yes' to confirm these settings and complete setup.".format(
-                ark_manager, ark_storage))
+                            ark_manager, ark_storage))
             answer = await self.bot.wait_for("message", check=wait_check, timeout=30)
             if answer.content.lower() != "yes":
                 return await ctx.send("Okay, setup cancelled.")
@@ -194,8 +194,8 @@ class Arkserver(BaseCog):
         await ctx.send("{0} is the current instance limit.\n{1} is the arkmanager configuration location.\n{2} is the "
                        "additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin"
                        "channel ID {5}.\nSelected privileged role ID {6}.\nCharacter management enabled? {7}.".format(
-            ark_limit, ark_manager, ark_storage, setup_done, ark_channel, ark_admin_channel, ark_role,
-            ark_char))
+                        ark_limit, ark_manager, ark_storage, setup_done, ark_channel, ark_admin_channel, ark_role,
+                        ark_char))
 
     @commands.group()
     @commands.check(setupcheck)
@@ -317,8 +317,8 @@ class Arkserver(BaseCog):
 
     async def get_alt_save_directory(self):
         save_dir = None
-        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + \
-                      await self.settings.Instance() + ".cfg "
+        config_file = await self.settings.ARKManagerConfigDirectory() + "instances/" + await self.settings.Instance() \
+            + ".cfg "
         with open(config_file, "r") as f:
             for line in f:
                 if line.startswith("ark_AltSaveDirectoryName"):
@@ -1093,8 +1093,8 @@ class Arkserver(BaseCog):
 
     async def update_server(self):
         adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
-        await self.runcommand(command="stop", channel=adminchannel, verbose=await self.settings.Verbose(),
-                              instance="all")
+        await self.run_command(command="stop", channel=adminchannel, verbose=await self.settings.Verbose(),
+                               instance="all")
         update = await self.run_command(command="update --update-mods --backup", channel=adminchannel,
                                         verbose=await self.settings.Verbose(), instance="all")
         if not update:
