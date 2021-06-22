@@ -1049,7 +1049,7 @@ class Arkserver(BaseCog):
                         if not instance_list:
                             if channel is not None:
                                 message = await channel.send("Servers are updating.")
-                            await self.update_server()
+                            await self.update_server(instance_list)
                         else:
                             if channel is not None:
                                 message = await channel.send("Servers are restarting soon for updates.")
@@ -1059,7 +1059,7 @@ class Arkserver(BaseCog):
                             else:
                                 if channel is not None and message is not None:
                                     await message.edit(content="Servers are updating.")
-                                await self.update_server()
+                                await self.update_server(instance_list)
                         if self.cancel:
                             self.cancel = False
                             self.updating = False
@@ -1091,7 +1091,7 @@ class Arkserver(BaseCog):
             line = "```" + line + "```"
             await destination.send(line)
 
-    async def update_server(self):
+    async def update_server(self, instance_list):
         adminchannel = self.bot.get_channel(await self.settings.AdminChannel())
         await self.run_command(command="stop", channel=adminchannel, verbose=await self.settings.Verbose(),
                                instance="all")
@@ -1106,3 +1106,7 @@ class Arkserver(BaseCog):
                     await self.split_and_send(update, adminchannel)
                 except discord.HTTPException as e:
                     await adminchannel.send("Error when trying to split and send. - {0}".format(e))
+        if instance_list is not None:
+            for instance in instance_list:
+                await self.run_command(command="start", channel=adminchannel, verbose=await self.settings.Verbose(),
+                                       instance=instance)
