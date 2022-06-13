@@ -27,7 +27,7 @@ async def arkrolecheck(ctx):
     from redbot.core import Config
     settings = Config.get_conf(cog_instance=None, identifier=3931293439, force_registration=False,
                                cog_name="Arkserver")
-    role = discord.utils.get(ctx.guild.roles, id=(await settings.Role()))
+    role = discord.utils.get(ctx.guild.roles, id=(await settings.guild(ctx.guild).Role()))
     return role in ctx.author.roles
 
 
@@ -76,6 +76,10 @@ class Arkserver(BaseCog):
             AdminChannel=None,
             Role=None,
             InstanceLimit=1
+        )
+        self.settings.register_guild(
+            Channel=None,
+            Role=None
         )
         self.settings.register_user(**default_user)
 
@@ -186,10 +190,10 @@ class Arkserver(BaseCog):
         ark_limit = await self.settings.InstanceLimit()
         ark_manager = await self.settings.ARKManagerConfigDirectory()
         ark_storage = await self.settings.ARKStorageDirectory()
-        ark_channel = await self.settings.Channel()
+        ark_channel = await self.settings.guild(ctx.guild).Channel()
         ark_admin_channel = await self.settings.AdminChannel()
         setup_done = await self.settings.SetupDone()
-        ark_role = await self.settings.Role()
+        ark_role = await self.settings.guild(ctx.guild).Role()
         ark_char = await self.settings.CharacterEnabled()
         await ctx.send("{0} is the current instance limit.\n{1} is the arkmanager configuration location.\n{2} is the "
                        "additional storage location.\nSetup complete? {3}\nSelected channel ID {4}.\nSelected admin"
@@ -575,7 +579,7 @@ class Arkserver(BaseCog):
         """Sets the channel that log messages are sent to, mostly used for the autoupdater."""
         if not ctx.guild.me.permissions_in(channel).send_messages:
             return await ctx.send("I do not have permissions to send messages to {.mention}".format(channel))
-        await self.settings.Channel.set(channel.id)
+        await self.settings.guild(ctx.guild).Channel.set(channel.id)
         await ctx.send("Channel set to {.mention}".format(channel))
         await ctx.send("You may also want to setup an administration channel with {0}arkadmin adminchannel. This"
                        " channel is used for full verbose autoupdater logs - it can be quite spammy but is useful for"
@@ -585,7 +589,7 @@ class Arkserver(BaseCog):
     async def arkadmin_role(self, ctx, role: discord.Role):
         """Sets a privileged role that has access to additional commands, privileged users can
         start, stop, restart, update, and change the active instance. """
-        await self.settings.Role.set(role.id)
+        await self.settings.guild(ctx.guild).Role.set(role.id)
         await ctx.send("Role set to {.mention}".format(role))
 
     @arkadmin.command(name="instancelimit")
@@ -1009,25 +1013,25 @@ class Arkserver(BaseCog):
     async def notify_updates(self, instance):
         if await self.playercheck(instance):
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
-                                   ' 15 minutes."', await self.settings.Channel(), False)
+                                   ' 15 minutes."', await self.settings.AdminChannel(), False)
             await asyncio.sleep(300)
             if self.cancel:
                 await self.run_command('broadcast "Server shutdown was aborted by user request."')
                 return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
-                                   ' 10 minutes."', await self.settings.Channel(), False)
+                                   ' 10 minutes."', await self.settings.AdminChannel(), False)
             await asyncio.sleep(300)
             if self.cancel:
                 await self.run_command('broadcast "Server shutdown was aborted by user request."')
                 return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
-                                   ' 5 minutes."', await self.settings.Channel(), False)
+                                   ' 5 minutes."', await self.settings.AdminChannel(), False)
             await asyncio.sleep(240)
             if self.cancel:
                 await self.run_command('broadcast "Server shutdown was aborted by user request."')
                 return
             await self.run_command('broadcast "Server will shutdown for updates in approximately'
-                                   ' 60 seconds."', await self.settings.Channel(), False)
+                                   ' 60 seconds."', await self.settings.AdminChannel(), False)
             await asyncio.sleep(60)
 
     async def update_checker(self):
@@ -1048,11 +1052,19 @@ class Arkserver(BaseCog):
                         message = None
                         if not instance_list:
                             if channel is not None:
-                                message = await channel.send("Servers are updating.")
+                                if status:
+                                    text = "Servers are updating for a game update."
+                                else:
+                                    text = "Servers are updating for a workshop mod update."
+                                message = await channel.send(text)
                             await self.update_server(instance_list)
                         else:
                             if channel is not None:
-                                message = await channel.send("Servers are restarting soon for updates.")
+                                if status:
+                                    text = "Servers are restarting soon for a game update."
+                                else:
+                                    text = "Servers are restarting soon for a workshop mod update."
+                                message = await channel.send(text)
                             await asyncio.gather(*[self.notify_updates(instance) for instance in instance_list])
                             if self.cancel:
                                 pass
