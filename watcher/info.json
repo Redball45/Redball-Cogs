@@ -1,0 +1,8 @@
+{
+    "AUTHOR" : "Redball45",
+    "INSTALL_MSG" : "ARK Server Manager Cog Successfully Installed",
+    "NAME" : "ArkServer",
+    "SHORT" : "Ark Server management utility",
+    "DESCRIPTION" : "Remote update and restart of ARK Servers",
+    "TAGS": ["ARK", "utilities"]
+}
